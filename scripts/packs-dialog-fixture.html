@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../src/renderer/src/theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio-theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/todos.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio.css" />
+    <link rel="stylesheet" href="../src/renderer/src/app.css" />
+  </head>
+  <body>
+    <dialog id="configure-agent" class="agent-dialog packs-dialog">
+      <form method="dialog" id="configure-agent-form">
+        <header class="agent-dialog-head">
+          <div class="agent-dialog-copy">
+            <h2>工具包</h2>
+            <p id="configure-agent-copy">给「随手记」打开或关掉通用能力</p>
+          </div>
+          <button type="submit" value="cancel" class="tool-close" aria-label="关闭">×</button>
+        </header>
+        <div class="agent-dialog-body">
+          <div class="agent-dialog-form">
+            <fieldset id="configure-agent-packs" class="agent-packs" aria-label="工具包">
+              <label class="agent-pack-row">
+                <input type="checkbox" checked />
+                <span>待办</span>
+              </label>
+              <label class="agent-pack-row">
+                <input type="checkbox" />
+                <span>工作区文件与终端</span>
+              </label>
+              <label class="agent-pack-row">
+                <input type="checkbox" />
+                <span>GitHub</span>
+              </label>
+              <label class="agent-pack-row">
+                <input type="checkbox" />
+                <span>浏览器抓取</span>
+              </label>
+            </fieldset>
+            <label id="configure-agent-plan-row" class="agent-plan-row">
+              <input id="configure-agent-plan" type="checkbox" />
+              <span>先出计划再动手。确认后回复「按计划执行」才改文件。</span>
+            </label>
+          </div>
+        </div>
+        <footer class="agent-dialog-foot">
+          <button type="submit" value="cancel" class="ghost">取消</button>
+          <button type="submit" value="save" class="primary">保存</button>
+        </footer>
+      </form>
+    </dialog>
+    <script>
+      const dialog = document.getElementById('configure-agent')
+      if (!dialog.open) {
+        dialog.showModal()
+      }
+      const form = dialog.querySelector('form')
+      const body = dialog.querySelector('.agent-dialog-body')
+      const panel = dialog.querySelector('.agent-dialog-form')
+      const row = dialog.querySelector('.agent-pack-row')
+      const plan = dialog.querySelector('.agent-plan-row')
+      const input = row.querySelector('input')
+      const copy = row.querySelector('span')
+      const planInput = plan.querySelector('input')
+      const planCopy = plan.querySelector('span')
+      const dialogBox = dialog.getBoundingClientRect()
+      const formBox = form.getBoundingClientRect()
+      const panelBox = panel.getBoundingClientRect()
+      const inputBox = input.getBoundingClientRect()
+      const copyBox = copy.getBoundingClientRect()
+      const planInputBox = planInput.getBoundingClientRect()
+      const planCopyBox = planCopy.getBoundingClientRect()
+      document.documentElement.dataset.packMetrics = JSON.stringify({
+        dialogWidth: Math.round(dialogBox.width),
+        formHeight: Math.round(formBox.height),
+        panelWidth: Math.round(panelBox.width),
+        bodyDisplay: getComputedStyle(body).display,
+        packDirection: getComputedStyle(row).flexDirection,
+        planDirection: getComputedStyle(plan).flexDirection,
+        checkboxLeftOfText: copyBox.left >= inputBox.right - 2,
+        sameRow: Math.abs(inputBox.top - copyBox.top) < 14,
+        planSameRow: Math.abs(planInputBox.top - planCopyBox.top) < 14,
+        planWrapsNarrow: planCopyBox.height > 48,
+      })
+    </script>
+  </body>
+</html>

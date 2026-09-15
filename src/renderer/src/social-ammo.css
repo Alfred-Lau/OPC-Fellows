@@ -1,0 +1,45 @@
+body[data-view='social-ammo'] #view-social-ammo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+#view-social-ammo {
+  padding: 0 28px 28px;
+  overflow: auto;
+  -webkit-app-region: no-drag;
+}
+
+#view-social-ammo .tick-head {
+  padding: 24px 0 8px;
+}
+
+#view-social-ammo > .hint {
+  margin: 4px 0 14px;
+  color: var(--cream);
+}
+
+#view-social-ammo > .hint.is-error {
+  color: var(--danger, #c45c5c);
+}
+
+.social-layout {
+  display: grid;
+  gap: 18px;
+}
+
+@container tool-pane (max-width: 480px) {
+  #view-social-ammo {
+    padding: 0 14px 16px;
+  }
+
+  #view-social-ammo .tick-head {
+    padding: 12px 0 6px;
+  }
+
+  #view-social-ammo > .hint {
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "defaultProjectTag": "OPC项目",
+  "socialSignature": "",
+  "products": [
+    {
+      "id": "demo",
+      "line": "bitou",
+      "name": "示例产品",
+      "nameEn": "Demo Product",
+      "url": "https://example.com/",
+      "statsOrigin": "https://example.com",
+      "statsStatus": "pending",
+      "pitch": "用来演示工作台如何关联站点，不是真实产品。",
+      "pitchEn": "A fictional site that shows how the catalog attaches to the workbench.",
+      "aliases": ["demo", "example"],
+      "tagsZh": ["示例", "一人公司"],
+      "tagsEn": ["Demo", "OPC", "IndieHacker"]
+    }
+  ]
+}

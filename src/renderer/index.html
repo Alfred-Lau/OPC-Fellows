@@ -1,0 +1,1716 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OPC Agent Team - Solokit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light'
+        : 'dark'
+    </script>
+  </head>
+  <body data-view="home" data-rail="open" data-tool="todos" data-tool-collapsed="true">
+    <aside class="rail">
+      <div class="rail-drag" aria-hidden="true"></div>
+      <div class="rail-gutter" role="separator" aria-orientation="vertical" aria-label="调整侧栏宽度"></div>
+      <button type="button" id="rail-toggle" class="rail-toggle" aria-expanded="true" aria-label="收起目录">‹</button>
+      <div class="rail-actions">
+        <button type="button" data-global="home" title="今日">
+          <span class="nav-mark">今</span>
+          <span class="nav-label">今日</span>
+        </button>
+        <button type="button" data-global="task" title="新任务">
+          <span class="nav-mark">新</span>
+          <span class="nav-label">新任务</span>
+        </button>
+        <button type="button" data-global="schedule" title="日程">
+          <span class="nav-mark">日</span>
+          <span class="nav-label">日程</span>
+        </button>
+        <button type="button" data-global="extensions" title="技能">
+          <span class="nav-mark">技</span>
+          <span class="nav-label">技能</span>
+        </button>
+      </div>
+      <div class="rail-scroll">
+        <section class="rail-block" data-rail-list="pinned">
+          <div class="rail-kicker-row">
+            <p class="rail-kicker">置顶</p>
+          </div>
+          <nav id="pin-nav" class="rail-list" aria-label="置顶"></nav>
+        </section>
+        <section class="rail-block" data-rail-list="project">
+          <div class="rail-kicker-row">
+            <p class="rail-kicker">项目</p>
+            <button type="button" id="project-create" class="rail-add" title="新建项目">+</button>
+          </div>
+          <nav id="thread-nav" class="rail-list" aria-label="项目"></nav>
+        </section>
+        <section class="rail-block" data-rail-list="agent">
+          <div class="rail-kicker-row">
+            <p class="rail-kicker">成员</p>
+            <button type="button" id="agent-create" class="rail-add" title="雇成员">+</button>
+          </div>
+          <nav id="agent-nav" class="rail-list" aria-label="成员"></nav>
+        </section>
+      </div>
+      <div class="rail-foot">
+        <div class="rail-user-wrap">
+          <button type="button" id="rail-user" class="rail-user" aria-expanded="false" aria-haspopup="menu">
+            <span class="agent-avatar" data-hue="4">
+              <img id="rail-user-avatar" data-user-avatar src="./assets/avatars/user.png" alt="" />
+            </span>
+            <span id="rail-user-name" class="nav-label">用户中心</span>
+          </button>
+          <div id="rail-user-pop" class="rail-user-pop" hidden role="menu">
+            <p class="rail-user-kicker">外观</p>
+            <div class="appearance" role="group" aria-label="外观">
+              <button type="button" data-theme-pref="system">系统</button>
+              <button type="button" data-theme-pref="dark">深色</button>
+              <button type="button" data-theme-pref="light">浅色</button>
+            </div>
+            <button type="button" id="rail-settings" class="rail-user-item">设置</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <section id="view-prefs" class="prefs">
+      <header class="prefs-head">
+        <div>
+          <h1>设置</h1>
+          <p>这台工作台的人和共享情况，不管某个职业怎么干活。</p>
+        </div>
+        <button type="button" id="prefs-back" class="ghost">返回工作台</button>
+      </header>
+      <div class="prefs-body">
+        <nav class="prefs-nav" aria-label="设置小节">
+          <button type="button" data-prefs-section="me" class="is-current">我</button>
+          <button type="button" data-prefs-section="appearance">外观</button>
+          <button type="button" data-prefs-section="model">模型</button>
+          <button type="button" data-prefs-section="catalog">工作情况</button>
+          <button type="button" data-prefs-section="about">关于我们</button>
+        </nav>
+        <div class="prefs-main">
+          <section data-prefs-panel="me" class="prefs-panel">
+            <h2>我</h2>
+            <p class="hint">会话里怎么称呼你。没有云账号，只留在这台电脑。</p>
+            <div class="prefs-me">
+              <div class="prefs-avatar-wrap">
+                <span class="agent-avatar prefs-avatar" data-hue="4">
+                  <img id="prefs-avatar" data-user-avatar src="./assets/avatars/user.png" alt="" />
+                </span>
+                <div class="form-actions">
+                  <button type="button" id="prefs-avatar-pick" class="ghost">更换</button>
+                  <button type="button" id="prefs-avatar-clear" class="ghost">恢复默认</button>
+                </div>
+              </div>
+              <form id="prefs-me-form" class="prefs-me-form">
+                <label>显示名
+                  <input id="prefs-display-name" type="text" maxlength="40" placeholder="例如：阿宁" />
+                </label>
+                <p id="prefs-host-hint" class="hint"></p>
+                <div class="form-actions">
+                  <button type="submit">保存称呼</button>
+                </div>
+              </form>
+            </div>
+          </section>
+          <section data-prefs-panel="appearance" class="prefs-panel" hidden>
+            <h2>外观</h2>
+            <p class="hint">跟用户中心下拉里的三个按钮是同一份偏好。</p>
+            <div class="appearance prefs-appearance" role="group" aria-label="外观">
+              <button type="button" data-theme-pref="system">系统</button>
+              <button type="button" data-theme-pref="dark">深色</button>
+              <button type="button" data-theme-pref="light">浅色</button>
+            </div>
+          </section>
+          <section data-prefs-panel="model" class="prefs-panel" hidden>
+            <h2>模型</h2>
+            <p class="hint">对话、待办拆解、文案和选品摘要共用这一把 DeepSeek API Key。保存在本机，由 Completions 和 dsh SDK 进程共用。</p>
+            <form id="prefs-llm-form" class="prefs-model-form">
+              <p id="prefs-llm-status" class="hint"></p>
+              <div class="prefs-key-form">
+                <input id="prefs-llm-key" type="password" spellcheck="false" autocomplete="off" placeholder="sk-…" />
+                <button type="submit">保存</button>
+                <button id="prefs-llm-clear" type="button" class="ghost">清除</button>
+              </div>
+              <p class="hint">设置了环境变量 DEEPSEEK_API_KEY 时以环境变量优先。中栏对话的 SDK 进程会沿用同一把 key；改完后下一轮对话生效。</p>
+            </form>
+          </section>
+          <section data-prefs-panel="catalog" class="prefs-panel" hidden>
+            <h2>工作情况</h2>
+            <p class="hint">监控哪些产品、待办默认标签、社媒签名。默认是空目录，改完立即生效，不用重新打包。示例见 examples/catalog.example.json。</p>
+            <form id="catalog-form" class="catalog-form">
+              <div class="catalog-fields">
+                <label>默认项目标签
+                  <input id="catalog-tag" type="text" spellcheck="false" />
+                </label>
+                <label>社媒签名
+                  <input id="catalog-signature" type="text" spellcheck="false" />
+                </label>
+              </div>
+              <div id="catalog-products" class="catalog-products"></div>
+              <div class="form-actions">
+                <button id="catalog-add" type="button" class="ghost">添加产品</button>
+                <button type="submit">保存工作情况</button>
+                <button id="catalog-reset" type="button" class="ghost">清空为空白</button>
+              </div>
+            </form>
+            <p id="catalog-hint" class="hint"></p>
+          </section>
+          <section data-prefs-panel="about" class="prefs-panel" hidden>
+            <div class="prefs-brand">
+              <span class="prefs-logo">
+                <img src="./assets/logo.png" alt="" width="64" height="64" />
+              </span>
+              <div>
+                <h2>关于我们</h2>
+                <p id="prefs-product" class="prefs-product"></p>
+              </div>
+            </div>
+            <dl class="prefs-about">
+              <div>
+                <dt>版本</dt>
+                <dd id="prefs-version">—</dd>
+              </div>
+              <div>
+                <dt>频道</dt>
+                <dd id="prefs-channel">—</dd>
+              </div>
+            </dl>
+            <p class="hint">能力包的安装、源和开发者通道在左栏「技能」。模型密钥在这一页的「模型」。</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <div class="studio">
+      <section class="thread-pane">
+        <header class="thread-head">
+          <div class="thread-head-copy">
+            <span id="thread-face" class="thread-face" hidden></span>
+            <div>
+              <h1 id="thread-title">今日</h1>
+              <p id="thread-meta" class="thread-meta">收件箱</p>
+            </div>
+          </div>
+          <div class="thread-head-actions">
+            <button type="button" id="tool-reveal" class="tool-reveal" title="展开工具面板" aria-label="展开工具面板">
+              <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M15 4v16M14 9l3 3-3 3" />
+              </svg>
+            </button>
+          </div>
+        </header>
+        <div class="thread-body">
+          <section id="view-home" class="view thread-home">
+            <div class="home-board">
+              <section class="home-section">
+                <header class="home-section-head">
+                  <p class="home-kicker">今天要提醒</p>
+                </header>
+                <ul id="due-today" class="home-rows"></ul>
+              </section>
+              <section class="home-section">
+                <header class="home-section-head">
+                  <p class="home-kicker">待办</p>
+                  <div id="todo-tags" class="home-tags"></div>
+                </header>
+                <ul id="open-todos" class="home-rows"></ul>
+              </section>
+              <section class="home-section">
+                <header class="home-section-head">
+                  <p class="home-kicker">最近用过</p>
+                </header>
+                <ul id="recent" class="home-recent"></ul>
+              </section>
+            </div>
+          </section>
+          <section id="view-task" class="task-page" hidden>
+            <h1 id="task-headline" class="task-headline">
+              <span id="task-headline-before">发起</span>
+              <span class="task-project-picker">
+                <span class="task-project-pair">
+                  <button type="button" id="task-project-label" class="task-project-label">新项目</button>
+                  <button type="button" id="task-project-trigger" class="task-project-chevron" aria-haspopup="listbox" aria-expanded="false" aria-label="选择项目"></button>
+                </span>
+                <div id="task-project-menu" class="task-project-menu" hidden role="listbox"></div>
+              </span>
+              <span id="task-headline-after">？</span>
+            </h1>
+            <p id="task-empty" class="task-empty" hidden>点「新项目」起一件新的，或点旁边箭头选已有的。</p>
+            <p id="task-brief" class="task-brief" hidden></p>
+            <form id="task-form" class="composer task-composer">
+              <label class="sr-only" for="task-command">新任务</label>
+              <textarea
+                id="task-command"
+                rows="3"
+                spellcheck="false"
+                autocomplete="off"
+                placeholder="把这次的目标丢进来，材料也可以一起带上…"
+              ></textarea>
+              <div id="task-attachments" class="composer-attachments" hidden></div>
+              <div class="composer-bar">
+                <div class="composer-context" id="task-context">
+                  <button type="button" id="task-plus" class="composer-plus" title="项目上下文" aria-haspopup="menu" aria-expanded="false" aria-controls="task-context-menu">+</button>
+                  <button type="button" id="task-host" class="composer-host" title="项目上下文"></button>
+                  <div id="task-context-menu" class="composer-context-menu" hidden role="menu"></div>
+                </div>
+                <span id="task-model" class="task-model" title="deepseek-flash">DeepSeek V4.1 Flash</span>
+                <button id="task-send" type="submit" class="composer-send" title="发送" aria-label="发送">发送</button>
+              </div>
+              <p id="task-hint" class="task-hint" hidden></p>
+            </form>
+            <section id="task-agents-panel" class="task-agents" aria-label="选择加入项目的成员">
+              <p id="task-agents-meta" class="task-agents-meta">选择加入项目的成员</p>
+              <div id="task-agents" class="task-agent-list"></div>
+            </section>
+          </section>
+          <div id="thread-feed" class="thread-feed" hidden></div>
+        </div>
+        <form id="inbox" class="composer">
+          <div id="mention-menu" class="mention-menu" hidden></div>
+          <label class="sr-only" for="command">会话输入</label>
+          <textarea
+            id="command"
+            rows="1"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="输入 / 引用技能，或 @成员"
+          ></textarea>
+          <div id="composer-attachments" class="composer-attachments" hidden></div>
+          <div class="composer-bar">
+            <div class="composer-context" id="composer-context">
+              <button type="button" id="composer-plus" class="composer-plus" title="项目上下文" aria-haspopup="menu" aria-expanded="false" aria-controls="composer-context-menu">+</button>
+              <button type="button" id="composer-host" class="composer-host" title="项目上下文"></button>
+              <div id="composer-context-menu" class="composer-context-menu" hidden role="menu"></div>
+            </div>
+            <button type="submit" class="composer-send" title="发送" aria-label="发送">↑</button>
+          </div>
+          <p id="composer-hint" class="task-hint" hidden></p>
+        </form>
+      </section>
+
+      <aside class="tool-pane" id="tool-pane">
+        <div class="tool-gutter" role="separator" aria-orientation="vertical" aria-label="调整聊天与工具分界"></div>
+        <nav class="tool-rail" aria-label="工具面板">
+          <div class="tool-rail-tabs" role="tablist">
+            <button type="button" data-tool-tab="tool" title="工具" aria-label="工具">
+              <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14.7 6.3a4 4 0 0 0-5.7 5.4L3 18l3 3 6.3-6a4 4 0 0 0 5.4-5.7l-3.2 3.2-2-2z" />
+              </svg>
+            </button>
+            <button type="button" data-tool-tab="todos" class="is-current" title="待办" aria-label="待办">
+              <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 6h12M9 12h12M9 18h12" />
+                <path d="M4 6h.01M4 12h.01M4 18h.01" />
+              </svg>
+            </button>
+            <button type="button" data-tool-tab="calendar" title="日程" aria-label="日程">
+              <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M8 3v4M16 3v4M3 10h18" />
+              </svg>
+            </button>
+          </div>
+          <span class="tool-rail-gap" aria-hidden="true"></span>
+          <button type="button" id="tool-expand" class="tool-rail-action" title="在主区打开" aria-label="在主区打开">
+            <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M3 15v4a2 2 0 0 0 2 2h4" />
+            </svg>
+          </button>
+          <button type="button" id="tool-close" class="tool-rail-action" title="收起右栏" aria-label="收起右栏">
+            <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M15 4v16M10 9l-3 3 3 3" />
+            </svg>
+          </button>
+        </nav>
+        <div class="tool-main">
+        <div id="workspace-stage" class="workspace-stage">
+
+      <section id="view-calendar" class="view">
+        <header class="cal-head">
+          <div>
+            <p class="mark">日程</p>
+            <h1 id="cal-title">本周</h1>
+          </div>
+          <div class="cal-tools">
+            <div class="cal-modes" role="tablist" aria-label="日历视图">
+              <button type="button" data-cal-mode="day">日</button>
+              <button type="button" data-cal-mode="week" class="is-current">周</button>
+              <button type="button" data-cal-mode="month">月</button>
+            </div>
+            <div class="cal-nav">
+              <button type="button" id="cal-prev" aria-label="上一页">‹</button>
+              <button type="button" id="cal-today">今天</button>
+              <button type="button" id="cal-next" aria-label="下一页">›</button>
+            </div>
+          </div>
+        </header>
+        <div id="cal-stage" class="cal-stage"></div>
+      </section>
+
+      <section id="view-todos" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">待办</p>
+            <h1>全部任务 <span id="todo-count" class="tick-count">0</span></h1>
+          </div>
+        </header>
+        <div class="tick-add">
+          <span class="tick-plus" aria-hidden="true">+</span>
+          <textarea
+            id="source"
+            rows="1"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            placeholder="添加任务，或写一段话拆成多条。#OPC项目 可打标"
+          ></textarea>
+          <input id="default-time" type="datetime-local" title="默认提醒" />
+          <button id="decompose" type="button">添加</button>
+        </div>
+        <p id="hint" class="hint">识别「明天 / 周五 / X 点 / X 分钟后」。#标签 会写入事项。项目监控生成的明日待办会打「OPC项目」。点标题可选中，Shift 连选后批量完成。</p>
+        <div class="tick-stream">
+          <section id="draft-block" class="tick-section" hidden>
+            <div class="tick-sec-head">
+              <p class="caption">待确认</p>
+              <button id="save" type="button" disabled>全部写入</button>
+            </div>
+            <ul id="drafts" class="tick-rows"></ul>
+          </section>
+          <section class="tick-section">
+            <div class="tick-sec-head">
+              <p class="caption">未完成</p>
+              <div class="tick-sec-tools">
+                <div id="saved-tags" class="tag-filter"></div>
+                <button id="complete-batch" type="button" hidden>全部完成</button>
+              </div>
+            </div>
+            <ul id="saved" class="tick-rows"></ul>
+          </section>
+          <details id="done-block" class="tick-section" hidden>
+            <summary id="done-caption" class="caption">已完成</summary>
+            <ul id="done" class="tick-rows"></ul>
+          </details>
+        </div>
+      </section>
+
+      <section id="view-notes" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">随手记</p>
+            <h1>记下 <span id="note-count" class="tick-count">0</span></h1>
+          </div>
+          <input
+            id="note-filter"
+            class="note-filter"
+            type="search"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="筛选"
+          />
+        </header>
+        <form id="note-composer" class="tick-add">
+          <span class="tick-plus" aria-hidden="true">+</span>
+          <input
+            id="note-input"
+            type="text"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="听到 / 想到就写下来，回车记下"
+          />
+          <button type="submit">记下</button>
+        </form>
+        <div class="tick-stream">
+          <ul id="notes" class="tick-rows"></ul>
+        </div>
+      </section>
+
+      <section id="view-monitor" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">个人项目监控</p>
+            <h1>项目态势 <span id="monitor-updated" class="tick-count"></span></h1>
+          </div>
+          <button id="monitor-refresh" type="button">刷新</button>
+        </header>
+        <p id="monitor-status" class="hint"></p>
+        <div class="monitor-layout">
+          <aside class="monitor-side">
+            <nav id="monitor-nav" class="monitor-nav" aria-label="监控子模块"></nav>
+          </aside>
+          <div class="monitor-main">
+            <div class="monitor-group" data-group="overview">
+              <section class="monitor-panel monitor-traffic">
+                <div class="panel-head">
+                  <p class="caption">网站流量 · 近 30 天</p>
+                  <span id="monitor-overview-meta" class="tick-count"></span>
+                </div>
+                <div id="overview-summary" class="users-summary"></div>
+                <div id="traffic-total-chart" class="traffic-total-chart"></div>
+                <div id="traffic-analysis" class="traffic-analysis"></div>
+                <div id="traffic-attribution" class="traffic-attribution"></div>
+                <div class="traffic-wrap">
+                  <div id="traffic-list" class="traffic-list"></div>
+                  <div class="traffic-detail">
+                    <div id="traffic-head" class="traffic-head"></div>
+                    <div id="traffic-chart" class="traffic-chart"></div>
+                    <div id="traffic-stats" class="traffic-stats"></div>
+                    <div id="traffic-pages" class="traffic-pages"></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="monitor-group" data-group="projects" hidden>
+              <section class="monitor-panel">
+                <div class="panel-head">
+                  <p class="caption">仓库 · 本地 git</p>
+                  <span id="monitor-projects-meta" class="tick-count"></span>
+                </div>
+                <div id="projects-summary" class="users-summary"></div>
+                <div id="projects-chart" class="bar-chart"></div>
+                <ul id="monitor-projects" class="monitor-rows is-tall"></ul>
+              </section>
+            </div>
+
+            <div class="monitor-group" data-group="deploys" hidden>
+              <section class="monitor-panel">
+                <div class="panel-head">
+                  <p class="caption">Vercel 部署 · 生产环境</p>
+                  <span id="monitor-vercel-meta" class="tick-count"></span>
+                </div>
+                <div id="deploys-summary" class="users-summary"></div>
+                <div id="deploys-chart" class="bar-chart"></div>
+                <ul id="monitor-vercel" class="monitor-rows is-tall"></ul>
+              </section>
+            </div>
+
+            <div class="monitor-group" data-group="perf" hidden>
+              <section class="monitor-panel monitor-traffic">
+                <div class="panel-head">
+                  <p class="caption">全球性能 · Speed Insights · 近 7 天 P75</p>
+                  <span id="monitor-perf-meta" class="tick-count"></span>
+                </div>
+                <div id="perf-summary" class="users-summary"></div>
+                <div id="perf-chart" class="bar-chart"></div>
+                <div class="traffic-wrap">
+                  <div id="perf-list" class="traffic-list"></div>
+                  <div class="traffic-detail">
+                    <div id="perf-head" class="traffic-head"></div>
+                    <div id="perf-stats" class="traffic-stats"></div>
+                    <div id="perf-countries" class="traffic-pages"></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="monitor-group" data-group="alerts" hidden>
+              <section class="monitor-panel">
+                <div class="panel-head">
+                  <p class="caption">线上报警</p>
+                  <span id="monitor-alerts-meta" class="tick-count"></span>
+                </div>
+                <div id="alerts-summary" class="users-summary"></div>
+                <ul id="monitor-alerts" class="monitor-rows is-tall"></ul>
+              </section>
+            </div>
+
+            <div class="monitor-group" data-group="users" hidden>
+              <section class="monitor-panel monitor-users">
+                <div class="panel-head">
+                  <p class="caption">后台用户 · 注册 / 付费 / 订单</p>
+                  <span id="monitor-users-meta" class="tick-count"></span>
+                </div>
+                <div id="users-summary" class="users-summary"></div>
+                <div id="users-chart" class="bar-chart"></div>
+                <ul id="monitor-users" class="monitor-rows is-tall"></ul>
+              </section>
+            </div>
+
+            <div class="monitor-group" data-group="todos" hidden>
+              <section class="monitor-panel monitor-todos">
+                <div class="panel-head">
+                  <p class="caption">明日待办 · OPC项目</p>
+                  <span id="monitor-todo-meta" class="tick-count"></span>
+                </div>
+                <ul id="monitor-todos" class="monitor-rows is-tall"></ul>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-social-ammo" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">社媒弹药</p>
+            <h1>六平台文案 <span id="social-updated" class="tick-count"></span></h1>
+          </div>
+          <button id="social-refresh" type="button">装填弹药</button>
+        </header>
+        <p id="social-status" class="hint">按最新产品能力写出六平台文案，记下发布和互动。不跟着项目监控一起刷新。</p>
+        <div class="social-layout">
+          <section class="monitor-panel monitor-social">
+            <div class="panel-head">
+              <p class="caption">弹药 · 按平台最新形态</p>
+              <span id="social-copy-meta" class="tick-count"></span>
+            </div>
+            <div id="social-copy-filters" class="social-filters"></div>
+            <div id="social-copy-list" class="social-copy-list is-capped"></div>
+          </section>
+          <section class="monitor-panel monitor-social">
+            <div class="panel-head">
+              <p class="caption">互动 · 浏览 / 赞评转发收藏</p>
+              <span id="social-metrics-meta" class="tick-count"></span>
+            </div>
+            <div id="social-metrics-bar" class="social-metrics-bar"></div>
+            <form id="social-metrics-form" class="social-metrics-form">
+              <select id="social-metrics-target" aria-label="记到哪条"></select>
+              <label>浏览 <input id="social-m-views" type="number" min="0" step="1" value="0" /></label>
+              <label>赞 <input id="social-m-likes" type="number" min="0" step="1" value="0" /></label>
+              <label>评 <input id="social-m-comments" type="number" min="0" step="1" value="0" /></label>
+              <label>转 <input id="social-m-shares" type="number" min="0" step="1" value="0" /></label>
+              <label>藏 <input id="social-m-saves" type="number" min="0" step="1" value="0" /></label>
+              <button type="submit">记一笔</button>
+            </form>
+            <ul id="social-metrics-list" class="monitor-rows"></ul>
+          </section>
+        </div>
+      </section>
+
+      <section id="view-micro" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">Micro 选品策略</p>
+            <h1>今日痛点 <span id="micro-updated" class="tick-count"></span></h1>
+          </div>
+          <button id="micro-refresh" type="button" aria-busy="false">扫描金矿</button>
+        </header>
+        <p id="micro-status" class="hint">只捞今天新发的 Reddit / Ask HN 帖，标清日期，再用帖内事实做不迎合的选品调查。</p>
+        <div id="micro-scan-bar" class="micro-scan-bar" hidden></div>
+        <div class="micro-layout">
+          <aside class="micro-side">
+            <nav id="micro-nav" class="monitor-nav" aria-label="选品子模块"></nav>
+          </aside>
+          <div class="micro-main">
+            <div class="micro-group" data-group="today">
+              <section class="micro-panel">
+                <div class="panel-head">
+                  <p class="caption">今日热榜 · 只收当天新帖</p>
+                  <span id="micro-today-meta" class="tick-count"></span>
+                </div>
+                <div id="micro-kpis" class="users-summary"></div>
+                <div id="micro-domain-filters" class="social-filters"></div>
+                <div id="micro-today-list" class="micro-idea-list"></div>
+              </section>
+            </div>
+
+            <div class="micro-group" data-group="ideas" hidden>
+              <section class="micro-panel">
+                <div class="panel-head">
+                  <p class="caption">产品 Idea · 当天证据上的调查</p>
+                  <span id="micro-ideas-meta" class="tick-count"></span>
+                </div>
+                <div id="micro-ideas-list" class="micro-idea-list"></div>
+              </section>
+            </div>
+
+            <div class="micro-group" data-group="signals" hidden>
+              <section class="micro-panel">
+                <div class="panel-head">
+                  <p class="caption">信号流 · 当天原文与评论</p>
+                  <span id="micro-signals-meta" class="tick-count"></span>
+                </div>
+                <ul id="micro-signals" class="micro-rows is-tall"></ul>
+              </section>
+            </div>
+
+            <div class="micro-group" data-group="pipeline" hidden>
+              <section class="micro-panel">
+                <div class="panel-head">
+                  <p class="caption">观察管线 · 盯着 / 动手 / 搁置</p>
+                  <span id="micro-pipeline-meta" class="tick-count"></span>
+                </div>
+                <div id="micro-pipeline-list" class="micro-idea-list"></div>
+              </section>
+            </div>
+
+            <div class="micro-group" data-group="settings" hidden>
+              <section class="micro-panel">
+                <p class="caption">盯哪些金矿</p>
+                <p class="hint">默认对准你擅长的海外自媒体、独立站、效率工具，外加独立开发许愿帖。关掉的领域下一轮扫描不再请求。</p>
+                <form id="micro-settings-form" class="micro-form">
+                  <div class="micro-domain-toggles">
+                    <label class="is-check"><input id="micro-dom-creator" type="checkbox" /> 海外自媒体</label>
+                    <label class="is-check"><input id="micro-dom-ecommerce" type="checkbox" /> 独立站</label>
+                    <label class="is-check"><input id="micro-dom-productivity" type="checkbox" /> 效率工具</label>
+                    <label class="is-check"><input id="micro-dom-indie" type="checkbox" /> 独立开发许愿</label>
+                  </div>
+                  <div class="micro-form-grid">
+                    <label>心跳
+                      <select id="micro-heartbeat">
+                        <option value="0">关闭</option>
+                        <option value="6">每 6 小时</option>
+                        <option value="12">每 12 小时</option>
+                        <option value="24">每天</option>
+                        <option value="48">每两天</option>
+                      </select>
+                    </label>
+                    <label class="is-check"><input id="micro-notify" type="checkbox" /> 新高痛点桌面通知</label>
+                    <label class="is-check"><input id="micro-todo" type="checkbox" /> 今日前三写入待办（#选品）</label>
+                    <label class="is-wide">代理
+                      <input
+                        id="micro-proxy"
+                        type="text"
+                        spellcheck="false"
+                        autocomplete="off"
+                        placeholder="http://127.0.0.1:7890"
+                      />
+                    </label>
+                    <label class="is-wide">额外源（JSON 数组）
+                      <textarea
+                        id="micro-custom-sources"
+                        rows="5"
+                        spellcheck="false"
+                        placeholder='[{"id":"reddit-ai","kind":"reddit","label":"r/artificial","domain":"indie","subs":["artificial"],"mode":"hot"}]'
+                      ></textarea>
+                    </label>
+                  </div>
+                  <p class="hint">
+                    CatCloud 填混合端口，例如 http://127.0.0.1:12334（不要填透明代理口）。代理连不上时本轮自动直连，HN 一般还能捞。Reddit 常把机场出口拦成 403，扫描会改走档案源。
+                  </p>
+                  <div class="form-actions">
+                    <button type="submit">保存配置</button>
+                  </div>
+                </form>
+              </section>
+              <section class="micro-panel">
+                <p class="caption">采集源</p>
+                <ul id="micro-sources" class="micro-rows"></ul>
+                <p class="hint">
+                  优先 Reddit 公开 JSON；被墙或 403 后改走 Arctic Shift 档案，再不行才试 Pullpush。Hacker News（Algolia）国内一般可直连。
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-growth" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">增长黑客</p>
+            <h1>增长台 <span id="growth-count" class="tick-count">0</span></h1>
+          </div>
+          <button id="growth-new" type="button">开实验</button>
+        </header>
+        <p class="hint">实验、增长环和渠道是这份台的真相。流量看监控官，文案看弹药手，账本看财务顾问。</p>
+        <div id="growth-filters" class="growth-filters"></div>
+        <div class="growth-layout">
+          <aside class="growth-side">
+            <ul id="growth-list"></ul>
+          </aside>
+          <div class="growth-main">
+            <div id="growth-empty" class="growth-empty"></div>
+            <div id="growth-detail">
+              <form id="growth-experiment-form" class="growth-fields" hidden>
+                <p class="caption">实验</p>
+                <input id="experiment-id" type="hidden" />
+                <input id="experiment-title" type="text" spellcheck="false" autocomplete="off" placeholder="实验名，例如官网 CTA" required />
+                <textarea id="experiment-hypothesis" spellcheck="false" placeholder="假设：改什么、对谁、预期怎样"></textarea>
+                <input id="experiment-metric" type="text" spellcheck="false" autocomplete="off" placeholder="指标，例如注册数" />
+                <div class="account-fields">
+                  <select id="experiment-stage" aria-label="AARRR 层"></select>
+                  <select id="experiment-status" aria-label="状态"></select>
+                </div>
+                <input id="experiment-note" type="text" spellcheck="false" autocomplete="off" placeholder="备注（可选）" />
+                <button type="submit">保存实验</button>
+                <div id="experiment-meta"></div>
+              </form>
+              <form id="growth-loop-form" class="growth-fields" hidden>
+                <p class="caption">增长环</p>
+                <input id="loop-id" type="hidden" />
+                <input id="loop-title" type="text" spellcheck="false" autocomplete="off" placeholder="环的名字，例如内容环" required />
+                <select id="loop-kind" aria-label="环类型"></select>
+                <textarea id="loop-steps" spellcheck="false" placeholder="步骤：发帖 → GEO → 注册 → 再发"></textarea>
+                <select id="loop-product" aria-label="关联产品"></select>
+                <input id="loop-note" type="text" spellcheck="false" autocomplete="off" placeholder="备注（可选）" />
+                <button type="submit">保存增长环</button>
+              </form>
+              <form id="growth-channel-form" class="growth-fields" hidden>
+                <p class="caption">渠道</p>
+                <input id="channel-id" type="hidden" />
+                <input id="channel-name" type="text" spellcheck="false" autocomplete="off" placeholder="渠道名，例如小红书" required />
+                <div class="account-fields">
+                  <select id="channel-status" aria-label="处置"></select>
+                  <select id="channel-stage" aria-label="AARRR 层"></select>
+                  <input id="channel-score" type="number" min="1" max="5" step="1" value="3" aria-label="分数" />
+                </div>
+                <select id="channel-product" aria-label="关联产品"></select>
+                <input id="channel-note" type="text" spellcheck="false" autocomplete="off" placeholder="备注（可选）" />
+                <button type="submit">保存渠道</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-accounts" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">自媒体账号</p>
+            <h1>账号管理 <span id="accounts-count" class="tick-count">0</span></h1>
+          </div>
+          <button id="accounts-new" type="button">新账号</button>
+        </header>
+        <p class="hint">管视频号、抖音、小红书上的多个账号。国内平台没有开放接口，当日内容、数据、选材都靠手录。</p>
+        <div class="accounts-layout">
+          <aside class="accounts-side">
+            <div id="accounts-platform-filters" class="social-filters"></div>
+            <ul id="accounts-list" class="accounts-list"></ul>
+            <form id="accounts-create" class="accounts-create" hidden>
+              <p class="caption">账号资料</p>
+              <input id="account-edit-id" type="hidden" />
+              <div class="account-fields">
+                <select id="account-platform" aria-label="平台"></select>
+                <input id="account-name" type="text" spellcheck="false" autocomplete="off" placeholder="账号名" required />
+                <input id="account-handle" type="text" spellcheck="false" autocomplete="off" placeholder="ID / 主页（可选）" />
+                <input id="account-note" type="text" spellcheck="false" autocomplete="off" placeholder="备注，比如主号 / 测试号" />
+              </div>
+              <div class="form-actions">
+                <button id="account-create-submit" type="submit">添加账号</button>
+                <button id="account-create-cancel" type="button" class="ghost">取消</button>
+              </div>
+            </form>
+            <section class="accounts-materials">
+              <p class="caption">选材库</p>
+              <form id="material-create" class="material-fields">
+                <input id="material-title" type="text" spellcheck="false" autocomplete="off" placeholder="选题 / 素材名" />
+                <select id="material-product" aria-label="关联产品"></select>
+                <button type="submit">加入选材</button>
+              </form>
+              <ul id="materials-list" class="materials-list"></ul>
+            </section>
+          </aside>
+          <div class="accounts-main">
+            <div id="accounts-empty" class="accounts-empty" hidden></div>
+            <div id="accounts-day" hidden>
+              <div id="account-head" class="account-head"></div>
+              <div class="accounts-datebar">
+                <button id="day-prev" type="button" aria-label="前一天">‹</button>
+                <input id="day-date" type="date" aria-label="日期" />
+                <button id="day-next" type="button" aria-label="后一天">›</button>
+                <button id="day-today" type="button">今天</button>
+              </div>
+              <div id="day-strip" class="day-strip"></div>
+              <section class="accounts-panel">
+                <p class="caption">当日发的内容</p>
+                <form id="post-form" class="post-fields">
+                  <div class="post-row">
+                    <input id="post-title" type="text" spellcheck="false" autocomplete="off" placeholder="标题或口播钩子" />
+                    <select id="post-format" aria-label="形态"></select>
+                  </div>
+                  <textarea id="post-body" spellcheck="false" placeholder="正文 / 拍摄备注（可选）"></textarea>
+                  <input id="post-url" type="text" spellcheck="false" autocomplete="off" placeholder="发布链接（可选）" />
+                  <button type="submit">记一条</button>
+                </form>
+                <ul id="posts-list" class="posts-list"></ul>
+              </section>
+              <section class="accounts-panel">
+                <p class="caption">当日数据</p>
+                <form id="metrics-form">
+                  <div id="metrics-labels" class="metrics-fields"></div>
+                  <button type="submit">记下数据</button>
+                </form>
+              </section>
+              <section class="accounts-panel">
+                <p class="caption">选材关联</p>
+                <div id="day-materials" class="day-materials"></div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-wxdraft" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">公众号草稿</p>
+            <h1>微信草稿生成 <span id="wxd-run-state" class="tick-count"></span></h1>
+          </div>
+          <div class="wx-head-actions">
+            <button id="wxd-stop" type="button" class="ghost" hidden>停止</button>
+            <button id="wxd-run" type="button">生成草稿</button>
+          </div>
+        </header>
+        <p class="hint">
+          只要贴入或读取正文 Markdown。作者在下方填写，也可到设置里存一份默认作者；标题和简介会在生成时由 AI 根据正文总结。
+          转 HTML 前会先审查正文：去掉封面图、文首 YAML、排版风格 / 封面图方案 / 备选标题 / 内容验真等策划模块，以及 AI 指引性文案，只留知识正文。
+          校对正文只做红线词筛查、错别字纠正、去掉没有形成格式的 Markdown 符号，不改表意。
+          封面只读文档同级 <code>images/</code> 里的手工图（<code>封面.jpg</code> / <code>封面.png</code> / <code>cover.jpg</code>），不会自动生成，也不会写进正文。
+          正文里的本地图片（如 <code>/images/插图.jpg</code>）会按 .md 所在目录或所选配图文件夹解析，先上传到微信再写回正文。
+          按所选通道（直连微信 API 或扣子工作流）：审查正文 → 校对正文 → 取 token → Markdown 转 HTML → 上传封面与正文图 → 新建草稿，成功后到公众号后台「草稿箱」查看。
+        </p>
+        <div class="wx-layout">
+          <div class="wx-main">
+            <section id="wxd-drop" class="panel wx-panel">
+              <div class="panel-head">
+                <p class="caption">正文主文档 · Markdown</p>
+                <div class="wx-doc-actions">
+                  <button id="wxd-pick" type="button" class="ghost wx-mini">读取本地 .md</button>
+                  <button id="wxd-pick-assets" type="button" class="ghost wx-mini">选择配图文件夹</button>
+                </div>
+              </div>
+              <p id="wxd-file" class="wx-file" hidden></p>
+              <p id="wxd-assets" class="wx-file wx-assets" hidden></p>
+              <textarea
+                id="wxd-markdown"
+                class="wx-markdown"
+                spellcheck="false"
+                placeholder="把主文档 Markdown 贴在这里，或把 .md / 配图文件夹拖进来"
+              ></textarea>
+            </section>
+
+            <section class="panel wx-panel">
+              <p class="caption">文章信息</p>
+              <div class="wx-form-grid">
+                <label class="is-wide">标题 <input id="wxd-title" type="text" spellcheck="false" placeholder="留空则由 AI 根据正文生成" /></label>
+                <label>作者 <input id="wxd-author" type="text" spellcheck="false" placeholder="可到设置里存默认作者" /></label>
+                <label class="is-wide">封面图 <input id="wxd-cover" type="text" spellcheck="false" placeholder="默认读取文档目录 images/封面.jpg，不自动生成" /></label>
+                <p id="wxd-cover-hint" class="hint wx-cover-hint" hidden></p>
+                <label class="is-wide">摘要 <input id="wxd-digest" type="text" spellcheck="false" placeholder="留空则由 AI 根据正文生成，不超过 120 字" /></label>
+                <label class="is-wide">原文链接 <input id="wxd-source-url" type="url" spellcheck="false" placeholder="https://…（可选）" /></label>
+                <label class="is-check"><input id="wxd-open-comment" type="checkbox" /> 开启评论</label>
+                <label class="is-check"><input id="wxd-fans-only" type="checkbox" /> 仅粉丝可评论</label>
+                <label class="is-check"><input id="wxd-original" type="checkbox" checked /> 文末加原创声明</label>
+                <p id="wxd-original-hint" class="hint wx-original-hint">
+                  微信 <code>draft/add</code> 没有官方「声明原创」字段，原创标只能到公众号后台草稿箱手动点。
+                  勾选后会在正文末尾写入「本账号」原创说明（有默认作者则用作者名）；阅读原文用上方链接。
+                </p>
+              </div>
+            </section>
+
+            <details class="panel wx-panel wx-settings">
+              <summary class="caption">接口与密钥设置（AppID / Secret / 生成通道）</summary>
+              <div class="wx-form-grid">
+                <label class="is-wide">生成通道
+                  <select id="wxd-channel">
+                    <option value="direct">直连微信 API（推荐，无需扣子）</option>
+                    <option value="coze">扣子工作流</option>
+                  </select>
+                </label>
+                <label class="is-wide coze-only">扣子工作流 ID <input id="wxd-workflow" type="text" spellcheck="false" /></label>
+                <label>默认作者 <input id="wxd-default-author" type="text" spellcheck="false" placeholder="例如：公众号署名" /></label>
+                <label>公众号 AppID <input id="wxd-appid" type="text" spellcheck="false" placeholder="wx…" /></label>
+                <label class="coze-only">扣子 PAT <input id="wxd-token" type="password" autocomplete="off" spellcheck="false" /></label>
+                <label class="coze-only">令牌状态 <span id="wxd-token-state" class="wx-secret-state"></span></label>
+                <label>微信 AppSecret <input id="wxd-secret" type="password" autocomplete="off" spellcheck="false" /></label>
+                <label>密钥状态 <span id="wxd-secret-state" class="wx-secret-state"></span></label>
+                <label class="is-check"><input id="wxd-set-open" type="checkbox" /> 默认开启评论</label>
+                <label class="is-check"><input id="wxd-set-fans" type="checkbox" /> 默认仅粉丝评论</label>
+              </div>
+              <p class="hint">
+                直连模式需要公众号 AppID/AppSecret，且本机出口 IP 需在公众号后台「IP 白名单」内（否则报 40164）；扣子模式额外需要工作流 ID 和 PAT。
+                敏感信息通过系统安全存储加密保存在本机；也可用环境变量 COZE_TOKEN / WX_APPID / WX_APP_SECRET
+                覆盖（环境变量优先）。扣子 PAT 在 coze.cn/open/oauth/pats 创建，需具备该工作流运行权限。
+              </p>
+              <div class="form-actions">
+                <button id="wxd-save-settings" type="button">保存设置</button>
+                <button id="wxd-clear-token" type="button" class="ghost coze-only">清除 PAT</button>
+                <button id="wxd-clear-secret" type="button" class="ghost">清除 Secret</button>
+              </div>
+            </details>
+          </div>
+
+          <aside class="wx-side">
+            <section class="panel wx-panel">
+              <div class="panel-head">
+                <p class="caption">执行进度</p>
+                <span id="wxd-progress-state" class="tick-count"></span>
+              </div>
+              <ul id="wxd-log" class="wx-log"></ul>
+            </section>
+            <section id="wxd-result-block" class="panel wx-panel" hidden>
+              <p class="caption">结果</p>
+              <div id="wxd-result" class="wx-result"></div>
+            </section>
+            <section class="panel wx-panel">
+              <div class="panel-head">
+                <p class="caption">历史</p>
+                <span id="wxd-history-meta" class="tick-count"></span>
+              </div>
+              <ul id="wxd-history" class="wx-history"></ul>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section id="view-wxhub" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">微信个人情报库</p>
+            <h1>本机只读 <span id="wxhub-updated" class="tick-count"></span></h1>
+          </div>
+          <button id="wxhub-refresh" type="button" aria-busy="false">刷新今日</button>
+        </header>
+        <p id="wxhub-status" class="hint">聊天、联系人和 key 只留在这台电脑。不发微信，也不上传原文。</p>
+        <div class="wxhub-layout">
+          <aside class="wxhub-side">
+            <nav id="wxhub-nav" class="monitor-nav" aria-label="微信情报子模块"></nav>
+          </aside>
+          <div class="wxhub-main">
+            <div class="wxhub-group" data-group="today">
+              <section class="micro-panel">
+                <div class="panel-head">
+                  <p class="caption">今日最该处理</p>
+                  <span id="wxhub-today-meta" class="tick-count"></span>
+                </div>
+                <div id="wxhub-today-list" class="wxhub-list"></div>
+              </section>
+            </div>
+
+            <div class="wxhub-group" data-group="inbox" hidden>
+              <section class="micro-panel">
+                <div class="panel-head">
+                  <p class="caption">待分流候选 · 不是已确认商机</p>
+                  <span id="wxhub-inbox-meta" class="tick-count"></span>
+                </div>
+                <div id="wxhub-inbox-list" class="wxhub-list"></div>
+              </section>
+            </div>
+
+            <div class="wxhub-group" data-group="lookup" hidden>
+              <section class="micro-panel">
+                <p class="caption">本机查找</p>
+                <p id="wxhub-lookup-hint" class="hint">只搜已索引的聊天。回复草稿可复制，不会替你发出去。</p>
+                <form id="wxhub-lookup-form" class="wxhub-form">
+                  <label>类型
+                    <select id="wxhub-lookup-kind">
+                      <option value="search">关键词</option>
+                      <option value="person">联系人 / 群</option>
+                      <option value="reply">回复草稿</option>
+                    </select>
+                  </label>
+                  <label>对象
+                    <input id="wxhub-lookup-query" type="text" spellcheck="false" placeholder="联系人、群名或关键词" />
+                  </label>
+                  <button type="submit">查找</button>
+                  <button id="wxhub-lookup-copy" type="button" class="ghost" hidden>复制结果</button>
+                </form>
+                <pre id="wxhub-lookup-out" class="wxhub-out"></pre>
+              </section>
+            </div>
+
+            <div class="wxhub-group" data-group="settings" hidden>
+              <section class="micro-panel">
+                <p class="caption">本机接入</p>
+                <p class="hint">
+                  这个模块只调用你电脑上已安装的
+                  <a id="wxhub-install" href="https://github.com/Rion-Wu-tech/wechat-intelligence-hub">WeChat Intelligence Hub</a>
+                  。请在本机 Codex / Cursor 里完成只读接入；不要把数据库、key 或聊天发到云端。
+                </p>
+                <form id="wxhub-settings-form" class="wxhub-settings">
+                  <label class="is-wide">项目目录
+                    <span class="wxhub-home-row">
+                      <input id="wxhub-home" type="text" spellcheck="false" placeholder="留空则自动发现 ~/.codex 与常见克隆位置" />
+                      <button id="wxhub-pick-home" type="button" class="ghost">选择…</button>
+                    </span>
+                  </label>
+                  <label>心跳
+                    <select id="wxhub-heartbeat">
+                      <option value="0">关闭</option>
+                      <option value="12">每 12 小时</option>
+                      <option value="24">每天</option>
+                      <option value="48">每 48 小时</option>
+                    </select>
+                  </label>
+                  <label class="is-check"><input id="wxhub-notify" type="checkbox" /> 刷新后发桌面通知</label>
+                  <label class="is-check"><input id="wxhub-todo" type="checkbox" /> 写入首页待办（#微信）</label>
+                  <button type="submit">保存</button>
+                </form>
+                <p id="wxhub-coverage" class="hint"></p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-mail" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">邮件整理</p>
+            <h1>只整理，不代发 <span id="mail-updated" class="tick-count"></span></h1>
+          </div>
+          <button id="mail-refresh" type="button" aria-busy="false">刷新收件箱</button>
+        </header>
+        <p id="mail-status" class="hint">本机邮件.app、iCloud、Gmail、QQ 都可以接入。只整理、写草稿，不代发。</p>
+        <div class="mail-layout">
+          <aside class="mail-side">
+            <nav id="mail-nav" class="monitor-nav" aria-label="邮件整理子模块"></nav>
+          </aside>
+          <div class="mail-main">
+            <div class="mail-group" data-group="inbox">
+              <section class="micro-panel">
+                <div class="panel-head">
+                  <p class="caption">待整理</p>
+                  <div class="mail-head-tools">
+                    <span id="mail-inbox-meta" class="tick-count"></span>
+                    <button id="mail-group-week" type="button" class="ghost is-on">按周</button>
+                  </div>
+                </div>
+                <div id="mail-inbox-list" class="mail-list"></div>
+              </section>
+            </div>
+
+            <div class="mail-group" data-group="lookup" hidden>
+              <section class="micro-panel">
+                <p class="caption">已同步的信</p>
+                <p class="hint">只搜拉到本机的主题和发件人，不上传原文。</p>
+                <form id="mail-lookup-form" class="mail-form">
+                  <label>关键词
+                    <input id="mail-lookup-query" type="text" spellcheck="false" placeholder="导师、发票、谁写来的" />
+                  </label>
+                  <button type="submit">查找</button>
+                </form>
+                <div id="mail-lookup-out" class="mail-list"></div>
+              </section>
+            </div>
+
+            <div class="mail-group" data-group="settings" hidden>
+              <section class="micro-panel">
+                <p class="caption">接入</p>
+                <p class="hint">
+                  本机走 macOS「邮件」。线上邮箱请用专用密码：iCloud 的 Apple 专用密码、Gmail 应用专用密码、QQ 授权码。不要填登录密码。不代发。
+                </p>
+                <p id="mail-coverage" class="hint"></p>
+                <button id="mail-enable-local" type="button">接入本机邮件.app</button>
+                <form id="mail-account-form" class="mail-settings">
+                  <label>邮箱
+                    <select id="mail-provider"></select>
+                  </label>
+                  <label>地址
+                    <input id="mail-email" type="email" spellcheck="false" placeholder="you@icloud.com" />
+                  </label>
+                  <label>专用密码
+                    <input id="mail-password" type="password" autocomplete="off" />
+                  </label>
+                  <button type="submit">保存账号</button>
+                </form>
+                <div id="mail-accounts"></div>
+                <p class="caption">关注的人</p>
+                <p class="hint">收件箱里点「关注」后，这些人的信会汇总置顶。也可以在这里取消。</p>
+                <div id="mail-watched"></div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-payments" class="view">
+        <header class="tick-head">
+          <div>
+            <p class="mark">收款管理</p>
+            <h1>财务台 <span id="pay-env" class="tick-count"></span></h1>
+          </div>
+          <div class="pay-head-actions">
+            <button id="pay-dashboard" type="button" class="ghost">Creem Dashboard</button>
+            <button id="pay-sync" type="button">同步 Creem</button>
+          </div>
+        </header>
+        <p id="pay-status" class="hint"></p>
+        <div class="pay-layout">
+          <aside class="pay-side">
+            <nav id="pay-nav" class="monitor-nav" aria-label="收款子模块"></nav>
+          </aside>
+          <div class="pay-main">
+            <div class="pay-group" data-group="overview">
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">本月 · 财务 KPI（折人民币）</p>
+                  <span id="pay-overview-meta" class="tick-count"></span>
+                </div>
+                <div id="pay-kpis" class="users-summary"></div>
+                <div id="pay-attention" class="pay-attention"></div>
+              </section>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">近 12 个月 · 收入 / 支出</p>
+                  <span id="pay-chart-meta" class="tick-count"></span>
+                </div>
+                <div id="pay-month-chart" class="pay-chart"></div>
+              </section>
+              <div class="pay-two">
+                <section class="pay-panel">
+                  <p class="caption">收入 · 按产品</p>
+                  <div id="pay-by-product" class="pay-breakdown"></div>
+                </section>
+                <section class="pay-panel">
+                  <p class="caption">收入 · 按渠道</p>
+                  <div id="pay-by-channel" class="pay-breakdown"></div>
+                </section>
+              </div>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">最近动态 · Creem 心跳</p>
+                  <button id="pay-events-clear" type="button" class="ghost">清空</button>
+                </div>
+                <ul id="pay-events" class="pay-rows"></ul>
+              </section>
+            </div>
+
+            <div class="pay-group" data-group="transactions" hidden>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">交易流水 · Creem + 手录</p>
+                  <button id="pay-export-ledger" type="button" class="ghost">导出 CSV</button>
+                </div>
+                <div class="pay-filters">
+                  <select id="pay-ledger-month" aria-label="月份"></select>
+                  <select id="pay-ledger-source" aria-label="来源">
+                    <option value="all">全部来源</option>
+                    <option value="creem">Creem</option>
+                    <option value="manual">手录</option>
+                  </select>
+                  <select id="pay-ledger-product" aria-label="产品"></select>
+                  <input id="pay-ledger-query" type="search" spellcheck="false" autocomplete="off" placeholder="搜客户 / 备注 / ID" />
+                </div>
+                <div id="pay-ledger-summary" class="users-summary"></div>
+                <ul id="pay-ledger" class="pay-rows is-tall"></ul>
+              </section>
+              <section class="pay-panel">
+                <p class="caption">手录一笔收款 · 分账 / 星球 / 扫码 / 社媒</p>
+                <form id="pay-receipt-form" class="pay-form">
+                  <input id="pay-receipt-id" type="hidden" />
+                  <div class="pay-form-grid">
+                    <label>日期 <input id="pay-receipt-date" type="date" required /></label>
+                    <label>渠道 <select id="pay-receipt-channel"></select></label>
+                    <label>金额 <input id="pay-receipt-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="199.00" required /></label>
+                    <label>币种
+                      <select id="pay-receipt-currency">
+                        <option value="CNY">CNY</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                      </select>
+                    </label>
+                    <label>产品 <select id="pay-receipt-product"></select></label>
+                    <label>客户 <input id="pay-receipt-customer" type="text" spellcheck="false" autocomplete="off" placeholder="微信名 / 星球昵称 / 邮箱" /></label>
+                    <label class="is-wide">备注 <input id="pay-receipt-note" type="text" spellcheck="false" autocomplete="off" placeholder="订单号 / 说明" /></label>
+                  </div>
+                  <div class="form-actions">
+                    <button id="pay-receipt-submit" type="submit">记一笔</button>
+                    <button id="pay-receipt-cancel" type="button" class="ghost" hidden>取消编辑</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+
+            <div class="pay-group" data-group="subscriptions" hidden>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">订阅 · 生命周期</p>
+                  <span id="pay-subs-meta" class="tick-count"></span>
+                </div>
+                <div id="pay-subs-summary" class="users-summary"></div>
+                <div id="pay-subs-filters" class="social-filters"></div>
+                <ul id="pay-subs" class="pay-rows is-tall"></ul>
+              </section>
+            </div>
+
+            <div class="pay-group" data-group="customers" hidden>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">客户 · 订阅与累计付款</p>
+                  <span id="pay-customers-meta" class="tick-count"></span>
+                </div>
+                <div class="pay-filters">
+                  <input id="pay-customer-query" type="search" spellcheck="false" autocomplete="off" placeholder="按邮箱 / 姓名 / 国家搜" />
+                </div>
+                <ul id="pay-customers" class="pay-rows is-tall"></ul>
+              </section>
+            </div>
+
+            <div class="pay-group" data-group="products" hidden>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">Creem 产品</p>
+                  <span id="pay-products-meta" class="tick-count"></span>
+                </div>
+                <ul id="pay-products" class="pay-rows"></ul>
+              </section>
+              <div class="pay-two">
+                <section class="pay-panel">
+                  <p class="caption">生成收款链接</p>
+                  <form id="pay-checkout-form" class="pay-form">
+                    <div class="pay-form-grid is-single">
+                      <label>产品 <select id="pay-checkout-product"></select></label>
+                      <label>客户邮箱（可选） <input id="pay-checkout-email" type="email" spellcheck="false" autocomplete="off" placeholder="预填收款页" /></label>
+                      <label>折扣码（可选） <input id="pay-checkout-discount" type="text" spellcheck="false" autocomplete="off" placeholder="LAUNCH20" /></label>
+                      <label>成功跳转（可选） <input id="pay-checkout-success" type="url" spellcheck="false" autocomplete="off" placeholder="https://…/thanks" /></label>
+                      <label>内部参考 ID（可选） <input id="pay-checkout-reference" type="text" spellcheck="false" autocomplete="off" placeholder="对应自家用户 ID" /></label>
+                    </div>
+                    <div class="form-actions">
+                      <button type="submit">生成并复制链接</button>
+                    </div>
+                  </form>
+                  <p id="pay-checkout-result" class="pay-result"></p>
+                </section>
+                <section class="pay-panel">
+                  <p class="caption">新建产品</p>
+                  <form id="pay-product-form" class="pay-form">
+                    <div class="pay-form-grid is-single">
+                      <label>名称 <input id="pay-product-name" type="text" spellcheck="false" autocomplete="off" placeholder="Pro Plan" required /></label>
+                      <label>描述 <input id="pay-product-description" type="text" spellcheck="false" autocomplete="off" placeholder="Creem 要求必填" required /></label>
+                      <div class="pay-form-row">
+                        <label>价格 <input id="pay-product-price" type="text" inputmode="decimal" autocomplete="off" placeholder="19.99" required /></label>
+                        <label>币种
+                          <select id="pay-product-currency">
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                          </select>
+                        </label>
+                      </div>
+                      <div class="pay-form-row">
+                        <label>计费
+                          <select id="pay-product-billing">
+                            <option value="onetime">一次性</option>
+                            <option value="recurring">订阅</option>
+                          </select>
+                        </label>
+                        <label>周期 <select id="pay-product-period"></select></label>
+                      </div>
+                      <div class="pay-form-row">
+                        <label>税类
+                          <select id="pay-product-tax">
+                            <option value="saas">SaaS</option>
+                            <option value="digital-goods-service">数字商品 / 服务</option>
+                            <option value="ebooks">电子书</option>
+                          </select>
+                        </label>
+                        <label>税价
+                          <select id="pay-product-taxmode">
+                            <option value="exclusive">价外税</option>
+                            <option value="inclusive">价内税</option>
+                          </select>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="form-actions">
+                      <button type="submit">创建到 Creem</button>
+                    </div>
+                  </form>
+                </section>
+              </div>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">折扣码</p>
+                  <span id="pay-discounts-meta" class="tick-count"></span>
+                </div>
+                <ul id="pay-discounts" class="pay-rows"></ul>
+                <form id="pay-discount-form" class="pay-form">
+                  <div class="pay-form-grid">
+                    <label>名称 <input id="pay-discount-name" type="text" spellcheck="false" autocomplete="off" placeholder="Launch Sale" required /></label>
+                    <label>代码 <input id="pay-discount-code" type="text" spellcheck="false" autocomplete="off" placeholder="LAUNCH20" required /></label>
+                    <label>类型
+                      <select id="pay-discount-type">
+                        <option value="percentage">百分比</option>
+                        <option value="fixed">固定金额</option>
+                      </select>
+                    </label>
+                    <label>数值 <input id="pay-discount-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="20 或 5.00" required /></label>
+                    <label>币种
+                      <select id="pay-discount-currency">
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                      </select>
+                    </label>
+                    <label>持续
+                      <select id="pay-discount-duration">
+                        <option value="forever">永久</option>
+                        <option value="once">仅首期</option>
+                        <option value="repeating">若干月</option>
+                      </select>
+                    </label>
+                    <label>月数 <input id="pay-discount-months" type="number" min="1" step="1" placeholder="repeating 时填" /></label>
+                    <label>最多兑换 <input id="pay-discount-max" type="number" min="1" step="1" placeholder="不限" /></label>
+                    <label>到期 <input id="pay-discount-expiry" type="date" /></label>
+                    <label class="is-wide">适用产品 <select id="pay-discount-products" multiple size="3"></select></label>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit">创建折扣码</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+
+            <div class="pay-group" data-group="payouts" hidden>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">结算提现 · 到账记录</p>
+                  <span id="pay-payouts-meta" class="tick-count"></span>
+                </div>
+                <div id="pay-payouts-summary" class="users-summary"></div>
+                <p class="hint">
+                  Creem 每月 1 号、15 号结算，余额 ≥ 50 USD/EUR 可申请；手续费取 7 USD/EUR 或 1% 的高者，USDC（Polygon）为 2%；
+                  款项需 7–12 天风控期。国内个人可走支付宝（单笔 ≤ 5 万 CNY），企业走本地银行账户。每笔到账都有反向发票可下载报税。
+                  自媒体分账、知识星球、微信扫码和海外社媒按各平台自己的结算周期手录，不会自动流入。
+                </p>
+                <ul id="pay-payouts" class="pay-rows"></ul>
+              </section>
+              <section class="pay-panel">
+                <p class="caption">记一笔到账</p>
+                <form id="pay-payout-form" class="pay-form">
+                  <input id="pay-payout-id" type="hidden" />
+                  <div class="pay-form-grid">
+                    <label>日期 <input id="pay-payout-date" type="date" required /></label>
+                    <label>来源 <select id="pay-payout-source"></select></label>
+                    <label>提现总额 <input id="pay-payout-gross" type="text" inputmode="decimal" autocomplete="off" placeholder="500.00" required /></label>
+                    <label>手续费 <input id="pay-payout-fee" type="text" inputmode="decimal" autocomplete="off" placeholder="7.00" /></label>
+                    <label>币种
+                      <select id="pay-payout-currency">
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="CNY">CNY</option>
+                      </select>
+                    </label>
+                    <label>实际到账 <input id="pay-payout-received" type="text" inputmode="decimal" autocomplete="off" placeholder="3540.00" /></label>
+                    <label>到账币种
+                      <select id="pay-payout-received-currency">
+                        <option value="CNY">CNY</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                      </select>
+                    </label>
+                    <label>到账账户 <input id="pay-payout-account" type="text" spellcheck="false" autocomplete="off" placeholder="支付宝 / 招行 / USDC 钱包" /></label>
+                    <label class="is-wide">备注 <input id="pay-payout-note" type="text" spellcheck="false" autocomplete="off" placeholder="反向发票号 / 说明" /></label>
+                  </div>
+                  <div class="form-actions">
+                    <button id="pay-payout-submit" type="submit">记到账</button>
+                    <button id="pay-payout-cancel" type="button" class="ghost" hidden>取消编辑</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+
+            <div class="pay-group" data-group="expenses" hidden>
+              <section class="pay-panel">
+                <div class="panel-head">
+                  <p class="caption">支出成本 · 利润</p>
+                  <button id="pay-export-report" type="button" class="ghost">导出月报 CSV</button>
+                </div>
+                <div id="pay-expenses-summary" class="users-summary"></div>
+                <div id="pay-expenses-by-category" class="pay-breakdown"></div>
+                <ul id="pay-expenses" class="pay-rows is-tall"></ul>
+              </section>
+              <section class="pay-panel">
+                <p class="caption">记一笔支出</p>
+                <form id="pay-expense-form" class="pay-form">
+                  <input id="pay-expense-id" type="hidden" />
+                  <div class="pay-form-grid">
+                    <label>日期 <input id="pay-expense-date" type="date" required /></label>
+                    <label>类别 <select id="pay-expense-category"></select></label>
+                    <label>金额 <input id="pay-expense-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="20.00" required /></label>
+                    <label>币种
+                      <select id="pay-expense-currency">
+                        <option value="CNY">CNY</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                      </select>
+                    </label>
+                    <label>供应商 <input id="pay-expense-vendor" type="text" spellcheck="false" autocomplete="off" placeholder="Vercel / OpenAI / 阿里云" /></label>
+                    <label>归属产品 <select id="pay-expense-product"></select></label>
+                    <label class="is-wide">备注 <input id="pay-expense-note" type="text" spellcheck="false" autocomplete="off" placeholder="发票 / 说明" /></label>
+                  </div>
+                  <div class="form-actions">
+                    <button id="pay-expense-submit" type="submit">记支出</button>
+                    <button id="pay-expense-cancel" type="button" class="ghost" hidden>取消编辑</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+
+            <div class="pay-group" data-group="settings" hidden>
+              <section class="pay-panel">
+                <p class="caption">Creem API key</p>
+                <p id="pay-key-status" class="hint"></p>
+                <form id="pay-key-form" class="pay-key-form">
+                  <input id="pay-key-input" type="password" spellcheck="false" autocomplete="off" placeholder="creem_test_… 或 creem_…" />
+                  <button type="submit">保存</button>
+                  <button id="pay-key-clear" type="button" class="ghost">清除</button>
+                </form>
+                <p class="hint">
+                  key 只发给 Creem API，用系统安全存储加密后存在本机；设置了环境变量 CREEM_API_KEY 时以环境变量优先。
+                  先用沙箱 key（creem_test_）跑通，再换生产 key。沙箱与生产数据完全隔离。
+                </p>
+              </section>
+              <section class="pay-panel">
+                <p class="caption">心跳与通知</p>
+                <form id="pay-settings-form" class="pay-form">
+                  <div class="pay-form-grid">
+                    <label>心跳间隔
+                      <select id="pay-set-heartbeat">
+                        <option value="0">关闭</option>
+                        <option value="15">15 分钟</option>
+                        <option value="30">30 分钟</option>
+                        <option value="60">1 小时</option>
+                        <option value="180">3 小时</option>
+                        <option value="360">6 小时</option>
+                        <option value="720">12 小时</option>
+                      </select>
+                    </label>
+                    <label class="is-check"><input id="pay-set-notify" type="checkbox" /> 新收款 / 取消 / 扣款失败时桌面通知</label>
+                    <label class="is-check"><input id="pay-set-todo" type="checkbox" /> 扣款失败 / 到期取消 / 争议写入待办</label>
+                    <label class="is-wide">默认成功跳转 <input id="pay-set-success" type="url" spellcheck="false" autocomplete="off" placeholder="https://…/thanks" /></label>
+                    <label>USD → CNY <input id="pay-set-usd" type="number" min="0.01" step="0.01" /></label>
+                    <label>EUR → CNY <input id="pay-set-eur" type="number" min="0.01" step="0.01" /></label>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit">保存设置</button>
+                  </div>
+                </form>
+                <p class="hint">心跳按 creem.io/HEARTBEAT.md 的规则：有变化才通知，没变化保持安静。汇率只用于折算展示，不影响 Creem 数据。</p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-settings" class="view">
+        <header class="view-head">
+          <h2>技能</h2>
+          <p class="hint">Skills 是更小的口令卡。模块停用只是收起入口，对应成员会从名单里拿掉，数据还在。</p>
+        </header>
+
+        <div class="settings-layout">
+          <aside class="settings-side">
+            <nav id="settings-nav" class="monitor-nav" aria-label="技能小节">
+              <button type="button" data-settings-section="skills" class="monitor-nav-item is-current">
+                <span class="monitor-nav-label">Skills</span>
+              </button>
+              <button type="button" data-settings-section="installed" class="monitor-nav-item">
+                <span class="monitor-nav-label">已安装</span>
+              </button>
+              <button type="button" data-settings-section="sources" class="monitor-nav-item">
+                <span class="monitor-nav-label">模块源</span>
+              </button>
+              <button type="button" data-settings-section="repo" class="monitor-nav-item">
+                <span class="monitor-nav-label">模块仓库</span>
+              </button>
+              <button type="button" data-settings-section="channels" class="monitor-nav-item">
+                <span class="monitor-nav-label">开发者</span>
+              </button>
+            </nav>
+          </aside>
+          <div class="settings-main">
+            <div class="settings-block" data-settings-section="skills">
+              <h3>Skills</h3>
+              <p id="skill-hint" class="hint">点一张小卡，选成员赋能。获得这条 Skill 的成员，在主对话和项目里会调用它。</p>
+              <div id="skill-list" class="skill-list"></div>
+            </div>
+
+            <div class="settings-block" data-settings-section="installed" hidden>
+              <h3>已安装模块</h3>
+              <p id="module-hint" class="hint"></p>
+              <div id="module-list" class="module-list" data-busy="false"></div>
+            </div>
+
+            <div class="settings-block" data-settings-section="sources" hidden>
+              <h3>模块源</h3>
+              <p class="hint">支持本地目录和 Git 仓库。仓库里的示例模块在 examples/hello-module，加为本地源即可试装。</p>
+              <form id="source-form" class="source-form">
+                <select id="source-kind" aria-label="源类型">
+                  <option value="local">本地目录</option>
+                  <option value="git">Git 仓库</option>
+                </select>
+                <input id="source-location" type="text" placeholder="/path/to/modules 或 https://github.com/you/modules.git" />
+                <button type="submit">添加源</button>
+              </form>
+              <ul id="source-list" class="source-list"></ul>
+            </div>
+
+            <div class="settings-block" data-settings-section="repo" hidden>
+              <div class="settings-head">
+                <h3>模块仓库</h3>
+                <button id="repo-refresh" type="button" class="ghost">刷新</button>
+              </div>
+              <p id="repo-hint" class="hint"></p>
+              <div id="available-list" class="module-list"></div>
+            </div>
+
+            <div class="settings-block" data-settings-section="channels" hidden>
+              <h3>开发者</h3>
+              <p id="channel-hint" class="hint"></p>
+              <ul id="channel-list" class="channel-list"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-hosted" class="view" aria-live="polite"></section>
+        </div>
+        </div>
+      </aside>
+    </div>
+
+    <dialog id="create-project" class="agent-dialog project-dialog">
+      <form method="dialog" id="create-project-form">
+        <header class="agent-dialog-head">
+          <div class="agent-dialog-copy">
+            <h2>新建项目</h2>
+            <p>先起名、写清这件事，再把要出场的成员叫进来</p>
+          </div>
+          <button type="submit" value="cancel" class="tool-close" formnovalidate aria-label="关闭">×</button>
+        </header>
+        <div class="agent-dialog-body">
+          <div class="agent-dialog-form">
+            <label>项目标题 *
+              <input id="create-project-title" type="text" required maxlength="40" placeholder="例如：古诗图文素材" />
+            </label>
+            <label>简述
+              <textarea id="create-project-desc" rows="3" maxlength="140" placeholder="这件事情要做成什么样，一句话就够"></textarea>
+              <span id="create-project-count" class="field-count">0/140</span>
+            </label>
+            <div class="create-project-members">
+              <p id="create-project-agents-meta" class="task-agents-meta">选择加入项目的成员</p>
+              <div id="create-project-agents" class="task-agent-list"></div>
+            </div>
+            <p id="create-project-hint" class="hint"></p>
+          </div>
+        </div>
+        <footer class="agent-dialog-foot">
+          <button type="submit" value="cancel" class="ghost" formnovalidate>取消</button>
+          <button type="submit" value="create" class="primary" id="create-project-submit">建好项目</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <div id="rail-context-menu" class="rail-context" hidden role="menu"></div>
+
+    <dialog id="rename-item" class="agent-dialog rename-dialog">
+      <form method="dialog" id="rename-item-form">
+        <header class="agent-dialog-head">
+          <div class="agent-dialog-copy">
+            <h2 id="rename-item-heading">重命名</h2>
+          </div>
+          <button type="submit" value="cancel" class="tool-close" formnovalidate aria-label="关闭">×</button>
+        </header>
+        <div class="agent-dialog-body">
+          <div class="agent-dialog-form">
+            <label>名称 *
+              <input id="rename-item-value" type="text" required maxlength="40" />
+            </label>
+            <p id="rename-item-hint" class="hint"></p>
+          </div>
+        </div>
+        <footer class="agent-dialog-foot">
+          <button type="submit" value="cancel" class="ghost" formnovalidate>取消</button>
+          <button type="submit" value="save" class="primary">保存</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog id="create-agent" class="agent-dialog">
+      <form method="dialog" id="create-agent-form">
+        <header class="agent-dialog-head">
+          <div class="agent-dialog-copy">
+            <h2>雇成员</h2>
+            <p>选一个职业模具，或从空白开始</p>
+          </div>
+          <button type="submit" value="cancel" class="tool-close" aria-label="关闭">×</button>
+        </header>
+        <div class="agent-dialog-body">
+          <aside id="create-agent-palette" class="agent-palette"></aside>
+          <div class="agent-dialog-form">
+            <div id="create-agent-hero" class="agent-hero"></div>
+            <label>成员名称 *
+              <span class="agent-name-row">
+                <input id="create-agent-name" type="text" required maxlength="40" />
+                <button type="button" id="create-agent-shuffle" class="ghost">换一个</button>
+              </span>
+            </label>
+            <label>描述
+              <textarea id="create-agent-desc" rows="2" maxlength="100" placeholder="补充这个成员的工作重点"></textarea>
+              <span id="create-agent-count" class="field-count">0/100</span>
+            </label>
+            <p id="create-agent-hint" class="hint"></p>
+            <fieldset id="create-agent-packs" class="agent-packs" hidden></fieldset>
+            <label id="create-agent-plan-row" class="agent-plan-row" hidden>
+              <input id="create-agent-plan" type="checkbox" />
+              <span>先出计划再动手。确认后回复「按计划执行」才改文件。</span>
+            </label>
+          </div>
+        </div>
+        <footer class="agent-dialog-foot">
+          <button type="submit" value="cancel" class="ghost">取消</button>
+          <button type="submit" value="create" class="primary" id="create-agent-submit">雇进来</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog id="configure-agent" class="agent-dialog packs-dialog">
+      <form method="dialog" id="configure-agent-form">
+        <header class="agent-dialog-head">
+          <div class="agent-dialog-copy">
+            <h2>工具包</h2>
+            <p id="configure-agent-copy">给这位成员打开或关掉通用能力</p>
+          </div>
+          <button type="submit" value="cancel" class="tool-close" aria-label="关闭">×</button>
+        </header>
+        <div class="agent-dialog-body">
+          <div class="agent-dialog-form">
+            <fieldset id="configure-agent-packs" class="agent-packs"></fieldset>
+            <label id="configure-agent-plan-row" class="agent-plan-row">
+              <input id="configure-agent-plan" type="checkbox" />
+              <span>先出计划再动手。确认后回复「按计划执行」才改文件。</span>
+            </label>
+            <p id="configure-agent-hint" class="hint"></p>
+          </div>
+        </div>
+        <footer class="agent-dialog-foot">
+          <button type="submit" value="cancel" class="ghost">取消</button>
+          <button type="submit" value="save" class="primary" id="configure-agent-submit">保存</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog id="assign-skill" class="agent-dialog project-dialog">
+      <form method="dialog" id="assign-skill-form">
+        <header class="agent-dialog-head">
+          <div class="agent-dialog-copy">
+            <h2 id="assign-skill-title">赋能 Skill</h2>
+            <p id="assign-skill-copy">选一个成员，把这条 Skill 集成到他身上</p>
+          </div>
+          <button type="submit" value="cancel" class="tool-close" formnovalidate aria-label="关闭">×</button>
+        </header>
+        <div class="agent-dialog-body">
+          <div class="agent-dialog-form">
+            <div class="create-project-members">
+              <p id="assign-skill-meta" class="task-agents-meta">选择获得这条能力的成员</p>
+              <div id="assign-skill-agents" class="task-agent-list"></div>
+            </div>
+            <p id="assign-skill-hint" class="hint"></p>
+          </div>
+        </div>
+        <footer class="agent-dialog-foot">
+          <button type="submit" value="cancel" class="ghost" formnovalidate>取消</button>
+          <button type="button" class="ghost" id="assign-skill-revoke" hidden>撤下</button>
+          <button type="submit" value="assign" class="primary" id="assign-skill-submit">赋能给他</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/app.ts"></script>
+  </body>
+</html>

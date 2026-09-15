@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: OPC Agent Team
+message: If you use this software, please cite it as below.
+type: software
+authors:
+  - name: bitou.tech
+    website: https://pen.bitou.tech/
+repository-code: https://github.com/Alfred-Lau/opc-agent-team-opensource
+url: https://www.solokit.run/
+abstract: >-
+  Local-first Electron workbench for a one-person company.
+  A small kernel (shell, todos, module contract) plus occupation
+  plugins on Cordis / DeepSeek Harness.
+keywords:
+  - electron
+  - deepseek-harness
+  - dsh-plugin
+  - local-first
+  - one-person-company
+  - indie-hacker
+  - cordis
+license: MIT
+version: 0.7.1
+date-released: "2026-09-15"

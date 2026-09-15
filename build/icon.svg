@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="ink" cx="38%" cy="28%" r="78%">
+      <stop offset="0" stop-color="#2a2218"/>
+      <stop offset="1" stop-color="#16120c"/>
+    </radialGradient>
+    <radialGradient id="brass" cx="32%" cy="28%" r="78%">
+      <stop offset="0" stop-color="#e8bc6c"/>
+      <stop offset="0.45" stop-color="#d4a054"/>
+      <stop offset="1" stop-color="#8a5e22"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#ink)"/>
+  <circle cx="512" cy="512" r="338" fill="#5c4018"/>
+  <circle cx="512" cy="512" r="318" fill="url(#brass)"/>
+  <circle cx="512" cy="512" r="292" fill="none" stroke="#f3e6d0" stroke-width="10" opacity="0.55"/>
+  <path d="M512 236 C430 236 392 318 392 368 C392 412 430 448 476 456 L476 668 C430 678 404 716 404 756 C404 808 448 848 512 848 C576 848 620 808 620 756 C620 716 594 678 548 668 L548 456 C594 448 632 412 632 368 C632 318 594 236 512 236 Z M512 292 C548 292 576 328 576 366 C576 398 552 422 512 422 C472 422 448 398 448 366 C448 328 476 292 512 292 Z M512 724 C542 724 564 740 564 758 C564 778 542 796 512 796 C482 796 460 778 460 758 C460 740 482 724 512 724 Z" fill="#f3e6d0"/>
+</svg>

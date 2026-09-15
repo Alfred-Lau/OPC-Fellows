@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../src/renderer/src/theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio-theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio.css" />
+    <link rel="stylesheet" href="../src/renderer/src/todos.css" />
+    <link rel="stylesheet" href="../src/renderer/src/notes.css" />
+    <link rel="stylesheet" href="../src/renderer/src/calendar.css" />
+    <link rel="stylesheet" href="../src/renderer/src/monitor.css" />
+    <link rel="stylesheet" href="../src/renderer/src/payments.css" />
+    <link rel="stylesheet" href="../src/renderer/src/settings.css" />
+    <link rel="stylesheet" href="../src/renderer/src/wx-draft.css" />
+    <link rel="stylesheet" href="../src/renderer/src/accounts.css" />
+    <link rel="stylesheet" href="../src/renderer/src/app.css" />
+    <style>
+      :root {
+        --tool-width: 480px;
+      }
+    </style>
+  </head>
+  <body data-view="monitor" data-tool="tool">
+    <main class="studio" style="height: 100vh">
+      <section class="thread-pane"></section>
+      <aside class="tool-pane" id="tool-pane">
+        <nav class="tool-rail" aria-label="工具面板">
+          <div class="tool-rail-tabs" role="tablist">
+            <button type="button" class="is-current" title="工具" aria-label="工具">
+              <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14.7 6.3a4 4 0 0 0-5.7 5.4L3 18l3 3 6.3-6a4 4 0 0 0 5.4-5.7l-3.2 3.2-2-2z" />
+              </svg>
+            </button>
+            <button type="button" title="待办" aria-label="待办">
+              <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 6h12M9 12h12M9 18h12" />
+                <path d="M4 6h.01M4 12h.01M4 18h.01" />
+              </svg>
+            </button>
+          </div>
+        </nav>
+        <div class="tool-main">
+        <div class="workspace-stage">
+          <section id="view-monitor" class="view">
+            <header class="tick-head">
+              <div>
+                <p class="mark">个人项目监控</p>
+                <h1>项目态势 <span class="tick-count">更新于 9月15日 10:02</span></h1>
+              </div>
+              <button type="button">刷新</button>
+            </header>
+            <p class="hint">
+              59 个项目、51/65 个站点已上线 · 注册 0 / 付费 0 · 订单 0 · 0 条报警 · 明日待办 12
+            </p>
+            <div class="monitor-layout">
+              <aside class="monitor-side">
+                <nav class="monitor-nav">
+                  <button type="button" class="monitor-nav-item is-current">
+                    <span class="monitor-nav-label">总览 · 流量</span>
+                  </button>
+                  <button type="button" class="monitor-nav-item">
+                    <span class="monitor-nav-label">仓库</span>
+                    <span class="monitor-nav-badge">23</span>
+                  </button>
+                  <button type="button" class="monitor-nav-item">
+                    <span class="monitor-nav-label">站点部署</span>
+                    <span class="monitor-nav-badge">51</span>
+                  </button>
+                  <button type="button" class="monitor-nav-item">
+                    <span class="monitor-nav-label">线上报警</span>
+                    <span class="monitor-nav-badge is-ok">✓</span>
+                  </button>
+                  <button type="button" class="monitor-nav-item">
+                    <span class="monitor-nav-label">后台用户</span>
+                    <span class="monitor-nav-badge is-danger">无 key</span>
+                  </button>
+                  <button type="button" class="monitor-nav-item">
+                    <span class="monitor-nav-label">明日待办</span>
+                    <span class="monitor-nav-badge">12</span>
+                  </button>
+                </nav>
+              </aside>
+              <div class="monitor-main">
+                <section class="monitor-panel monitor-traffic">
+                  <div class="panel-head">
+                    <p class="caption">网站流量 · 近 30 天</p>
+                  </div>
+                  <div class="traffic-wrap">
+                    <div class="traffic-list">
+                      <button type="button" class="traffic-item is-current">
+                        <span class="traffic-name">scope solokit</span>
+                        <span class="traffic-count">3</span>
+                      </button>
+                    </div>
+                    <div class="traffic-detail">
+                      <div class="traffic-head">
+                        <div class="traffic-title">scope solokit</div>
+                      </div>
+                      <div class="traffic-stats">
+                        <div class="traffic-stat">
+                          <b>3</b>
+                          <i>今日浏览</i>
+                        </div>
+                        <div class="traffic-stat">
+                          <b>0 / 0</b>
+                          <i>注册 / 付费</i>
+                        </div>
+                        <div class="traffic-stat">
+                          <b>51 / 65</b>
+                          <i>已上线站点</i>
+                        </div>
+                        <div class="traffic-stat">
+                          <b>0</b>
+                          <i>未恢复报警</i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+                <section class="traffic-attribution">
+                  <div class="attr-card is-down">
+                    <div class="attr-head">
+                      <strong>datafun</strong>
+                      <span class="attr-move is-down">↓98%</span>
+                      <span class="attr-counts">44 → 1 次 · 占全站 33%</span>
+                      <svg class="sparkline" viewBox="0 0 72 18" width="72" height="18">
+                        <path class="sparkline-line" d="M0 4 L72 14" />
+                      </svg>
+                    </div>
+                    <ul class="attr-reasons">
+                      <li>跌破近 29 天最低，此前谷值 10 次</li>
+                      <li>今天刚有一次生产部署：chore(brief): 更新每日论文简报 2026-09-15，时间点与这次回落吻合</li>
+                    </ul>
+                  </div>
+                </section>
+              </div>
+            </div>
+            <header class="tick-head" id="notes-head">
+              <div>
+                <p class="mark">随手记</p>
+                <h1>记下 <span class="tick-count">0</span></h1>
+              </div>
+              <input class="note-filter" type="search" value="筛选关键词" />
+            </header>
+            <div class="tick-add">
+              <span class="tick-plus">+</span>
+              <textarea rows="1">添加任务</textarea>
+              <input type="datetime-local" />
+              <button type="button">添加</button>
+            </div>
+            <div class="cal-week" id="cal-week">
+              <section class="cal-week-col"><button type="button" class="cal-week-head"><span>一</span><b>14</b></button></section>
+              <section class="cal-week-col"><button type="button" class="cal-week-head"><span>二</span><b>15</b></button></section>
+              <section class="cal-week-col"><button type="button" class="cal-week-head"><span>三</span><b>16</b></button></section>
+              <section class="cal-week-col"><button type="button" class="cal-week-head"><span>四</span><b>17</b></button></section>
+              <section class="cal-week-col"><button type="button" class="cal-week-head"><span>五</span><b>18</b></button></section>
+              <section class="cal-week-col"><button type="button" class="cal-week-head"><span>六</span><b>19</b></button></section>
+              <section class="cal-week-col"><button type="button" class="cal-week-head"><span>日</span><b>20</b></button></section>
+            </div>
+            <div class="skill-grid" id="skill-grid">
+              <button type="button" class="skill-mini">身份</button>
+              <button type="button" class="skill-mini">监控刷新</button>
+              <button type="button" class="skill-mini">增长台</button>
+            </div>
+            <div class="wx-form-grid" id="wx-form-grid">
+              <label>标题<input value="草稿标题" /></label>
+              <label>作者<input value="作者" /></label>
+            </div>
+            <div class="pay-bar" id="pay-bar">
+              <span>Creem 订阅</span>
+              <span class="track"><i style="width: 64%"></i></span>
+              <b>1,280<small> 3 笔</small></b>
+            </div>
+            <div class="post-row" id="accounts-post-row">
+              <input value="帖子正文" />
+              <input value="2026-09-15" />
+            </div>
+          </section>
+        </div>
+        </div>
+      </aside>
+    </main>
+  </body>
+</html>

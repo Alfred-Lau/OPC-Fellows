@@ -1,0 +1,16 @@
+node_modules
+out
+dist
+resources/dsh
+.DS_Store
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.key
+*.mobileprovision
+.idea
+*.local

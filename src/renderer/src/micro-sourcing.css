@@ -1,0 +1,480 @@
+body[data-view='micro'] #view-micro {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+#view-micro {
+  padding: 0 28px 28px;
+  overflow: auto;
+  -webkit-app-region: no-drag;
+}
+
+#view-micro .tick-head {
+  padding: 24px 0 8px;
+}
+
+#view-micro > .hint {
+  margin: 4px 0 14px;
+  color: var(--cream);
+  opacity: 0.75;
+}
+
+#view-micro > .hint.is-error {
+  color: var(--fault);
+  opacity: 1;
+}
+
+#view-micro > .hint.is-scanning {
+  color: var(--brass);
+  opacity: 1;
+}
+
+#micro-refresh[aria-busy='true'] {
+  opacity: 1;
+  color: var(--brass);
+  border-color: var(--brass);
+  cursor: progress;
+}
+
+#micro-refresh[aria-busy='true']::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border: 1.5px solid color-mix(in srgb, var(--brass) 35%, transparent);
+  border-top-color: var(--brass);
+  border-radius: 50%;
+  vertical-align: -1px;
+  animation: micro-spin 0.7s linear infinite;
+}
+
+.micro-scan-bar {
+  height: 2px;
+  margin: 0 0 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brass) 18%, transparent);
+}
+
+.micro-scan-bar::after {
+  content: '';
+  display: block;
+  width: 36%;
+  height: 100%;
+  background: var(--brass);
+  animation: micro-scan-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes micro-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes micro-scan-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+.micro-layout {
+  display: grid;
+  grid-template-columns: 208px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+}
+
+.micro-side {
+  position: sticky;
+  top: 8px;
+}
+
+.micro-main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.micro-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.micro-group[hidden] {
+  display: none;
+}
+
+.micro-panel {
+  padding: 14px 16px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+.micro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.micro-domain-toggles,
+.micro-form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.micro-form-grid label,
+.micro-domain-toggles label {
+  font-size: 13px;
+  color: var(--cream);
+}
+
+.micro-form-grid select {
+  margin-left: 8px;
+}
+
+.micro-form-grid label.is-wide {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.micro-form-grid textarea {
+  flex: 1 1 auto;
+  min-height: 88px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input);
+  color: var(--fg);
+  font: 12px/1.45 var(--font-mono, ui-monospace, monospace);
+}
+
+.micro-form-grid label.is-wide input {
+  flex: 1;
+  min-width: 0;
+  max-width: 360px;
+}
+
+label.is-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.micro-idea-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.micro-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--nested);
+}
+
+.micro-card.is-hot {
+  border-color: color-mix(in srgb, var(--brass) 55%, var(--border));
+}
+
+.micro-card-top {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.micro-rank {
+  flex: none;
+  min-width: 28px;
+  color: var(--brass);
+  font: 700 18px/1 var(--font-mono);
+}
+
+.micro-card h3 {
+  margin: 0;
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.micro-delta {
+  flex: none;
+  font-size: 12px;
+  color: var(--ok);
+}
+
+.micro-delta.is-down {
+  color: var(--mute);
+}
+
+.micro-dates {
+  margin: 0;
+  font-size: 12px;
+  color: var(--brass);
+  font-variant-numeric: tabular-nums;
+}
+
+.micro-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--nested) 70%, transparent);
+}
+
+.micro-sharp {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--fg);
+}
+
+.micro-market,
+.micro-fact {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cream);
+  opacity: 0.88;
+}
+
+.micro-quote {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--mute);
+}
+
+.micro-chip.is-verdict.is-kill {
+  background: color-mix(in srgb, var(--fault) 22%, transparent);
+  color: var(--fault);
+}
+
+.micro-chip.is-verdict.is-watch {
+  background: color-mix(in srgb, var(--brass) 22%, transparent);
+  color: var(--brass);
+}
+
+.micro-chip.is-verdict.is-build {
+  background: color-mix(in srgb, var(--ok) 22%, transparent);
+  color: var(--ok);
+}
+
+.micro-signal-body {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.45;
+  color: var(--mute);
+}
+
+.micro-meta,
+.micro-scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.micro-chip {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ruled) 70%, transparent);
+  color: var(--cream);
+  font-size: 11px;
+}
+
+.micro-chip.is-pay {
+  background: color-mix(in srgb, var(--ok) 22%, transparent);
+  color: var(--ok);
+}
+
+.micro-chip.is-score b {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.micro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.micro-actions button,
+.micro-actions a {
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--cream);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.micro-actions button.is-on,
+.micro-actions a:hover,
+.micro-actions button:hover {
+  border-color: var(--brass);
+  color: var(--brass);
+}
+
+.micro-evidence {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.micro-evidence a {
+  color: var(--brass);
+  text-decoration: none;
+}
+
+.micro-evidence a:hover {
+  text-decoration: underline;
+}
+
+.micro-note {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input);
+  color: var(--fg);
+  font: 12px/1.4 var(--font-sans);
+}
+
+.micro-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.micro-rows.is-tall {
+  max-height: 640px;
+  overflow: auto;
+}
+
+.micro-rows li.empty {
+  padding: 16px 8px;
+  color: var(--cream);
+  opacity: 0.5;
+  font-size: 13px;
+}
+
+.micro-signal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.micro-signal:hover {
+  background: color-mix(in srgb, var(--ruled) 45%, transparent);
+}
+
+.micro-signal strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.micro-signal span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--mute);
+}
+
+.micro-signal .micro-cat {
+  display: inline-block;
+  width: fit-content;
+  margin-top: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.micro-cat.is-competitor {
+  background: color-mix(in srgb, var(--ok) 22%, transparent);
+  color: var(--ok);
+}
+
+.micro-cat.is-idea {
+  background: color-mix(in srgb, var(--ruled) 70%, transparent);
+  color: var(--cream);
+}
+
+.micro-cat.is-self-promo,
+.micro-cat.is-plea,
+.micro-cat.is-discussion {
+  background: color-mix(in srgb, var(--ruled) 45%, transparent);
+  color: var(--mute);
+}
+
+.micro-signal b {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--brass);
+}
+
+.micro-empty {
+  padding: 18px 8px;
+  color: var(--cream);
+  opacity: 0.55;
+  font-size: 13px;
+}
+
+@container tool-pane (max-width: 640px) {
+  .micro-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .micro-side {
+    position: static;
+    min-width: 0;
+  }
+}
+
+@container tool-pane (max-width: 480px) {
+  #view-micro {
+    padding: 0 14px 16px;
+  }
+
+  .micro-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .micro-side {
+    position: static;
+    min-width: 0;
+  }
+}

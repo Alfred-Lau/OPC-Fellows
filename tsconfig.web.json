@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"]
+  },
+  "include": [
+    "src/renderer/**/*.ts",
+    "src/preload/index.d.ts",
+    "src/kernel/shared/**/*.ts",
+    "src/shared/**/*.ts"
+  ],
+  "exclude": ["src/shared/**/*.test.ts", "src/kernel/**/*.test.ts"]
+}

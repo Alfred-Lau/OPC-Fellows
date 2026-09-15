@@ -1,0 +1,50 @@
+name: Bug report
+description: Something is broken in the kernel, a built-in occupation, or the docs.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请不要在这里贴 API key、聊天记录、收款流水或本机绝对路径。
+        Do not paste API keys, chat logs, payment ledgers, or machine-absolute paths.
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope / 范围
+      options:
+        - kernel
+        - member / occupation
+        - project
+        - module install
+        - docs
+        - packaging
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened / 现象
+      description: Actual vs expected. Screenshots of the UI are fine; redact keys.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduce / 复现
+      description: Steps from `pnpm dev` or a packaged build.
+      placeholder: |
+        1. pnpm install && pnpm dev
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / 版本
+      placeholder: "0.7.x · macOS / Windows / Linux"
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra / 补充
+      description: Logs with secrets stripped. `pnpm test` result if relevant.

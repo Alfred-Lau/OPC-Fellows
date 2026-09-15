@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <title>Host badge fixture</title>
+    <link rel="stylesheet" href="../src/renderer/src/theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio-theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio.css" />
+    <link rel="stylesheet" href="../src/renderer/src/app.css" />
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: flex;
+        background: var(--bg);
+        -webkit-app-region: no-drag;
+      }
+      .thread-pane {
+        -webkit-app-region: no-drag;
+      }
+      .preview-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 24px 28px;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="rail">
+      <div class="rail-scroll">
+        <section class="rail-block" data-rail-list="agent">
+          <div class="rail-kicker-row">
+            <p class="rail-kicker">成员</p>
+            <button type="button" class="rail-add">+</button>
+          </div>
+          <nav id="agent-nav" class="rail-list" aria-label="成员">
+            <button type="button" class="is-host" title="每个项目都在场的默认主成员">
+              <span class="agent-avatar" data-hue="0"></span>
+              <span class="stack-copy">
+                <span class="nav-label">主理人<span class="host-badge">默认</span></span>
+                <span class="nav-desc">项目默认主成员。先看工作…</span>
+              </span>
+            </button>
+            <button type="button">
+              <span class="agent-avatar" data-hue="0"></span>
+              <span class="stack-copy">
+                <span class="nav-label">随手记</span>
+                <span class="nav-desc">听到、想到就记，不打断你…</span>
+              </span>
+            </button>
+            <button type="button">
+              <span class="agent-avatar" data-hue="3"></span>
+              <span class="stack-copy">
+                <span class="nav-label">项目监控官</span>
+                <span class="nav-desc">盯着 OPC / SoloKit 各站点的…</span>
+              </span>
+            </button>
+            <button type="button">
+              <span class="agent-avatar" data-hue="5"></span>
+              <span class="stack-copy">
+                <span class="nav-label">选品策略师</span>
+                <span class="nav-desc">从英语用户的求…</span>
+              </span>
+            </button>
+          </nav>
+        </section>
+      </div>
+    </aside>
+    <section class="thread-pane">
+      <header class="thread-head">
+        <div class="thread-head-copy">
+          <div>
+            <h1>多成员测试</h1>
+            <p class="thread-meta">@主理人 @项目监控官 @选品策略师</p>
+          </div>
+        </div>
+      </header>
+      <div class="preview-feed">
+        <article class="thread-msg is-user">
+          <div class="thread-msg-row">
+            <div class="bubble">
+              <span class="mention-chip is-host">@主理人<span class="host-badge">默认</span></span>
+              帮我更新下 readme
+            </div>
+          </div>
+        </article>
+        <div class="task-agents" style="display:flex;flex-wrap:wrap;gap:8px">
+          <button type="button" class="task-agent is-selected is-lead is-locked is-host">
+            <span class="agent-avatar" data-hue="0"></span>
+            <span>主理人</span>
+            <span class="host-badge">默认</span>
+          </button>
+          <button type="button" class="task-agent is-selected">
+            <span class="agent-avatar" data-hue="3"></span>
+            <span>项目监控官</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../src/renderer/src/theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio-theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio.css" />
+    <link rel="stylesheet" href="../src/renderer/src/todos.css" />
+    <link rel="stylesheet" href="../src/renderer/src/app.css" />
+  </head>
+  <body data-view="home" data-theme="dark">
+    <main class="studio" style="height: 100vh">
+      <section class="thread-pane" style="-webkit-app-region: no-drag">
+        <header class="thread-head">
+          <div class="thread-head-copy">
+            <div>
+              <h1>今日</h1>
+              <p class="thread-meta">9月15日 周二 · 收件箱</p>
+            </div>
+          </div>
+        </header>
+        <div class="thread-body">
+          <section id="view-home" class="view thread-home" style="display: block">
+            <div class="home-board">
+              <section class="home-section">
+                <header class="home-section-head">
+                  <p class="home-kicker">今天要提醒</p>
+                </header>
+                <ul id="due-today" class="home-rows">
+                  <li class="dash-row" data-case="wrap-due">
+                    <input class="dash-check" type="checkbox" title="完成" />
+                    <button type="button" class="dash-open">
+                      <span class="dash-main">
+                        <span class="title"
+                          >验证选品：把两小时视频自动剪成60秒竖版回顾并配音加字幕的工具</span
+                        >
+                        <span class="tag-chips"
+                          ><span class="tag-chip is-static">选品</span></span
+                        >
+                      </span>
+                      <span class="meta">09:00</span>
+                    </button>
+                    <span class="dash-actions">
+                      <button type="button" class="ghost">完成</button>
+                      <button type="button" class="ghost">打开</button>
+                      <button type="button" class="ghost">提到</button>
+                    </span>
+                  </li>
+                  <li class="dash-row is-hover" data-case="wrap-due-2">
+                    <input class="dash-check" type="checkbox" title="完成" />
+                    <button type="button" class="dash-open">
+                      <span class="dash-main">
+                        <span class="title"
+                          >验证选品：一个征集「你最近发了什么软件」的提问帖，本身不是产品</span
+                        >
+                        <span class="tag-chips"
+                          ><span class="tag-chip is-static">选品</span></span
+                        >
+                      </span>
+                      <span class="meta">09:00</span>
+                    </button>
+                    <span class="dash-actions">
+                      <button type="button" class="ghost">完成</button>
+                      <button type="button" class="ghost">打开</button>
+                      <button type="button" class="ghost">提到</button>
+                    </span>
+                  </li>
+                  <li class="dash-row" data-case="single-due">
+                    <input class="dash-check" type="checkbox" title="完成" />
+                    <button type="button" class="dash-open">
+                      <span class="dash-main">
+                        <span class="title">短标题不换行</span>
+                        <span class="tag-chips"
+                          ><span class="tag-chip is-static">选品</span></span
+                        >
+                      </span>
+                      <span class="meta">09:00</span>
+                    </button>
+                    <span class="dash-actions">
+                      <button type="button" class="ghost">完成</button>
+                      <button type="button" class="ghost">打开</button>
+                      <button type="button" class="ghost">提到</button>
+                    </span>
+                  </li>
+                </ul>
+              </section>
+              <section class="home-section">
+                <header class="home-section-head">
+                  <p class="home-kicker">待办</p>
+                  <div class="home-tags">
+                    <button type="button" class="tag-chip is-current">全部</button>
+                    <button type="button" class="tag-chip">选品</button>
+                  </div>
+                </header>
+                <ul class="home-rows">
+                  <li class="dash-row" data-case="wrap-todo">
+                    <input class="dash-check" type="checkbox" title="完成" />
+                    <button type="button" class="dash-open">
+                      <span class="dash-main">
+                        <span class="title"
+                          >验证选品：Shopify卖家手动拼凑广告费、COGS、运费、退款算真实利润</span
+                        >
+                        <span class="tag-chips"
+                          ><span class="tag-chip is-static">选品</span></span
+                        >
+                      </span>
+                      <span class="meta">明天 09:00</span>
+                    </button>
+                    <span class="dash-actions">
+                      <button type="button" class="ghost">完成</button>
+                      <button type="button" class="ghost">打开</button>
+                      <button type="button" class="ghost">提到</button>
+                    </span>
+                  </li>
+                  <li class="dash-row">
+                    <input class="dash-check" type="checkbox" title="完成" />
+                    <button type="button" class="dash-open">
+                      <span class="dash-main">
+                        <span class="title">核对微信情报官今日行动</span>
+                      </span>
+                      <span class="meta">未定时</span>
+                    </button>
+                    <span class="dash-actions">
+                      <button type="button" class="ghost">完成</button>
+                      <button type="button" class="ghost">打开</button>
+                      <button type="button" class="ghost">提到</button>
+                    </span>
+                  </li>
+                </ul>
+              </section>
+              <section class="home-section">
+                <header class="home-section-head">
+                  <p class="home-kicker">最近用过</p>
+                </header>
+                <ul class="home-recent">
+                  <li>
+                    <button type="button" class="home-recent-chip" data-case="recent" title="模块">
+                      Micro选品
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" class="home-recent-chip" title="模块">监控</button>
+                  </li>
+                  <li>
+                    <button type="button" class="home-recent-chip" title="模块">收款</button>
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </section>
+        </div>
+        <form class="composer" style="-webkit-app-region: no-drag">
+          <textarea rows="1" placeholder="输入 / 引用技能，或 @成员"></textarea>
+          <div class="composer-bar">
+            <button type="button" class="composer-plus">+</button>
+            <span class="composer-host"></span>
+            <button type="submit" class="composer-send">↑</button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <section id="isolated" style="position: absolute; left: -9999px; width: 280px">
+      <button type="button" class="dash-row" data-case="isolated">
+        <span class="dash-main">
+          <span class="title">验证选品：把两小时视频自动剪成60秒竖版回顾并配音加字幕的工具</span>
+        </span>
+        <span class="meta">09:00</span>
+      </button>
+    </section>
+  </body>
+</html>

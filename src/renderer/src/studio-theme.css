@@ -1,0 +1,64 @@
+:root[data-theme='light'] {
+  --bg: #f5f6f8;
+  --sidebar: #f7f8fa;
+  --surface: #ffffff;
+  --surface-hover: #eef0f4;
+  --input: #ffffff;
+  --nested: #f7f8fa;
+  --border: #eceef2;
+  --fg: #1f2329;
+  --muted: #8b919a;
+  --accent: #4c6fff;
+  --on-accent: #ffffff;
+  --danger: #e24c4c;
+  --ok: #2f9d63;
+  --solid: #1f2329;
+  --chip: #eef2ff;
+}
+
+:root,
+:root[data-theme='dark'] {
+  --solid: #f1f1ef;
+  --chip: #2a3348;
+}
+
+.agent-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  overflow: hidden;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.agent-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #111;
+}
+
+.agent-avatar[data-hue='0'] { background: #ede7ff; color: #6d5ae6; }
+.agent-avatar[data-hue='1'] { background: #d8f3e4; color: #1f9d55; }
+.agent-avatar[data-hue='2'] { background: #fde2ea; color: #d23b6c; }
+.agent-avatar[data-hue='3'] { background: #ddebff; color: #3b6fe8; }
+.agent-avatar[data-hue='4'] { background: #e8e8e8; color: #5a5a5a; }
+.agent-avatar[data-hue='5'] { background: #fff3d6; color: #c47b16; }
+.agent-avatar[data-hue='6'] { background: #d6f4f7; color: #1a8a96; }
+.agent-avatar[data-hue='7'] { background: #f3e0d8; color: #a85a3a; }
+.agent-avatar[data-hue='8'] { background: #e4f6c8; color: #4a8a12; }
+
+:root[data-theme='dark'] .agent-avatar[data-hue='0'] { background: #3b3358; color: #cfc4ff; }
+:root[data-theme='dark'] .agent-avatar[data-hue='1'] { background: #1f3d2c; color: #8ee0ad; }
+:root[data-theme='dark'] .agent-avatar[data-hue='2'] { background: #4a2a35; color: #f3b0c4; }
+:root[data-theme='dark'] .agent-avatar[data-hue='3'] { background: #24375c; color: #9cbcff; }
+:root[data-theme='dark'] .agent-avatar[data-hue='4'] { background: #3a3a3a; color: #d0d0d0; }
+:root[data-theme='dark'] .agent-avatar[data-hue='5'] { background: #4a3b1f; color: #f0c77a; }
+:root[data-theme='dark'] .agent-avatar[data-hue='6'] { background: #1e3d42; color: #8ed7df; }
+:root[data-theme='dark'] .agent-avatar[data-hue='7'] { background: #433028; color: #e0b09a; }
+:root[data-theme='dark'] .agent-avatar[data-hue='8'] { background: #2f4620; color: #b7e07a; }

@@ -1,0 +1,5 @@
+# Electron 主进程走 applyOpcKernel。dsh --profile opc 只挂这个空入口，
+# 避免在 Agent 树上碰 BrowserWindow / ipcMain。
+- insert:
+    - id: opc-kernel
+      name: ownworkbuddy-kernel

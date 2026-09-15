@@ -1,0 +1,509 @@
+:root {
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: Menlo, Monaco, Consolas, "Courier New", monospace;
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 15px;
+  --text-xl: 17px;
+  --text-2xl: 20px;
+  --leading-tight: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: var(--leading-normal);
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.mast {
+  padding: 28px 32px 8px;
+  -webkit-app-region: drag;
+}
+
+.lede {
+  margin: 8px 0 0;
+  font-size: 20px;
+  font-style: italic;
+  color: var(--brass);
+  -webkit-app-region: no-drag;
+}
+
+.desk,
+button,
+input,
+textarea,
+label,
+details,
+summary {
+  -webkit-app-region: no-drag;
+}
+
+.mark,
+.caption,
+.hint,
+.when,
+.time,
+.meta {
+  font-family: var(--font-sans);
+}
+
+.mark,
+.caption {
+  margin: 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--mute);
+}
+
+h1 {
+  margin: 10px 0 0;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 600;
+}
+
+input[type='datetime-local'] {
+  background: var(--input);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  font: 12px/1 var(--font-mono);
+}
+
+.tick-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 8px;
+  -webkit-app-region: drag;
+}
+
+.tick-head > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.tick-head h1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 2px;
+  margin: 4px 0 0;
+  font-size: 22px;
+}
+
+.tick-head > button,
+.tick-head-actions {
+  flex: none;
+}
+
+.tick-count {
+  margin-left: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--mute);
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.tick-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 24px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  border-radius: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.tick-plus {
+  flex: none;
+  width: 20px;
+  color: var(--brass);
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+}
+
+#source {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  max-height: 88px;
+  margin: 0;
+  padding: 8px 0;
+  resize: none;
+  border: 0;
+  background: transparent;
+  color: var(--cream);
+  font: 14px/20px var(--font-sans);
+  outline: none;
+}
+
+.tick-add input[type='datetime-local'] {
+  flex: none;
+  width: 168px;
+  padding: 4px 6px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--mute);
+}
+
+#view-todos .hint {
+  margin: 6px 24px 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.tick-stream {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 16px 24px;
+  -webkit-app-region: no-drag;
+}
+
+.tick-section {
+  margin-top: 10px;
+}
+
+.tick-stream > .tick-section > .caption {
+  padding: 8px 8px 0;
+  letter-spacing: 0.08em;
+}
+
+.tick-stream > .tick-section > summary.caption {
+  cursor: pointer;
+  list-style: none;
+}
+
+.tick-stream > .tick-section > summary.caption::-webkit-details-marker {
+  display: none;
+}
+
+.tick-stream > .tick-section > summary.caption::before {
+  content: '▸ ';
+}
+
+.tick-stream > .tick-section[open] > summary.caption::before {
+  content: '▾ ';
+}
+
+.tick-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 8px;
+}
+
+.tick-sec-head .caption {
+  letter-spacing: 0.08em;
+}
+
+.tick-sec-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tick-sec-head button {
+  padding: 6px 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.tick-rows {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.tick-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.tick-row:hover {
+  background: var(--surface-hover);
+}
+
+.tick-row.is-pickable {
+  cursor: pointer;
+}
+
+.tick-row.is-selected {
+  background: color-mix(in srgb, var(--brass) 14%, transparent);
+}
+
+.tick-row.is-selected:hover {
+  background: color-mix(in srgb, var(--brass) 20%, transparent);
+}
+
+.tick-row input[type='checkbox'] {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--brass);
+}
+
+.tick-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.tick-row .title {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.tag-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag-chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--brass) 55%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brass) 12%, transparent);
+  color: var(--brass);
+  font: 600 11px/1.4 var(--font-sans);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.tag-chip.is-static {
+  cursor: default;
+}
+
+.tag-chip.is-current,
+.tag-chip:hover:not(:disabled):not(.is-static) {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.tick-row input[type='datetime-local'] {
+  flex: none;
+  width: 158px;
+  padding: 2px 4px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--mute);
+}
+
+.tick-row .ghost {
+  flex: none;
+  opacity: 0;
+  padding: 2px 4px;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.tick-row:hover .ghost,
+.tick-row:focus-within .ghost {
+  opacity: 1;
+}
+
+.tick-row.is-done .title {
+  text-decoration: line-through;
+  color: var(--mute);
+}
+
+.tick-row.is-flash {
+  animation: flash 1.2s ease;
+}
+
+.tick-rows .empty {
+  margin: 8px;
+  font-size: 13px;
+  font-style: normal;
+}
+
+button {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  padding: 10px 16px;
+  font: 500 13px/1 var(--font-sans);
+  letter-spacing: 0.04em;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--fg);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button.tag-chip {
+  padding: 2px 8px;
+  font: 600 11px/1.4 var(--font-sans);
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+}
+
+button.tag-chip:hover:not(:disabled):not(.is-current) {
+  background: color-mix(in srgb, var(--brass) 28%, transparent);
+  color: var(--brass);
+}
+
+button.tag-chip.is-current:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.hint {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--mute);
+}
+
+.hint.is-error {
+  color: var(--fault);
+}
+
+.tick-add button {
+  padding: 7px 12px;
+  letter-spacing: 0.04em;
+}
+
+.rows {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.meta {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--mute);
+}
+
+.row-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.ghost {
+  border-color: transparent;
+  color: var(--mute);
+  padding: 4px 0;
+}
+
+.empty {
+  margin: 16px 0 0;
+  color: var(--mute);
+  font-style: italic;
+}
+
+@keyframes flash {
+  0% {
+    background: color-mix(in srgb, var(--brass) 22%, transparent);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@media (max-width: 720px) {
+  .tick-add {
+    flex-wrap: wrap;
+  }
+
+  .tick-add input[type='datetime-local'] {
+    width: auto;
+  }
+}
+
+@container tool-pane (max-width: 480px) {
+  .tick-head {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .tick-add {
+    flex-wrap: wrap;
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+
+  .tick-add input[type='datetime-local'] {
+    width: auto;
+  }
+
+  #view-todos .hint {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+
+  .tick-stream {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .tick-row input[type='datetime-local'] {
+    width: min(158px, 100%);
+  }
+}

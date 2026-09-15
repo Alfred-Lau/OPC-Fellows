@@ -1,0 +1,98 @@
+{
+  "name": "ownworkbuddy",
+  "version": "0.7.3",
+  "private": true,
+  "author": "bitou.tech",
+  "license": "MIT",
+  "productName": "OPC Agent Team - Solokit",
+  "description": "OPC Agent Team — local-first workbench for a one-person company. 一人公司的本地优先工作台。",
+  "homepage": "https://github.com/Alfred-Lau/opc-agent-team-opensource#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alfred-Lau/opc-agent-team-opensource.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Alfred-Lau/opc-agent-team-opensource/issues"
+  },
+  "keywords": [
+    "electron",
+    "deepseek",
+    "dsh",
+    "dsh-plugin",
+    "local-first",
+    "agent",
+    "one-person-company",
+    "indie-hacker",
+    "workbench",
+    "cordis"
+  ],
+  "type": "module",
+  "main": "./out/main/index.js",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "postinstall": "install-electron",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "clean:dist": "node scripts/clean-dist.mjs",
+    "pack": "pnpm clean:dist && electron-vite build && node scripts/vendor-dsh.mjs && electron-builder --dir",
+    "dist": "pnpm clean:dist && electron-vite build && node scripts/vendor-dsh.mjs && electron-builder",
+    "dist:mac": "bash scripts/package-mac.sh",
+    "vendor:dsh": "node scripts/vendor-dsh.mjs",
+    "dsh": "dsh",
+    "test": "node --experimental-strip-types --test src/shared/*.test.ts src/kernel/**/*.test.ts src/main/*.test.ts",
+    "test:layout": "electron scripts/check-tool-pane-layout.cjs",
+    "test:home-board": "electron scripts/check-home-board-typography.cjs",
+    "test:calendar": "electron scripts/check-calendar-layout.cjs",
+    "test:packs": "node scripts/check-packs-dialog-layout.cjs"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/dsh": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-tools": "0.1.5-rc.2",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^26.2.0",
+    "electron": "^43.4.1",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "js-yaml": "^4.3.1",
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@deepseek-ai/dsh-subprocess-local",
+      "@google/genai",
+      "electron",
+      "esbuild",
+      "koffi",
+      "node-pty",
+      "protobufjs"
+    ],
+    "overrides": {
+      "@deepseek-ai/cordis-plugin-group": "1.0.2",
+      "@deepseek-ai/dsh-anonymous-user-id": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-attachment": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-authorization": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-bash-local": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-code-runtime": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-compaction": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-fs": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-jobs": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-llm": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-output-retention": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-sandbox": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-session": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-session-persistence": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-session-query": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-session-telemetry": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-session-title-llm": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-settings": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-shell": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-spill": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-subagent-in-process-driver": "$@deepseek-ai/dsh",
+      "@deepseek-ai/dsh-workflow": "$@deepseek-ai/dsh"
+    }
+  }
+}

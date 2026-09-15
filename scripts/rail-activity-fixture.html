@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <title>Rail activity fixture</title>
+    <link rel="stylesheet" href="../src/renderer/src/theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio-theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio.css" />
+    <link rel="stylesheet" href="../src/renderer/src/app.css" />
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: flex;
+        gap: 24px;
+        padding: 24px;
+        background: var(--bg);
+        -webkit-app-region: no-drag;
+      }
+      .rail {
+        height: 720px;
+        box-shadow: 0 0 0 1px var(--border);
+      }
+      [data-demo='collapsed'] {
+        width: 56px;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      [data-demo='collapsed'] .nav-label,
+      [data-demo='collapsed'] .rail-item-meta,
+      [data-demo='collapsed'] .rail-kicker,
+      [data-demo='collapsed'] .rail-kicker-row {
+        display: none;
+      }
+      [data-demo='collapsed'] .rail-list button {
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="rail" data-demo="open">
+      <div class="rail-scroll">
+        <section class="rail-block" data-rail-list="pinned">
+          <div class="rail-kicker-row">
+            <p class="rail-kicker">置顶</p>
+          </div>
+          <nav class="rail-list" aria-label="置顶">
+            <button type="button" data-activity="working" aria-busy="true" aria-label="多成员测试，正在做">
+              <span class="rail-face">
+                <span class="rail-avatar-wrap" data-activity="working">
+                  <span class="agent-avatar" data-hue="2"></span>
+                  <svg class="rail-activity-ring" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                </span>
+                <span class="agent-avatar" data-hue="0"></span>
+              </span>
+              <span class="nav-label">多成员测试</span>
+              <span class="rail-item-meta" data-activity="working" title="正在做">
+                <svg class="rail-activity-icon is-spin" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M8 2.25a5.75 5.75 0 1 1-4.07 1.68" />
+                </svg>
+              </span>
+            </button>
+          </nav>
+        </section>
+        <section class="rail-block" data-rail-list="project">
+          <div class="rail-kicker-row">
+            <p class="rail-kicker">项目</p>
+            <button type="button" class="rail-add">+</button>
+          </div>
+          <nav class="rail-list" aria-label="项目">
+            <button type="button">
+              <span class="rail-face">
+                <span class="agent-avatar" data-hue="3"></span>
+              </span>
+              <span class="nav-label">今日模块</span>
+              <span class="rail-item-meta">2 天</span>
+            </button>
+          </nav>
+        </section>
+        <section class="rail-block" data-rail-list="agent">
+          <div class="rail-kicker-row">
+            <p class="rail-kicker">成员</p>
+            <button type="button" class="rail-add">+</button>
+          </div>
+          <nav id="agent-nav" class="rail-list" aria-label="成员">
+            <button type="button" class="is-host" title="每个项目都在场的默认主成员">
+              <span class="agent-avatar" data-hue="0"></span>
+              <span class="stack-copy">
+                <span class="nav-label">主理人<span class="host-badge" title="每个项目都在场的默认主成员">默认</span></span>
+                <span class="nav-desc">项目默认主成员。先看工作…</span>
+              </span>
+            </button>
+            <button type="button" data-activity="thinking" aria-busy="true" aria-label="随手记，正在想">
+              <span class="rail-avatar-wrap" data-activity="thinking">
+                <span class="agent-avatar" data-hue="0"></span>
+                <svg class="rail-activity-ring" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              </span>
+              <span class="stack-copy">
+                <span class="nav-label">随手记</span>
+                <span class="nav-desc">听到、想到就记</span>
+              </span>
+              <span class="rail-item-meta" data-activity="thinking" title="正在想">
+                <span class="rail-activity-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+              </span>
+            </button>
+            <button type="button" class="is-current" data-activity="working" aria-busy="true" aria-label="项目监控官，正在做">
+              <span class="rail-avatar-wrap" data-activity="working">
+                <span class="agent-avatar" data-hue="3"></span>
+                <svg class="rail-activity-ring" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              </span>
+              <span class="stack-copy">
+                <span class="nav-label">项目监控官</span>
+                <span class="nav-desc">盯着 OPC / SoloKit 各站点</span>
+              </span>
+              <span class="rail-item-meta" data-activity="working" title="正在做">
+                <svg class="rail-activity-icon is-spin" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M8 2.25a5.75 5.75 0 1 1-4.07 1.68" />
+                </svg>
+              </span>
+            </button>
+            <button type="button" data-activity="error" aria-label="社媒弹药手，没接上">
+              <span class="rail-avatar-wrap" data-activity="error">
+                <span class="agent-avatar" data-hue="7"></span>
+                <svg class="rail-activity-ring" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              </span>
+              <span class="stack-copy">
+                <span class="nav-label">社媒弹药手</span>
+                <span class="nav-desc">按产品能力写出六平台文案</span>
+              </span>
+              <span class="rail-item-meta" data-activity="error" title="没接上">
+                <svg class="rail-activity-icon" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M5.15 5.15l5.7 5.7M10.85 5.15l-5.7 5.7" />
+                </svg>
+              </span>
+            </button>
+            <button type="button">
+              <span class="agent-avatar" data-hue="5"></span>
+              <span class="stack-copy">
+                <span class="nav-label">选品策略师</span>
+                <span class="nav-desc">从英语用户的求助帖里捞愿</span>
+              </span>
+            </button>
+          </nav>
+        </section>
+      </div>
+    </aside>
+    <aside class="rail" data-demo="collapsed" style="width: 56px">
+      <div class="rail-scroll">
+        <section class="rail-block" data-rail-list="agent">
+          <div class="rail-kicker-row">
+            <p class="rail-kicker">成员</p>
+          </div>
+          <nav class="rail-list">
+            <button type="button" class="is-host" title="每个项目都在场的默认主成员">
+              <span class="agent-avatar" data-hue="0"></span>
+              <span class="nav-label">主理人</span>
+            </button>
+            <button type="button" data-activity="working" aria-busy="true">
+              <span class="rail-avatar-wrap" data-activity="working">
+                <span class="agent-avatar" data-hue="3"></span>
+                <svg class="rail-activity-ring" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              </span>
+              <span class="nav-label">项目监控官</span>
+              <span class="rail-item-meta" data-activity="working">忙</span>
+            </button>
+            <button type="button" data-activity="error">
+              <span class="rail-avatar-wrap" data-activity="error">
+                <span class="agent-avatar" data-hue="7"></span>
+                <svg class="rail-activity-ring" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              </span>
+              <span class="nav-label">社媒弹药手</span>
+            </button>
+          </nav>
+        </section>
+      </div>
+    </aside>
+  </body>
+</html>

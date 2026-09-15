@@ -1,0 +1,41 @@
+name: Feature request
+description: A kernel contract, occupation, or docs change.
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind / 类型
+      options:
+        - kernel contract
+        - built-in occupation
+        - example module
+        - i18n
+        - docs
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / 要解决什么
+      description: Who is blocked today, and what they cannot do.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal / 建议
+      description: Prefer a new module over growing kernel union types.
+    validations:
+      required: true
+  - type: checkboxes
+    id: trunk
+    attributes:
+      label: Trunk check / 主干检查
+      options:
+        - label: This does not add personal site catalogs, signing identities, or secret defaults.
+          required: true
+        - label: UI copy still says 成员 / project, not Agent / Team.
+          required: true

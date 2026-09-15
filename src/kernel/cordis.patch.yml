@@ -1,0 +1,30 @@
+# OPC 内核在 Electron 主进程上的组合顺序。
+# 运行时仍静态 import（asar 不能动态解析这些行的 name）；
+# `bootKernel` 按 KERNEL_PLUGINS 对齐这份 insert 列表 plugin。
+- insert:
+    - id: opc-bridge
+      name: ownworkbuddy-kernel/bridge
+    - id: opc-storage
+      name: ownworkbuddy-kernel/storage
+    - id: opc-workbench
+      name: ownworkbuddy-kernel/workbench
+    - id: opc-modules
+      name: ownworkbuddy-kernel/modules
+    - id: opc-todos
+      name: ownworkbuddy-kernel/todos
+    - id: opc-catalog
+      name: ownworkbuddy-kernel/catalog
+    - id: opc-profile
+      name: ownworkbuddy-kernel/profile
+    - id: opc-repository
+      name: ownworkbuddy-kernel/repository
+    - id: opc-llm
+      name: ownworkbuddy-kernel/llm
+    - id: opc-tools
+      name: ownworkbuddy-kernel/tools
+    - id: opc-dsh-runtime
+      name: ownworkbuddy-kernel/dsh-runtime
+    - id: opc-kernel-work
+      name: ownworkbuddy-kernel/kernel-work
+    - id: opc-agents
+      name: ownworkbuddy-kernel/agents

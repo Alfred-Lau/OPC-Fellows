@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security / 安全披露
+    url: https://github.com/Alfred-Lau/opc-agent-team-opensource/security/advisories/new
+    about: Do not file a public issue for secrets or user data. 密钥和用户数据不要开公开 Issue。
+  - name: DeepSeek Harness
+    url: https://github.com/deepseek-ai/deepseek-harness
+    about: Runtime / CLI issues that belong upstream.
+  - name: dsh-plugin topic
+    url: https://github.com/topics/dsh-plugin
+    about: Other desktop workbenches and plugins in this ecosystem.

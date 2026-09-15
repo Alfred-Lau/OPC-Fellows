@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../src/renderer/src/theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio-theme.css" />
+    <link rel="stylesheet" href="../src/renderer/src/studio.css" />
+    <link rel="stylesheet" href="../src/renderer/src/todos.css" />
+    <link rel="stylesheet" href="../src/renderer/src/calendar.css" />
+    <link rel="stylesheet" href="../src/renderer/src/app.css" />
+  </head>
+  <body data-view="home" data-tool="calendar" data-tool-expanded="true">
+    <section id="view-calendar" class="view" style="height: 100vh">
+      <header class="cal-head">
+        <div>
+          <p class="mark">日程</p>
+          <h1>9月7日 – 13日</h1>
+        </div>
+        <div class="cal-tools">
+          <div class="cal-modes">
+            <button type="button">日</button>
+            <button type="button" class="is-current">周</button>
+            <button type="button">月</button>
+          </div>
+        </div>
+      </header>
+      <div class="cal-stage">
+        <div class="cal-week" id="week">
+          <section class="cal-week-col is-today">
+            <button type="button" class="cal-week-head"><span>六</span><b>12</b></button>
+            <div class="cal-week-list">
+              <button type="button" class="cal-event">
+                <span class="cal-event-time">未定时</span>
+                <span class="cal-event-title">随手记升格</span>
+              </button>
+              <button type="button" class="cal-event">
+                <span class="cal-event-time">09:00</span>
+                <span class="cal-event-title">验证选品：把两小时视频自动剪成60秒</span>
+              </button>
+            </div>
+          </section>
+          <section class="cal-week-col"></section>
+          <section class="cal-week-col"></section>
+          <section class="cal-week-col"></section>
+          <section class="cal-week-col"></section>
+          <section class="cal-week-col"></section>
+          <section class="cal-week-col"></section>
+        </div>
+        <div class="cal-month" id="month" hidden>
+          <div class="cal-month-weekdays">
+            <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+          </div>
+          <div class="cal-month-grid" id="month-grid"></div>
+        </div>
+      </div>
+    </section>
+    <script>
+      const grid = document.getElementById('month-grid')
+      for (let i = 0; i < 42; i += 1) {
+        const cell = document.createElement('div')
+        cell.className = 'cal-month-cell'
+        cell.innerHTML = '<button type="button" class="cal-month-num">' + (i + 1) + '</button>'
+        grid.append(cell)
+      }
+    </script>
+  </body>
+</html>

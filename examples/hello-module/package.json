@@ -1,0 +1,24 @@
+{
+  "name": "ownworkbuddy-hello",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dsh-plugin.js",
+  "ownworkbuddy": {
+    "id": "hello",
+    "title": "你好",
+    "mark": "你",
+    "description": "示范第三方模块：装上立刻出现在侧栏，点进去能调自己的 IPC。",
+    "kind": "view",
+    "group": "示例",
+    "order": 200,
+    "capabilities": [],
+    "main": "index.js",
+    "ui": "ui.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

@@ -38,7 +38,7 @@ Do not commit `.env`, on-device `userData`, certificates, notarization identitie
 | Kernel | `src/kernel/` | Shell, todos, IPC bridge, module registry, capabilities, members / projects |
 | Built-in occupations | `src/modules/`, `packages/occupation-*`, leftover `src/main` / `src/renderer` | Panels and `ctx.tools` in `src/modules`; dsh stack is a marked bundle |
 | Examples | `examples/` | Smallest third-party module that actually runs |
-| Docs | `README.md`, `README.en.md`, `docs/`, `CONTEXT.md` | Contract text; do not grow a personal runbook |
+| Docs | `README.md` (English default), `README.zh-CN.md`, `docs/`, `CONTEXT.md` | Contract text; do not grow a personal runbook |
 
 New features are modules. Do not grow the kernel view union. Cross-module traffic goes through kernel services (`todos.ingestAgent` and the like). Do not reach into another module's store.
 

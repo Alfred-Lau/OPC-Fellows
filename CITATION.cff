@@ -5,7 +5,7 @@ type: software
 authors:
   - name: bitou.tech
     website: https://pen.bitou.tech/
-repository-code: https://github.com/Alfred-Lau/opc-agent-team-opensource
+repository-code: https://github.com/Alfred-Lau/OPC-Fellows
 url: https://www.solokit.run/
 abstract: >-
   Local-first Electron workbench for a one-person company.

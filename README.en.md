@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Alfred-Lau/opc-agent-team-opensource/stargazers"><img src="https://img.shields.io/github/stars/Alfred-Lau/opc-agent-team-opensource?style=flat-square" alt="GitHub stars"></a>
-  <a href="https://github.com/Alfred-Lau/opc-agent-team-opensource/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Alfred-Lau/opc-agent-team-opensource/ci.yml?style=flat-square&label=CI" alt="CI"></a>
+  <a href="https://github.com/Alfred-Lau/OPC-Fellows/stargazers"><img src="https://img.shields.io/github/stars/Alfred-Lau/OPC-Fellows?style=flat-square" alt="GitHub stars"></a>
+  <a href="https://github.com/Alfred-Lau/OPC-Fellows/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Alfred-Lau/OPC-Fellows/ci.yml?style=flat-square&label=CI" alt="CI"></a>
   <a href="https://github.com/topics/dsh-plugin"><img src="https://img.shields.io/badge/topic-dsh--plugin-1f6feb?style=flat-square" alt="dsh-plugin"></a>
   <a href="https://github.com/deepseek-ai/deepseek-harness"><img src="https://img.shields.io/badge/runtime-DeepSeek%20Harness-000?style=flat-square" alt="DeepSeek Harness"></a>
   <a href="https://github.com/cordiverse/cordis"><img src="https://img.shields.io/badge/kernel-Cordis-6f42c1?style=flat-square" alt="Cordis"></a>
@@ -33,7 +33,7 @@
 
 A local-first Electron workbench for a one-person company. Built on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-> This tree is the full daily-driver product. The public snapshot keeps the **kernel and contracts**. Personal site catalogs, signing identities, and sourcing stacks stay out of default code.
+> Product catalogs, social signatures, and author names are filled in by the user under Work situation and module settings. Repository defaults stay empty.
 
 ## Why
 
@@ -50,30 +50,32 @@ Vocabulary lives in [CONTEXT.md](CONTEXT.md). Modular design lives in [docs/modu
 
 ### Why this split
 
-The popular desktop workbenches on [dsh-plugin](https://github.com/topics/dsh-plugin) — [OpenDesign](https://github.com/nexu-io/open-design), [iPolloWork](https://github.com/Devin-AXIS/iPolloWork), [dsh-desktop](https://github.com/anywhere-labs/dsh-desktop), [dsh-web](https://github.com/zhu1090093659/dsh-web) — treat **Harness as the runtime and capabilities as plugins**. OPC-Fellows walks the same road. The shell is a one-person-company roster, not another dsh web skin.
+The desktop workbenches on [dsh-plugin](https://github.com/topics/dsh-plugin) — [OpenDesign](https://github.com/nexu-io/open-design), [iPolloWork](https://github.com/Devin-AXIS/iPolloWork), [dsh-desktop](https://github.com/anywhere-labs/dsh-desktop), [dsh-web](https://github.com/zhu1090093659/dsh-web) — treat **Harness as the runtime and capabilities as plugins**. OPC-Fellows walks the same road. The shell is a one-person-company roster and occupation panels.
 
-H1–H8 already send the center-pane chat through `dsh --profile opc`. Scratch notes `notes_add` hang on opc's dsh `ctx.tools`; payments / monitor / micro-sourcing still run on Electron `ctx.tools`. See [ADR 0005](docs/adr/0005-dsh-as-composition-host.md).
+Center-pane chat already goes through `dsh --profile opc`. Scratch notes `notes_add` hang on opc's dsh `ctx.tools`; payments / monitor / micro-sourcing still run on Electron `ctx.tools`. See [ADR 0005](docs/adr/0005-dsh-as-composition-host.md).
 
 - **Local first**: business data stays in `userData`; model keys go through Settings → Model and `safeStorage`
 - **Everything plugs in**: occupations, Panels, and Skills are modules; the kernel only keeps contracts
 - **Capability allow-list**: a module may call only what its manifest declares; dangerous ones confirm at install
 - **Contracts match dsh**: `apply(ctx)`, custom package.json fields, layered capabilities — easy to port from the Harness ecosystem
 
-## What the trunk keeps
+## What ships in the repo
+
+The kernel, module contracts, and examples ship with the repository. Real business data stays in on-device configuration.
 
 ```
-src/kernel/          trunk: boot, IPC bridge, storage, todos, nav, module registry, members
+src/kernel/          boot, IPC bridge, storage, todos, nav, module registry, members
 src/modules/         built-in occupations (reference implementations)
 examples/            smallest third-party module
 docs/                architecture and ADRs
 ```
 
-| Stays in the trunk | Stays out of defaults |
+| Ships with the repo | Filled in by the user |
 | --- | --- |
-| Module contract, capabilities, install | Personal site catalog (fill in Work situation) |
-| Todos / reminders / agent inbox | Social signatures, WeChat author, Coze workflow IDs |
-| Local storage and `safeStorage` | Packaging identity, notarization Team ID |
-| `examples/hello-module` | Real product catalog (see `examples/catalog.example.json`) |
+| Module contract, capabilities, install | Product catalog (Work situation) |
+| Todos / reminders / inbox | Social signatures, WeChat author, workflow IDs |
+| Local storage and `safeStorage` | Packaging identity (environment variables) |
+| `examples/hello-module` | Real site list (shape in `examples/catalog.example.json`) |
 
 Credentials travel as env vars or on-device `safeStorage`. The repo has no hardcoded keys. Legacy `~/.dsh` is still readable; new keys should be entered in Settings. After launch the product catalog, social signature, and WeChat author are empty until you fill them in. See [`examples/catalog.example.json`](examples/catalog.example.json).
 
@@ -185,7 +187,7 @@ Target (ADR 0005)
       OPC kernel bundle (todos, members, projects)
       Occupation bundles → ctx.tools + right-pane Panel
 
-Today (H8)
+Today
   Electron main
     applyOpcKernel (cordis.patch.yml order)
       services: modules / workbench / bridge / storage / secrets
@@ -215,13 +217,11 @@ The module contract follows DeepSeek Harness community conventions. For discover
 
 Full list: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
-The author runs this workbench against the [SoloKit](https://www.solokit.run/) line (Studio / PromptMan / SaaS Cost and the rest) and the [榆关](https://pen.bitou.tech/) tool wall. That is a configuration, not the trunk.
-
 ## Contributing
 
-The public trunk is [Alfred-Lau/opc-agent-team-opensource](https://github.com/Alfred-Lau/opc-agent-team-opensource): `main` only, no leftover agent branches or signing history.
+This repository is the public trunk: [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows).
 
-PRs against the **trunk contract** are welcome: kernel services, module manifests, capabilities, sample modules, docs. Do not weld personal sites, signing identities, or secret defaults into `src/shared`.
+PRs against the **trunk contract** are welcome: kernel services, module manifests, capabilities, sample modules, docs. Do not add real site catalogs, signing identities, or secret defaults to `src/shared`.
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) (中文) · [CONTRIBUTING.en.md](CONTRIBUTING.en.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
@@ -245,4 +245,4 @@ UI copy is still hardcoded Chinese. The i18n plan is [docs/i18n-plan.md](docs/i1
 
 [MIT License](LICENSE). Runtime depends on [Cordis](https://github.com/cordiverse/cordis) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Cover and badges follow the usual desktop-workbench look on [dsh-plugin](https://github.com/topics/dsh-plugin).
 
-Author: [bitou.tech](https://pen.bitou.tech/).
+Maintainer: [bitou.tech](https://pen.bitou.tech/).

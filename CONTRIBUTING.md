@@ -2,7 +2,7 @@
 
 [English](CONTRIBUTING.en.md)
 
-欢迎改**主干契约**。不要把个人站点、签名或密钥默认值焊进代码。
+欢迎改**主干契约**。不要把真实站点目录、签名或密钥默认值写进默认代码。
 
 词表以 [CONTEXT.md](CONTEXT.md) 为准：界面写「成员」不写 Agent，写「项目」不写 Team / Workspace。模块化边界见 [docs/module-architecture-design.md](docs/module-architecture-design.md)。Agent 运行时进 dsh、Electron 只留薄壳，见 [docs/adr/0005-dsh-as-composition-host.md](docs/adr/0005-dsh-as-composition-host.md)。
 
@@ -38,7 +38,7 @@ pnpm test
 | 内核 | `src/kernel/` | 外壳、待办、IPC 桥、模块仓库、capability、成员 / 项目 |
 | 内置职业 | `src/modules/`、`packages/occupation-*`，以及仍散落的 `src/main` / `src/renderer` | Panel 与 `ctx.tools` 在 `src/modules`；dsh 层栈是标记 bundle |
 | 示例 | `examples/` | 第三方模块最小可运行样例 |
-| 文档 | `README.md`、`README.en.md`、`docs/`、`CONTEXT.md` | 契约说明；个人操作手册请不要加长 |
+| 文档 | `README.md`、`README.en.md`、`docs/`、`CONTEXT.md` | 契约说明；不要把个人操作手册写进文档 |
 
 新功能加模块，不改内核的视图联合类型。跨模块只走内核服务（例如 `todos.ingestAgent`），不要直连对方 store。
 
@@ -53,7 +53,7 @@ pnpm test
 
 ## 不要做
 
-- 把 `products.ts`、社媒签名、默认项目标签、选品 subreddit 清单当成「项目自带的数据」继续加长。这些是配置，开源主干不会带走。
+- 把 `products.ts`、社媒签名、默认项目标签、选品来源清单当成「项目自带的数据」继续加长。这些是用户配置，应保持默认值为空。
 - 在公开 Issue / PR 里贴 API key、聊天记录、收款流水或用户数据。
 - 为了一个职业去改 preload 或内核导航白名单。模块自己注册 nav / IPC。
 - 在界面文案里把成员写成 Agent、把项目写成团队。

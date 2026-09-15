@@ -2,7 +2,7 @@
 
 [中文](CONTRIBUTING.md)
 
-Please change the **trunk contract**. Do not weld personal sites, signing identities, or secret defaults into the code.
+Please change the **trunk contract**. Do not add real site catalogs, signing identities, or secret defaults to the code.
 
 Vocabulary follows [CONTEXT.md](CONTEXT.md): the UI says “member”, never Agent; it says “project”, never Team / Workspace. Modular boundaries: [docs/module-architecture-design.md](docs/module-architecture-design.md). The agent runtime lives in dsh; Electron stays a thin shell. See [ADR 0005](docs/adr/0005-dsh-as-composition-host.md).
 
@@ -38,7 +38,7 @@ Do not commit `.env`, on-device `userData`, certificates, notarization identitie
 | Kernel | `src/kernel/` | Shell, todos, IPC bridge, module registry, capabilities, members / projects |
 | Built-in occupations | `src/modules/`, `packages/occupation-*`, leftover `src/main` / `src/renderer` | Panels and `ctx.tools` in `src/modules`; dsh stack is a marked bundle |
 | Examples | `examples/` | Smallest third-party module that actually runs |
-| Docs | `README.md`, `README.en.md`, `docs/`, `CONTEXT.md` | Contract text; do not grow a personal runbook |
+| Docs | `README.md`, `README.en.md`, `docs/`, `CONTEXT.md` | Contract text; do not add a personal runbook |
 
 New features are modules. Do not grow the kernel view union. Cross-module traffic goes through kernel services (`todos.ingestAgent` and the like). Do not reach into another module's store.
 
@@ -53,7 +53,7 @@ Third-party shape: [`examples/hello-module`](examples/hello-module) — `ownwork
 
 ## Do not
 
-- Keep growing `products.ts`, social signatures, default project tags, or sourcing subreddit lists as if they were “the product's own data”. Those are configuration. The trunk will not take them.
+- Keep growing `products.ts`, social signatures, default project tags, or sourcing lists as if they were “the product's own data”. Those are user configuration and should stay empty by default.
 - Paste API keys, chat logs, payment ledgers, or user data into a public issue / PR.
 - Change preload or the kernel nav allow-list for one occupation. Modules register their own nav / IPC.
 - Call a member an Agent, or a project a team, in UI copy.

@@ -6,13 +6,13 @@
   "license": "MIT",
   "productName": "OPC-Fellows",
   "description": "OPC-Fellows — local-first workbench for a one-person company. 一人公司的本地优先工作台。",
-  "homepage": "https://github.com/Alfred-Lau/opc-agent-team-opensource#readme",
+  "homepage": "https://github.com/Alfred-Lau/OPC-Fellows#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Alfred-Lau/opc-agent-team-opensource.git"
+    "url": "git+https://github.com/Alfred-Lau/OPC-Fellows.git"
   },
   "bugs": {
-    "url": "https://github.com/Alfred-Lau/opc-agent-team-opensource/issues"
+    "url": "https://github.com/Alfred-Lau/OPC-Fellows/issues"
   },
   "keywords": [
     "electron",

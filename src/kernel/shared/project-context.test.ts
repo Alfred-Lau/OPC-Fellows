@@ -46,14 +46,14 @@ function project(overrides: Partial<ThreadRecord> = {}): ThreadRecord {
 }
 
 test('海框芯片：有文件夹显示目录名，否则显示本机名', () => {
-  assert.equal(folderLabel('/Users/yu/申城'), '申城')
-  assert.deepEqual(composerContextChip({ folderPath: '/Users/yu/申城', hostName: 'liujians-MacBook-Pro.local' }), {
+  assert.equal(folderLabel('/Users/me/demo-project'), 'demo-project')
+  assert.deepEqual(composerContextChip({ folderPath: '/Users/me/demo-project', hostName: 'opc.local' }), {
     kind: 'folder',
-    label: '申城',
-    title: '/Users/yu/申城',
+    label: 'demo-project',
+    title: '/Users/me/demo-project',
   })
-  assert.equal(composerContextChip({ hostName: '申城' }).kind, 'host')
-  assert.equal(composerContextChip({ hostName: '申城' }).label, '申城')
+  assert.equal(composerContextChip({ hostName: 'opc.local' }).kind, 'host')
+  assert.equal(composerContextChip({ hostName: 'opc.local' }).label, 'opc.local')
 })
 
 test('海框下拉：文件夹、文件、引用技能；绑了目录才出现清除', () => {
@@ -65,8 +65,8 @@ test('海框下拉：文件夹、文件、引用技能；绑了目录才出现�
   assert.match(idle[0]?.hint ?? '', /dsh/)
   const bound = composerContextMenuItems({
     allowWorkspace: true,
-    folderPath: '/tmp/申城',
-    files: [{ path: '/tmp/申城/readme.md', name: 'readme.md' }],
+    folderPath: '/tmp/demo-project',
+    files: [{ path: '/tmp/demo-project/readme.md', name: 'readme.md' }],
   })
   assert.equal(bound.some((item) => item.action === 'clear-folder'), true)
   assert.equal(bound.some((item) => item.action === 'detach-file' && item.path?.endsWith('readme.md')), true)
@@ -94,19 +94,19 @@ test('选文件夹只改项目 / 主对话，今日不行', () => {
     updatedAt: clock,
   }
   assert.equal(canBindProjectFolder(inbox), false)
-  const denied = planSetProjectFolder([inbox], inbox.id, '/tmp/申城')
+  const denied = planSetProjectFolder([inbox], inbox.id, '/tmp/demo-project')
   assert.equal(denied.ok, false)
   if (!denied.ok) {
     assert.match(denied.error, /今日不是项目/)
   }
 
-  const set = planSetProjectFolder([project()], 'thread:user:poem', '/tmp/申城/ ')
+  const set = planSetProjectFolder([project()], 'thread:user:poem', '/tmp/demo-project/ ')
   assert.equal(set.ok, true)
   if (set.ok) {
-    assert.equal(set.thread.folderPath, resolve('/tmp/申城'))
+    assert.equal(set.thread.folderPath, resolve('/tmp/demo-project'))
   }
 
-  const cleared = planClearProjectFolder([project({ folderPath: '/tmp/申城' })], 'thread:user:poem')
+  const cleared = planClearProjectFolder([project({ folderPath: '/tmp/demo-project' })], 'thread:user:poem')
   assert.equal(cleared.ok, true)
   if (cleared.ok) {
     assert.equal(cleared.thread.folderPath, undefined)
@@ -158,11 +158,11 @@ test('选文件会绑到共同父目录，并丢掉目录外的引用', () => {
 test('dsh cwd：项目文件夹优先于成员工作区；换目录要重启进程', () => {
   assert.equal(
     resolveProjectCwd({
-      folderPath: '/tmp/申城',
+      folderPath: '/tmp/demo-project',
       agentWorkspace: '/tmp/userData/workspaces/rumi',
       fallback: '/tmp/userData',
     }),
-    resolve('/tmp/申城'),
+    resolve('/tmp/demo-project'),
   )
   assert.equal(
     resolveProjectCwd({
@@ -174,17 +174,17 @@ test('dsh cwd：项目文件夹优先于成员工作区；换目录要重启进�
   assert.equal(shouldRestartDsh('', '/tmp/a'), false)
   assert.equal(shouldRestartDsh('/tmp/a', '/tmp/a/'), false)
   assert.equal(shouldRestartDsh('/tmp/a', '/tmp/b'), true)
-  assert.equal(shouldWriteWorkspaceDocument('/tmp/申城', '/tmp/userData'), true)
+  assert.equal(shouldWriteWorkspaceDocument('/tmp/demo-project', '/tmp/userData'), true)
   assert.equal(shouldWriteWorkspaceDocument('/tmp/userData', '/tmp/userData'), false)
 })
 
 test('人设和引用文件都声明工作目录', () => {
-  const hint = composeWorkspaceSystemHint('/tmp/申城')
-  assert.match(hint, /\/tmp\/申城/)
+  const hint = composeWorkspaceSystemHint('/tmp/demo-project')
+  assert.match(hint, /\/tmp\/demo-project/)
   assert.match(hint, /dsh-fs/)
-  const prompt = composeAttachedFilesPrompt('/tmp/申城', [
-    { path: '/tmp/申城/readme.md', name: 'readme.md', text: '# hi' },
-    { path: '/tmp/申城/shot.png', name: 'shot.png', omitted: '不是文本' },
+  const prompt = composeAttachedFilesPrompt('/tmp/demo-project', [
+    { path: '/tmp/demo-project/readme.md', name: 'readme.md', text: '# hi' },
+    { path: '/tmp/demo-project/shot.png', name: 'shot.png', omitted: '不是文本' },
   ])
   assert.match(prompt, /readme\.md/)
   assert.match(prompt, /# hi/)

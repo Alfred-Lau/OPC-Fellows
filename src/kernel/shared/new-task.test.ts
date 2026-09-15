@@ -65,13 +65,13 @@ test('没选项目时标题是发起新项目，不预勾身份', () => {
   const page = describeNewTaskPage({
     threads: [project()],
     agents: [agent(), agent({ id: 'mina', title: 'Mina', mark: '米', hue: 1 })],
-    hostName: 'liujians-MacBook-Pro.local',
+    hostName: 'opc.local',
   })
   assert.equal(page.headline, '发起新项目？')
   assert.equal(page.triggerLabel, '新项目')
   assert.equal(page.placeholder, NEW_TASK_PLACEHOLDER)
-  assert.equal(page.hostLabel, 'liujians-MacBook-Pro.local')
-  assert.equal(page.chipLabel, 'liujians-MacBook-Pro.local')
+  assert.equal(page.hostLabel, 'opc.local')
+  assert.equal(page.chipLabel, 'opc.local')
   assert.equal(page.folderLabel, '')
   assert.equal(page.selectedCount, 0)
   assert.equal(page.totalCount, 2)
@@ -276,7 +276,7 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
     description: '把目录和封面图一次收齐',
     agentIds: ['rumi', 'mina'],
     workspaceAgentId: 'mina',
-    folderPath: '/tmp/申城',
+    folderPath: '/tmp/demo-project',
     clock,
   })
   assert.equal(created.ok, true)
@@ -287,7 +287,7 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
     assert.equal(created.thread.description, '把目录和封面图一次收齐')
     assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'rumi', 'mina'])
     assert.equal(created.thread.workspaceAgentId, 'mina')
-    assert.equal(created.thread.folderPath, '/tmp/申城')
+    assert.equal(created.thread.folderPath, '/tmp/demo-project')
   }
 
   const bare = planProjectCreate({ title: '周报', agentIds: ['rumi'], clock })

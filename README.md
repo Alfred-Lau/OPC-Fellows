@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Alfred-Lau/opc-agent-team-opensource/stargazers"><img src="https://img.shields.io/github/stars/Alfred-Lau/opc-agent-team-opensource?style=flat-square" alt="GitHub stars"></a>
-  <a href="https://github.com/Alfred-Lau/opc-agent-team-opensource/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Alfred-Lau/opc-agent-team-opensource/ci.yml?style=flat-square&label=CI" alt="CI"></a>
+  <a href="https://github.com/Alfred-Lau/OPC-Fellows/stargazers"><img src="https://img.shields.io/github/stars/Alfred-Lau/OPC-Fellows?style=flat-square" alt="GitHub stars"></a>
+  <a href="https://github.com/Alfred-Lau/OPC-Fellows/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Alfred-Lau/OPC-Fellows/ci.yml?style=flat-square&label=CI" alt="CI"></a>
   <a href="https://github.com/topics/dsh-plugin"><img src="https://img.shields.io/badge/topic-dsh--plugin-1f6feb?style=flat-square" alt="dsh-plugin"></a>
   <a href="https://github.com/deepseek-ai/deepseek-harness"><img src="https://img.shields.io/badge/runtime-DeepSeek%20Harness-000?style=flat-square" alt="DeepSeek Harness"></a>
   <a href="https://github.com/cordiverse/cordis"><img src="https://img.shields.io/badge/kernel-Cordis-6f42c1?style=flat-square" alt="Cordis"></a>
@@ -29,12 +29,12 @@
   <a href="#架构">架构</a> ·
   <a href="#生态">生态</a> ·
   <a href="#贡献">贡献</a> ·
-  <a href="#开源计划">开源计划</a>
+  <a href="#开源与治理">开源与治理</a>
 </p>
 
 A local-first Electron workbench for a one-person company: a small kernel (shell, todos, module contract) plus occupation plugins. Built on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-> 本仓库是正在使用的完整产品。开源将**另起仓库只带主干**；这份 README 按主干来写，个人站点清单、签名、选品栈不再当作产品本身。
+> 产品目录、社媒签名、作者名等业务数据由用户在「工作情况」和模块设置里填写，仓库默认值为空。
 
 ## 定位
 
@@ -51,34 +51,34 @@ A local-first Electron workbench for a one-person company: a small kernel (shell
 
 ### 为什么这样拆
 
-对照 [dsh-plugin](https://github.com/topics/dsh-plugin) 上的爆款桌面工作台（[OpenDesign](https://github.com/nexu-io/open-design)、[iPolloWork](https://github.com/Devin-AXIS/iPolloWork)、[dsh-desktop](https://github.com/anywhere-labs/dsh-desktop)、[dsh-web](https://github.com/zhu1090093659/dsh-web)）：它们把 **Harness 当运行时、把能力当插件**。OPC-Fellows 的目标同一条路，外壳是一人公司的花名册，不是再做一个 dsh web 皮肤。
+对照 [dsh-plugin](https://github.com/topics/dsh-plugin) 上的桌面工作台（[OpenDesign](https://github.com/nexu-io/open-design)、[iPolloWork](https://github.com/Devin-AXIS/iPolloWork)、[dsh-desktop](https://github.com/anywhere-labs/dsh-desktop)、[dsh-web](https://github.com/zhu1090093659/dsh-web)）：它们把 **Harness 当运行时、把能力当插件**。OPC-Fellows 走同一条路，外壳是一人公司的花名册与职业面板。
 
-H1–H8 已让中栏闲聊走 `dsh --profile opc`。随手记 `notes_add` 挂在 opc 的 dsh `ctx.tools` 上；收款 / 监控 / 选品仍由 Electron `ctx.tools` 执行。见 [ADR 0005](docs/adr/0005-dsh-as-composition-host.md)。
+中栏闲聊走 `dsh --profile opc`。随手记 `notes_add` 挂在 opc 的 dsh `ctx.tools` 上；收款 / 监控 / 选品仍由 Electron `ctx.tools` 执行。见 [ADR 0005](docs/adr/0005-dsh-as-composition-host.md)。
 
 - **本地优先**：业务数据在本机 `userData`，模型密钥在「设置 → 模型」走 `safeStorage`
 - **万物可插**：职业、Panel、Skill 都是模块；内核只保留契约
 - **权限白名单**：模块只能调用 manifest 声明的 capability，高危项安装前确认
 - **契约对齐 dsh**：`apply(ctx)`、package.json 自定义字段、capability 分层，方便从 Harness 生态平移
 
-## 主干会带走什么
+## 仓库范围
 
-抽仓库时，开源主干只保留通用层。个人业务数据走配置，不进默认代码。
+内核、模块契约和示例随仓库提供。真实业务数据走本机配置，不进默认代码。
 
 ```
-src/kernel/          主干：启动、IPC 桥、存储、待办、导航、模块仓库、成员
-src/modules/         内置职业（参考实现，开源仓库会做成可选包或示例）
+src/kernel/          启动、IPC 桥、存储、待办、导航、模块仓库、成员
+src/modules/         内置职业（参考实现）
 examples/            第三方模块最小示例
 docs/                架构与 ADR
 ```
 
-| 留下（主干） | 不进主干默认值 |
+| 随仓库提供 | 由用户在本机填写 |
 | --- | --- |
-| 模块契约、capability、仓库安装 | 个人站点清单（工作情况里自填） |
-| 待办 / 提醒 / Agent 收件箱 | 社媒签名、公众号作者、扣子工作流 ID |
-| 本机存储与 `safeStorage` | 打包签名身份、公证 Team ID |
-| `examples/hello-module` | 真实产品目录（示例见 `examples/catalog.example.json`） |
+| 模块契约、capability、仓库安装 | 产品目录（工作情况里自填） |
+| 待办 / 提醒 / 收件箱 | 社媒签名、公众号作者、工作流 ID |
+| 本机存储与 `safeStorage` | 打包签名身份（走环境变量） |
+| `examples/hello-module` | 真实站点清单（形状见 `examples/catalog.example.json`） |
 
-凭据只走环境变量或本机 `safeStorage`（设置 → 模型），仓库里没有硬编码 key。仍可读 `~/.dsh` 遗留配置，但新填写请走设置页。启动后产品目录、社媒签名、公众号作者都是空的，要自己在「工作情况」和各模块设置里填。示例目录见 [`examples/catalog.example.json`](examples/catalog.example.json)。
+凭据只走环境变量或本机 `safeStorage`（设置 → 模型），仓库里没有硬编码 key。仍可读 `~/.dsh` 遗留配置，但新填写请走设置页。启动后产品目录、社媒签名、公众号作者都是空的。示例目录见 [`examples/catalog.example.json`](examples/catalog.example.json)。
 
 ## 快速开始
 
@@ -186,7 +186,7 @@ pnpm dsh plugin --profile opc add ./packages/occupation-micro
       OPC 内核 bundle（todos、成员、项目）
       职业 bundle → ctx.tools + 右栏 Panel
 
-现状（H8）
+现状
   Electron 主进程
     applyOpcKernel（cordis.patch.yml 顺序）
       服务：modules / workbench / bridge / storage / secrets
@@ -220,18 +220,16 @@ pnpm dsh plugin --profile opc add ./packages/occupation-micro
 
 完整列表：[github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
-作者日常用这张工作台跑 [SoloKit](https://www.solokit.run/) 产品线（Studio / PromptMan / SaaS Cost 等）和 [榆关](https://pen.bitou.tech/) 工具墙。那是一份配置，不是主干。
+## 开源与治理
 
-## 开源计划
+本仓库即公开主干：[Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)。
 
-公开主干在 [Alfred-Lau/opc-agent-team-opensource](https://github.com/Alfred-Lau/opc-agent-team-opensource)，只有 `main`，不带旧分支和签名历史。
-
-1. 主干：`src/kernel`、模块 SDK、示例模块与治理文件；个人目录默认值不进仓库。
+1. 内核、模块 SDK、示例模块与治理文件随仓库提供；真实目录默认值不进仓库。
 2. [MIT License](LICENSE)，对齐 Cordis / dsh。
-3. 贡献见 [CONTRIBUTING.md](CONTRIBUTING.md) / [CONTRIBUTING.en.md](CONTRIBUTING.en.md)，安全见 [SECURITY.md](SECURITY.md)。UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。
-4. 打包签名身份走环境变量，不进开源快照；不要上传已签名的 `.app` / `.dmg`。
+3. 贡献见 [CONTRIBUTING.md](CONTRIBUTING.md) / [CONTRIBUTING.en.md](CONTRIBUTING.en.md)，安全见 [SECURITY.md](SECURITY.md)。界面国际化方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。
+4. 打包签名身份走环境变量；不要上传已签名的 `.app` / `.dmg`。
 
-欢迎对**主干契约**提 PR：内核服务、模块 manifest、capability、示例模块、文档。不要把个人站点、签名或密钥默认值加进 `src/shared`。
+欢迎对**主干契约**提 PR：内核服务、模块 manifest、capability、示例模块、文档。不要把真实站点、签名或密钥默认值加进 `src/shared`。
 
 ## 贡献
 
@@ -254,4 +252,4 @@ pnpm dsh plugin --profile opc add ./packages/occupation-micro
 
 [MIT License](LICENSE)。运行时依赖 [Cordis](https://github.com/cordiverse/cordis) 与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。封面与徽章对齐 [dsh-plugin](https://github.com/topics/dsh-plugin) 生态里桌面工作台的常见呈现。
 
-作者 [bitou.tech](https://pen.bitou.tech/)。想一起改主干，见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+维护者 [bitou.tech](https://pen.bitou.tech/)。想一起改主干，见 [CONTRIBUTING.md](CONTRIBUTING.md)。

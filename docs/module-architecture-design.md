@@ -7,7 +7,7 @@
 
 本文只做功能拆解与系统设计，不含实现代码。
 
-已定的三条前提（§18）：**待办上收为内核服务**、**首版做完整形态**（含第三方模块仓库与隔离）、**开源另起新仓库、本轮不做**。
+已定的三条前提（§18）：**待办上收为内核服务**、**首版做完整形态**（含第三方模块仓库与隔离）、**真实业务数据走本机配置，不进仓库默认值**。
 
 外壳心智的下一层（模块 = 新建 Agent 时的职业模板，工作台改为左栏身份 / 中栏会话 / 右栏工作区）见 [agent-workspace-design.md](./agent-workspace-design.md)。**组合根已改判**：Agent 运行时进 dsh 的 Context，Electron 只留薄壳，见 [adr/0005-dsh-as-composition-host.md](./adr/0005-dsh-as-composition-host.md)。本文仍描述模块契约与仓库隔离；§2.1 的「选 C」已被 0005 取代。
 
@@ -726,18 +726,18 @@ input: { index: 'src/renderer/index.html', pet: 'src/renderer/pet.html' }
 | `shared/products.ts` 的 `OPC_PRODUCTS` | 默认 `[]`。用户在设置里增删，示例见 `examples/catalog.example.json` |
 | `shared/tags.ts` 的 `OPC_PROJECT_TAG = 'OPC项目'` | 内核默认标签，设置里可改 |
 | `shared/social-copy.ts` 的社媒签名 | 默认空字符串，设置里可填 |
-| `micro` 的 subreddit / 领域清单 | 通用公开源，不是某个人的站点清单 |
+| `micro` 的 subreddit / 领域清单 | 通用公开源，不是某条产品线的站点清单 |
 | `main/micro-sourcing-fetch.ts` 的 User-Agent | 只用产品名和版本，不带个人站点 |
 
 `products.ts` 里那套 `statsStatus`（`live` / `pending` / `unavailable`）仍是通用能力。
 
 直接收益：换一批产品、加一个监控站点，都不用改代码重新打包。
 
-### 15.1 开源快照
+### 15.1 仓库默认值
 
 - 没有任何硬编码的 API key / token。凭据走「设置 → 模型」的 `safeStorage`、环境变量，或 `~/.dsh` 遗留配置。
 - 打包签名身份不进仓库：`electron-builder.yml` 不写姓名 / Team ID；`scripts/sign-mac.sh` 要求 `CODESIGN_IDENTITY`；公证脚本帮助文本用 `<TEAM_ID>`。
-- 另需补齐的：i18n（UI 仍是中文硬编码，方案见 `docs/i18n-plan.md`）、`SECURITY.md`、CI 扩到 typecheck / lint / 构建冒烟。
+- 许可证、`SECURITY.md`、贡献指南已随仓库提供。界面 i18n 方案见 `docs/i18n-plan.md`。
 
 ---
 
@@ -798,7 +798,7 @@ packages/
 
 1. **`todos` 上收为内核服务**，不做成可禁用模块；视图也是内核固定视图。可替换性通过 `ctx.todos` 的 sink / source / view 扩展点保留（§5.1）。
 2. **首版做完整形态**：内核 + 9 模块 + 设置管理 + 模块仓库（含第三方安装、`utilityProcess` 隔离、capability 强制、iframe 渲染沙箱）。安全机制与安装功能同期上线，不留窗口期（§14 P5）。
-3. **开源另起新仓库，本轮不做**。§15 正文的「硬编码常量配置化」保留，但理由是模块化本身要求可配置，与开源无关；许可证、i18n、治理文件、身份参数化全部推迟到新仓库时处理（§15.1 备查）。
+3. **真实业务数据走本机配置**。§15 的「硬编码常量配置化」是模块化本身的要求；许可证、治理文件已随本仓库提供，界面 i18n 见 `docs/i18n-plan.md`（§15.1）。
 
 4. **模块粒度**：`social-ammo` 独立成模块，但首版 UI 仍挂在监控页里；`monitor` 的 4 个子模块不做成独立开关，避免配置项翻倍。
 5. **模块产物约束**：第三方模块必须自带构建产物、安装器只做复制，不在用户机器上跑 `pnpm install`。

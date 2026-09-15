@@ -65,13 +65,13 @@ test('没选项目时标题是发起新项目，不预勾身份', () => {
   const page = describeNewTaskPage({
     threads: [project()],
     agents: [agent(), agent({ id: 'mina', title: 'Mina', mark: '米', hue: 1 })],
-    hostName: 'example-mac.local',
+    hostName: 'opc.local',
   })
   assert.equal(page.headline, '发起新项目？')
   assert.equal(page.triggerLabel, '新项目')
   assert.equal(page.placeholder, NEW_TASK_PLACEHOLDER)
-  assert.equal(page.hostLabel, 'example-mac.local')
-  assert.equal(page.chipLabel, 'example-mac.local')
+  assert.equal(page.hostLabel, 'opc.local')
+  assert.equal(page.chipLabel, 'opc.local')
   assert.equal(page.folderLabel, '')
   assert.equal(page.selectedCount, 0)
   assert.equal(page.totalCount, 2)

@@ -47,7 +47,7 @@ function project(overrides: Partial<ThreadRecord> = {}): ThreadRecord {
 
 test('海框芯片：有文件夹显示目录名，否则显示本机名', () => {
   assert.equal(folderLabel('/Users/yu/申城'), '申城')
-  assert.deepEqual(composerContextChip({ folderPath: '/Users/yu/申城', hostName: 'example-mac.local' }), {
+  assert.deepEqual(composerContextChip({ folderPath: '/Users/yu/申城', hostName: 'opc.local' }), {
     kind: 'folder',
     label: '申城',
     title: '/Users/yu/申城',

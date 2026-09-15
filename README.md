@@ -3,17 +3,17 @@
 </p>
 
 <p align="center">
-  <strong>OPC-Fellows</strong> · 一人公司的本地优先工作台<br>
-  内核提供外壳、待办与模块契约，职业能力以插件挂上。
+  <strong>OPC-Fellows</strong> · a local-first workbench for a one-person company<br>
+  A small kernel (shell, todos, module contract) plus occupation plugins.
 </p>
 
 <p align="center">
-  <a href="README.md">中文</a> · <a href="README.en.md">English</a>
+  <a href="README.md">English</a> · <a href="README.zh-CN.md">中文</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Alfred-Lau/opc-agent-team-opensource/stargazers"><img src="https://img.shields.io/github/stars/Alfred-Lau/opc-agent-team-opensource?style=flat-square" alt="GitHub stars"></a>
-  <a href="https://github.com/Alfred-Lau/opc-agent-team-opensource/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Alfred-Lau/opc-agent-team-opensource/ci.yml?style=flat-square&label=CI" alt="CI"></a>
+  <a href="https://github.com/Alfred-Lau/OPC-Fellows/stargazers"><img src="https://img.shields.io/github/stars/Alfred-Lau/OPC-Fellows?style=flat-square" alt="GitHub stars"></a>
+  <a href="https://github.com/Alfred-Lau/OPC-Fellows/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Alfred-Lau/OPC-Fellows/ci.yml?style=flat-square&label=CI" alt="CI"></a>
   <a href="https://github.com/topics/dsh-plugin"><img src="https://img.shields.io/badge/topic-dsh--plugin-1f6feb?style=flat-square" alt="dsh-plugin"></a>
   <a href="https://github.com/deepseek-ai/deepseek-harness"><img src="https://img.shields.io/badge/runtime-DeepSeek%20Harness-000?style=flat-square" alt="DeepSeek Harness"></a>
   <a href="https://github.com/cordiverse/cordis"><img src="https://img.shields.io/badge/kernel-Cordis-6f42c1?style=flat-square" alt="Cordis"></a>
@@ -22,97 +22,96 @@
 </p>
 
 <p align="center">
-  <a href="#定位">定位</a> ·
-  <a href="#快速开始">快速开始</a> ·
-  <a href="#写一个模块">写一个模块</a> ·
-  <a href="#内置模块参考实现">内置模块</a> ·
-  <a href="#架构">架构</a> ·
-  <a href="#生态">生态</a> ·
-  <a href="#贡献">贡献</a> ·
-  <a href="#开源计划">开源计划</a>
+  <a href="#why">Why</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#write-a-module">Write a module</a> ·
+  <a href="#built-in-occupations">Built-in occupations</a> ·
+  <a href="#architecture">Architecture</a> ·
+  <a href="#ecosystem">Ecosystem</a> ·
+  <a href="#contributing">Contributing</a>
 </p>
 
-A local-first Electron workbench for a one-person company: a small kernel (shell, todos, module contract) plus occupation plugins. Built on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
+A local-first Electron workbench for a one-person company. Built on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-> 本仓库是正在使用的完整产品。开源将**另起仓库只带主干**；这份 README 按主干来写，个人站点清单、签名、选品栈不再当作产品本身。
+> This tree is the full daily-driver product. The public snapshot keeps the **kernel and contracts**. Personal site catalogs, signing identities, and sourcing stacks stay out of default code.
 
-## 定位
+## Why
 
-一人公司只有一张工作台。用户先选**成员**（职业身份）或**项目**（一件多人合作的事），在会话里推进，右侧是该身份正在盯的 Panel。新功能加模块，不改内核联合类型。
+A one-person company gets one workbench. You pick a **member** (an occupation) or a **project** (a multi-member job), push the work in a session, and the right pane is the Panel that identity is watching. New features are modules. The kernel union types stay small.
 
-| 概念 | 含义 |
+| Concept | Meaning |
 | --- | --- |
-| **内核** | 不可禁用：外壳、待办、搜索、设置、模块仓库、成员 / 项目 |
-| **模块** | 一份 Cordis 插件 + 一份 manifest。可 enable / disable，第三方可从本地目录或 Git 安装 |
-| **成员** | 模块的一次具身：人设、主 Panel、推荐 Skill。界面不写 Agent |
-| **待办** | 内核服务。任意模块经 `todos.ingestAgent` 写入，按 `dedupeKey` 去重 |
+| **Kernel** | Always on: shell, todos, search, settings, module registry, members / projects |
+| **Module** | One Cordis plugin + one manifest. Enable / disable. Install from a local folder or Git |
+| **Member** | One embodiment of a module: persona, home Panel, recommended Skills. The UI never says Agent |
+| **Todo** | A kernel service. Any module writes through `todos.ingestAgent`, deduped by `dedupeKey` |
 
-约定见 [CONTEXT.md](CONTEXT.md)，模块化设计见 [docs/module-architecture-design.md](docs/module-architecture-design.md)。
+Vocabulary lives in [CONTEXT.md](CONTEXT.md). Modular design lives in [docs/module-architecture-design.md](docs/module-architecture-design.md).
 
-### 为什么这样拆
+### Why this split
 
-对照 [dsh-plugin](https://github.com/topics/dsh-plugin) 上的爆款桌面工作台（[OpenDesign](https://github.com/nexu-io/open-design)、[iPolloWork](https://github.com/Devin-AXIS/iPolloWork)、[dsh-desktop](https://github.com/anywhere-labs/dsh-desktop)、[dsh-web](https://github.com/zhu1090093659/dsh-web)）：它们把 **Harness 当运行时、把能力当插件**。OPC-Fellows 的目标同一条路，外壳是一人公司的花名册，不是再做一个 dsh web 皮肤。
+The popular desktop workbenches on [dsh-plugin](https://github.com/topics/dsh-plugin) — [OpenDesign](https://github.com/nexu-io/open-design), [iPolloWork](https://github.com/Devin-AXIS/iPolloWork), [dsh-desktop](https://github.com/anywhere-labs/dsh-desktop), [dsh-web](https://github.com/zhu1090093659/dsh-web) — treat **Harness as the runtime and capabilities as plugins**. OPC-Fellows walks the same road. The shell is a one-person-company roster, not another dsh web skin.
 
-H1–H8 已让中栏闲聊走 `dsh --profile opc`。随手记 `notes_add` 挂在 opc 的 dsh `ctx.tools` 上；收款 / 监控 / 选品仍由 Electron `ctx.tools` 执行。见 [ADR 0005](docs/adr/0005-dsh-as-composition-host.md)。
+H1–H8 already send the center-pane chat through `dsh --profile opc`. Scratch notes `notes_add` hang on opc's dsh `ctx.tools`; payments / monitor / micro-sourcing still run on Electron `ctx.tools`. See [ADR 0005](docs/adr/0005-dsh-as-composition-host.md).
 
-- **本地优先**：业务数据在本机 `userData`，模型密钥在「设置 → 模型」走 `safeStorage`
-- **万物可插**：职业、Panel、Skill 都是模块；内核只保留契约
-- **权限白名单**：模块只能调用 manifest 声明的 capability，高危项安装前确认
-- **契约对齐 dsh**：`apply(ctx)`、package.json 自定义字段、capability 分层，方便从 Harness 生态平移
+- **Local first**: business data stays in `userData`; model keys go through Settings → Model and `safeStorage`
+- **Everything plugs in**: occupations, Panels, and Skills are modules; the kernel only keeps contracts
+- **Capability allow-list**: a module may call only what its manifest declares; dangerous ones confirm at install
+- **Contracts match dsh**: `apply(ctx)`, custom package.json fields, layered capabilities — easy to port from the Harness ecosystem
 
-## 主干会带走什么
-
-抽仓库时，开源主干只保留通用层。个人业务数据走配置，不进默认代码。
+## What the trunk keeps
 
 ```
-src/kernel/          主干：启动、IPC 桥、存储、待办、导航、模块仓库、成员
-src/modules/         内置职业（参考实现，开源仓库会做成可选包或示例）
-examples/            第三方模块最小示例
-docs/                架构与 ADR
+src/kernel/          trunk: boot, IPC bridge, storage, todos, nav, module registry, members
+src/modules/         built-in occupations (reference implementations)
+examples/            smallest third-party module
+docs/                architecture and ADRs
 ```
 
-| 留下（主干） | 不进主干默认值 |
+| Stays in the trunk | Stays out of defaults |
 | --- | --- |
-| 模块契约、capability、仓库安装 | 个人站点清单（工作情况里自填） |
-| 待办 / 提醒 / Agent 收件箱 | 社媒签名、公众号作者、扣子工作流 ID |
-| 本机存储与 `safeStorage` | 打包签名身份、公证 Team ID |
-| `examples/hello-module` | 真实产品目录（示例见 `examples/catalog.example.json`） |
+| Module contract, capabilities, install | Personal site catalog (fill in Work situation) |
+| Todos / reminders / agent inbox | Social signatures, WeChat author, Coze workflow IDs |
+| Local storage and `safeStorage` | Packaging identity, notarization Team ID |
+| `examples/hello-module` | Real product catalog (see `examples/catalog.example.json`) |
 
-凭据只走环境变量或本机 `safeStorage`（设置 → 模型），仓库里没有硬编码 key。仍可读 `~/.dsh` 遗留配置，但新填写请走设置页。启动后产品目录、社媒签名、公众号作者都是空的，要自己在「工作情况」和各模块设置里填。示例目录见 [`examples/catalog.example.json`](examples/catalog.example.json)。
+Credentials travel as env vars or on-device `safeStorage`. The repo has no hardcoded keys. Legacy `~/.dsh` is still readable; new keys should be entered in Settings. After launch the product catalog, social signature, and WeChat author are empty until you fill them in. See [`examples/catalog.example.json`](examples/catalog.example.json).
 
-## 快速开始
+## Quick start
 
-需要 Node.js `^22.19.0` 或 `>=24.0.0`，pnpm 10+。Electron 42+ 不再在自身 `postinstall` 里拉二进制，本仓库用 `postinstall: install-electron` 在依赖装完后下载，所以第一次 `pnpm install` 会多等一会儿。
+Needs Node.js `^22.19.0` or `>=24.0.0`, and pnpm 10+. Electron 42+ no longer downloads its binary in its own `postinstall`; this repo uses `postinstall: install-electron`, so the first `pnpm install` takes a while.
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-启动后工作台默认最大化。
+The workbench starts maximized.
 
-可选：
+Optional:
 
 ```sh
-export DEEPSEEK_API_KEY=sk-...   # 可选；覆盖「设置 → 模型」里保存的 key
-pnpm test                        # 内核与 shared 单测
-pnpm dsh                         # 本机 DeepSeek Harness CLI
+export DEEPSEEK_API_KEY=sk-...   # optional; overrides the key saved in Settings → Model
+pnpm test                        # kernel + shared unit tests
+pnpm dsh                         # local DeepSeek Harness CLI
 ```
 
-打包：`pnpm pack`（目录）、`pnpm dist`，或 macOS 签名安装包 `pnpm dist:mac`。
+Copy [`.env.example`](.env.example) if you prefer a dotenv file. Never commit a real `.env`.
 
-## 写一个模块
+Package with `pnpm pack` (dir), `pnpm dist`, or the signed macOS installer `pnpm dist:mac`.
 
-第三方模块是一个 npm 包。桌面工作台读 `ownworkbuddy` 字段（主进程 `apply(ctx)`，可选 UI `mount(root, api)`）；Agent 运行时读官方 `dsh.bundle`。过渡期两份都写。不必改 preload。
+## Write a module
 
-仓库里有最小示例 [`examples/hello-module`](examples/hello-module)：
+A third-party module is an npm package. The desktop workbench reads the `ownworkbuddy` field (main-process `apply(ctx)`, optional UI `mount(root, api)`); the agent runtime reads the official `dsh.bundle`. Write both during the transition. You do not need to touch preload.
+
+Minimal sample: [`examples/hello-module`](examples/hello-module).
 
 ```json
 {
   "main": "dsh-plugin.js",
   "ownworkbuddy": {
     "id": "hello",
-    "title": "你好",
+    "title": "Hello",
     "kind": "view",
     "main": "index.js",
     "capabilities": [],
@@ -126,12 +125,12 @@ pnpm dsh                         # 本机 DeepSeek Harness CLI
 
 ```js
 export default function apply(ctx) {
-  ctx.workbench.nav({ id: 'hello', title: '你好', mark: '你', kind: 'view', order: 200 })
+  ctx.workbench.nav({ id: 'hello', title: 'Hello', mark: 'Hi', kind: 'view', order: 200 })
   ctx.bridge.handle('hello:ping', () => ({ ok: true, at: new Date().toISOString() }))
 }
 ```
 
-工作台「扩展」页可从本地目录或 Git 安装。进 dsh 层栈用官方 CLI（会初始化 `$DSH_HOME/profiles/opc`）：
+Install from a local folder or Git on the Extensions page. To join the dsh stack (this initializes `$DSH_HOME/profiles/opc`):
 
 ```sh
 pnpm dsh plugin --profile opc add ./examples/hello-module
@@ -142,116 +141,108 @@ pnpm dsh plugin --profile opc add ./packages/occupation-payments
 pnpm dsh plugin --profile opc add ./packages/occupation-micro
 ```
 
-工作台里停用带 `dsh.bundle` 的模块（含随手记 / 监控 / 收款 / 选品）时，会在 opc profile 的 `cordis.patch.yml` 加上 `{ id: opc-<模块>, disabled: true }`。
+Disabling a module that has `dsh.bundle` writes `{ id: opc-<module>, disabled: true }` into the opc profile `cordis.patch.yml`.
 
-模块只能使用 manifest 里声明的 capability（`storage` / `todos:write` / `secrets` / `subprocess` …），未声明的调用会被内核拒绝。`subprocess` 与 `secrets` 安装时会单独提示。
+A module may only use capabilities declared in its manifest (`storage` / `todos:write` / `secrets` / `subprocess` …). Undeclared calls are rejected. `subprocess` and `secrets` prompt at install.
 
-内置模块构建期静态注册（`builtin:<id>`），避开 asar 动态 import 限制。模块之间不要直连 store，跨模块只走内核服务。
+Built-in modules register statically at build time (`builtin:<id>`) so asar does not have to dynamic-import them. Modules must not reach into each other's stores; cross-module traffic goes through kernel services.
 
-## 内置模块（参考实现）
+## Built-in occupations
 
-这些是当前产品里的职业，用来验证契约，不是主干的一部分。没配密钥时降级为本地功能，不发未认证请求。
+These occupations live in the current product to prove the contract. They are not the kernel. Without keys they degrade to local features and do not send unauthenticated requests.
 
-| 模块 | 做什么 |
+| Module | What it does |
 | --- | --- |
-| 随手记 | 本机笔记 |
-| 台伴 | 独立窗提醒；待办到点跳到屏幕中间 |
-| 项目监控 | 仓库 / 站点态势；可选拉取站点 `GET /api/stats` |
-| 社媒弹药 | 按产品能力生成多平台文案 |
-| Micro 选品 | 从公开论坛捞痛点，聚成产品 idea |
-| 增长黑客 | 实验、增长环与渠道表；不写文案、不刷新流量 |
-| 自媒体账号 | 国内平台账号与日记（数据手录） |
-| 微信情报 | 本机只读对接 [WeChat Intelligence Hub](https://github.com/Rion-Wu-tech/wechat-intelligence-hub)；不发微信、聊天不出本机 |
-| 邮件整理 | 本机「邮件」+ iCloud / Gmail / QQ IMAP；只整理、写草稿，不代发 |
-| 收款管理 | 本机台账；可选同步 [Creem](https://creem.io) |
-| DeepSeek Harness | 中栏对话与 Local API 共用 SDK session；不当可雇职业，不再起官方 UI |
+| Notes | Local notes |
+| Companion | Standalone reminder window; due todos jump to screen center |
+| Project monitor | Repo / site posture; optional `GET /api/stats` |
+| Social ammo | Multi-platform copy from product capabilities |
+| Micro sourcing | Public-forum pain points clustered into product ideas |
+| Growth hacker | Experiments, loops, and channels; no copy, no traffic refresh |
+| Creator accounts | Domestic-platform accounts and day logs (manual data) |
+| WeChat intel | Local read-only bridge to [WeChat Intelligence Hub](https://github.com/Rion-Wu-tech/wechat-intelligence-hub); never sends WeChat, chats stay on device |
+| Mail triage | Local Mail.app + iCloud / Gmail / QQ IMAP; triage and drafts only, no sending |
+| Payments | Local ledger; optional [Creem](https://creem.io) sync |
+| DeepSeek Harness | Center-pane chat and Local API share one SDK session; not a hireable occupation |
 
-站点统计、选品代理、Creem key 等都是**模块配置**，详见各模块设置页。环境变量备忘：
+Site stats, sourcing proxies, and Creem keys are **module settings**. Env-var cheat sheet:
 
-| 变量 | 用途 |
+| Variable | Use |
 | --- | --- |
-| `DEEPSEEK_API_KEY` | LLM（覆盖「设置 → 模型」；仍可读 `~/.dsh` 遗留） |
-| `OPC_USER_DATA` | 工作台传给 opc 子进程的 userData（随手记 `notes.json`） |
-| `OWNWORKBUDDY_STATS_KEY` | 项目监控请求站点 `/api/stats` 的共享密钥 |
-| `CREEM_API_KEY` | 收款模块覆盖本机保存的 key |
-| `HTTPS_PROXY` | 选品扫描走代理（国内访问 Reddit 时） |
+| `DEEPSEEK_API_KEY` | LLM (overrides Settings → Model; still reads legacy `~/.dsh`) |
+| `OPC_USER_DATA` | userData passed to the opc child (notes `notes.json`) |
+| `OWNWORKBUDDY_STATS_KEY` | Shared secret for monitor `GET /api/stats` |
+| `CREEM_API_KEY` | Payments override for the on-device key |
+| `HTTPS_PROXY` | Sourcing scan proxy (Reddit from mainland China) |
 
-## 架构
+## Architecture
 
 ```
-目标（ADR 0005）
-  Electron 薄壳（窗 / 托盘 / 台伴）
+Target (ADR 0005)
+  Thin Electron shell (window / tray / companion)
     dsh --profile opc
-      dsh-base（llm / tools / sessions / agent-loop）
-      OPC 内核 bundle（todos、成员、项目）
-      职业 bundle → ctx.tools + 右栏 Panel
+      dsh-base (llm / tools / sessions / agent-loop)
+      OPC kernel bundle (todos, members, projects)
+      Occupation bundles → ctx.tools + right-pane Panel
 
-现状（H8）
-  Electron 主进程
-    applyOpcKernel（cordis.patch.yml 顺序）
-      服务：modules / workbench / bridge / storage / secrets
-            todos / llm / tools / dshRuntime / scheduler / notify / search / repository / agents
-      内置模块（in-process）+ 已装第三方模块
-        notes_add：dsh ctx.tools（occupation-notes）+ Electron JSON 退路
-        monitor_refresh / payments_sync / micro_scan → Electron ctx.tools
-    同一 dsh --profile opc：中栏闲聊与 Local API /agent/task（in-box 含 dsh-sdk-app）
-    `$DSH_HOME/profiles/opc`：occupation-* + 第三方 dsh.bundle；工作台停用回写用户 patch
-    Completions 只走 ctx.llm（拆解 / 选品润色 / 弹药 / 公众号）
-  preload：workbench.invoke / subscribe（按模块校验）
-  渲染进程：左栏成员与项目 · 中栏会话 · 右栏 Panel
+Today (H8)
+  Electron main
+    applyOpcKernel (cordis.patch.yml order)
+      services: modules / workbench / bridge / storage / secrets
+                todos / llm / tools / dshRuntime / scheduler / notify / search / repository / agents
+      built-in modules (in-process) + installed third-party modules
+    Same dsh --profile opc for center-pane chat and Local API /agent/task
+  preload: workbench.invoke / subscribe (checked per module)
+  renderer: left members & projects · center session · right Panel
 ```
 
-外壳心智（成员 / 项目 / Skill，而不是侧栏功能页）见 [docs/agent-workspace-design.md](docs/agent-workspace-design.md)。运行时宿主见 [docs/adr/0005-dsh-as-composition-host.md](docs/adr/0005-dsh-as-composition-host.md)。
+Shell mental model: [docs/agent-workspace-design.md](docs/agent-workspace-design.md). Runtime host: [docs/adr/0005-dsh-as-composition-host.md](docs/adr/0005-dsh-as-composition-host.md).
 
-## 生态
+## Ecosystem
 
-模块契约对齐 DeepSeek Harness 社区约定。发现、安装、对照实现时，优先看官方话题和星标靠前的桌面 / 插件项目：
+The module contract follows DeepSeek Harness community conventions. For discovery and comparison, start with the official topic and the starred desktop / plugin projects:
 
-| 项目 | 星标量级 | 和本仓库的关系 |
-| --- | --- | --- |
-| [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) | 运行时本体 | 本机 `pnpm dsh`；现状是 `dsh --profile opc` 一棵进程 |
-| [nexu-io/open-design](https://github.com/nexu-io/open-design) | 设计工作台 | 同样是本地优先桌面 + dsh 一等运行时 |
-| [Devin-AXIS/iPolloWork](https://github.com/Devin-AXIS/iPolloWork) | 多引擎 Agent 工作台 | 成员 / 项目 / 插件生命周期可对照 |
-| [anywhere-labs/dsh-desktop](https://github.com/anywhere-labs/dsh-desktop) | DSH 桌面宿主 | 把 Harness 装进可分发客户端 |
-| [zhu1090093659/dsh-web](https://github.com/zhu1090093659/dsh-web) | Web GUI 插件全家桶 | 任务看板、远程、皮肤的插件切法 |
-| [liustack/modlens](https://github.com/liustack/modlens) | 视觉插件 | 单能力插件的 README / 安装体验 |
-| [dsh-market/dsh-market](https://github.com/dsh-market/dsh-market) | 应用内插件市场 | 扩展页的发现与一键安装可对照 |
-| [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | 精选列表 | 社区插件目录 |
+| Project | Role next to this repo |
+| --- | --- |
+| [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) | Runtime. Local `pnpm dsh`; today one `dsh --profile opc` process |
+| [nexu-io/open-design](https://github.com/nexu-io/open-design) | Local-first desktop + dsh as a first-class runtime |
+| [Devin-AXIS/iPolloWork](https://github.com/Devin-AXIS/iPolloWork) | Member / project / plugin lifecycle to compare |
+| [anywhere-labs/dsh-desktop](https://github.com/anywhere-labs/dsh-desktop) | Harness inside a shippable client |
+| [zhu1090093659/dsh-web](https://github.com/zhu1090093659/dsh-web) | Web GUI plugin family |
+| [liustack/modlens](https://github.com/liustack/modlens) | Single-capability plugin README / install UX |
+| [dsh-market/dsh-market](https://github.com/dsh-market/dsh-market) | In-app plugin market |
+| [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | Curated plugin list |
 
-完整列表：[github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
+Full list: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
-作者日常用这张工作台跑 [SoloKit](https://www.solokit.run/) 产品线（Studio / PromptMan / SaaS Cost 等）和 [榆关](https://pen.bitou.tech/) 工具墙。那是一份配置，不是主干。
+The author runs this workbench against the [SoloKit](https://www.solokit.run/) line (Studio / PromptMan / SaaS Cost and the rest) and the [榆关](https://pen.bitou.tech/) tool wall. That is a configuration, not the trunk.
 
-## 开源计划
+## Contributing
 
-公开主干在 [Alfred-Lau/opc-agent-team-opensource](https://github.com/Alfred-Lau/opc-agent-team-opensource)，只有 `main`，不带旧分支和签名历史。
+The public trunk is [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows): `main` only, no leftover agent branches or signing history. Chinese docs: [README.zh-CN.md](README.zh-CN.md).
 
-1. 主干：`src/kernel`、模块 SDK、示例模块与治理文件；个人目录默认值不进仓库。
-2. [MIT License](LICENSE)，对齐 Cordis / dsh。
-3. 贡献见 [CONTRIBUTING.md](CONTRIBUTING.md) / [CONTRIBUTING.en.md](CONTRIBUTING.en.md)，安全见 [SECURITY.md](SECURITY.md)。UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。
-4. 打包签名身份走环境变量，不进开源快照；不要上传已签名的 `.app` / `.dmg`。
+PRs against the **trunk contract** are welcome: kernel services, module manifests, capabilities, sample modules, docs. Do not weld personal sites, signing identities, or secret defaults into `src/shared`.
 
-欢迎对**主干契约**提 PR：内核服务、模块 manifest、capability、示例模块、文档。不要把个人站点、签名或密钥默认值加进 `src/shared`。
+- [CONTRIBUTING.en.md](CONTRIBUTING.en.md) · [CONTRIBUTING.md](CONTRIBUTING.md) (中文)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security policy](SECURITY.md)
 
-## 贡献
+By submitting a pull request you license your contribution under the [MIT License](LICENSE).
 
-- [贡献指南](CONTRIBUTING.md) · [Contributing (English)](CONTRIBUTING.en.md)
-- [行为准则](CODE_OF_CONDUCT.md)
-- [安全披露](SECURITY.md)
-- 好上手的第一刀：补英文词条、写 `examples/` 模块、给某个职业加测试、给 Issue 标 `good first issue`
+Good first cuts: English UI strings, an `examples/` module, tests for one occupation, or issues labeled `good first issue`.
 
-提交即按 [MIT License](LICENSE) 授权给本项目。版权声明见许可证全文。
+UI copy is still hardcoded Chinese. The i18n plan is [docs/i18n-plan.md](docs/i18n-plan.md) — help here travels far.
 
-## 安全
+## Security
 
-- 业务数据在本机 `userData`，不经过项目自己的服务器。
-- 微信情报只读本机索引，不上传聊天、不把 key 送出本机、不代发消息。
-- 邮件整理只读收件箱并写本机草稿；线上邮箱用专用密码，走 `safeStorage`，不代发。
-- 第三方模块按 capability 白名单运行；高危权限安装前确认。
-- 发现漏洞请走 [SECURITY.md](SECURITY.md)，不要在公开 Issue 里贴凭据或用户数据。
+- Business data stays in on-device `userData`. There is no first-party backend for it.
+- WeChat intel is a local read-only index. Chats are not uploaded, keys do not leave the machine, messages are not sent.
+- Mail triage reads the inbox and writes local drafts. Online mailboxes use app-specific passwords in `safeStorage`. The app does not send mail.
+- Third-party modules run on a capability allow-list. Dangerous permissions confirm at install.
+- Report vulnerabilities in private. Do not paste credentials or user data into a public issue. See [SECURITY.md](SECURITY.md).
 
-## 许可与致谢
+## License and thanks
 
-[MIT License](LICENSE)。运行时依赖 [Cordis](https://github.com/cordiverse/cordis) 与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。封面与徽章对齐 [dsh-plugin](https://github.com/topics/dsh-plugin) 生态里桌面工作台的常见呈现。
+[MIT License](LICENSE). Runtime depends on [Cordis](https://github.com/cordiverse/cordis) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Cover and badges follow the usual desktop-workbench look on [dsh-plugin](https://github.com/topics/dsh-plugin).
 
-作者 [bitou.tech](https://pen.bitou.tech/)。想一起改主干，见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+Author: [bitou.tech](https://pen.bitou.tech/).

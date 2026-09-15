@@ -17,7 +17,7 @@ body:
     id: done
     attributes:
       label: Done when / 完成标准
-      placeholder: pnpm test passes; README.en.md mentions the new flag; …
+      placeholder: pnpm test passes; README.md mentions the new flag; …
     validations:
       required: true
   - type: dropdown

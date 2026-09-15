@@ -38,7 +38,7 @@ pnpm test
 | 内核 | `src/kernel/` | 外壳、待办、IPC 桥、模块仓库、capability、成员 / 项目 |
 | 内置职业 | `src/modules/`、`packages/occupation-*`，以及仍散落的 `src/main` / `src/renderer` | Panel 与 `ctx.tools` 在 `src/modules`；dsh 层栈是标记 bundle |
 | 示例 | `examples/` | 第三方模块最小可运行样例 |
-| 文档 | `README.md`、`README.en.md`、`docs/`、`CONTEXT.md` | 契约说明；个人操作手册请不要加长 |
+| 文档 | `README.md`、`README.zh-CN.md`、`docs/`、`CONTEXT.md` | 契约说明；个人操作手册请不要加长 |
 
 新功能加模块，不改内核的视图联合类型。跨模块只走内核服务（例如 `todos.ingestAgent`），不要直连对方 store。
 

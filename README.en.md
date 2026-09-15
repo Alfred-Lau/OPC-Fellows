@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="docs/cover.png" alt="OPC Agent Team — Local-first workbench for a one-person company" width="100%">
+  <img src="docs/cover.png" alt="OPC-Fellows — Local-first workbench for a one-person company" width="100%">
 </p>
 
 <p align="center">
-  <strong>OPC Agent Team</strong> · a local-first workbench for a one-person company<br>
+  <strong>OPC-Fellows</strong> · a local-first workbench for a one-person company<br>
   A small kernel (shell, todos, module contract) plus occupation plugins.
 </p>
 
@@ -50,7 +50,7 @@ Vocabulary lives in [CONTEXT.md](CONTEXT.md). Modular design lives in [docs/modu
 
 ### Why this split
 
-The popular desktop workbenches on [dsh-plugin](https://github.com/topics/dsh-plugin) — [OpenDesign](https://github.com/nexu-io/open-design), [iPolloWork](https://github.com/Devin-AXIS/iPolloWork), [dsh-desktop](https://github.com/anywhere-labs/dsh-desktop), [dsh-web](https://github.com/zhu1090093659/dsh-web) — treat **Harness as the runtime and capabilities as plugins**. OPC Agent Team walks the same road. The shell is a one-person-company roster, not another dsh web skin.
+The popular desktop workbenches on [dsh-plugin](https://github.com/topics/dsh-plugin) — [OpenDesign](https://github.com/nexu-io/open-design), [iPolloWork](https://github.com/Devin-AXIS/iPolloWork), [dsh-desktop](https://github.com/anywhere-labs/dsh-desktop), [dsh-web](https://github.com/zhu1090093659/dsh-web) — treat **Harness as the runtime and capabilities as plugins**. OPC-Fellows walks the same road. The shell is a one-person-company roster, not another dsh web skin.
 
 H1–H8 already send the center-pane chat through `dsh --profile opc`. Scratch notes `notes_add` hang on opc's dsh `ctx.tools`; payments / monitor / micro-sourcing still run on Electron `ctx.tools`. See [ADR 0005](docs/adr/0005-dsh-as-composition-host.md).
 

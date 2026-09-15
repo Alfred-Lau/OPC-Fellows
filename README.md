@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="docs/cover.png" alt="OPC Agent Team — Local-first workbench for a one-person company" width="100%">
+  <img src="docs/cover.png" alt="OPC-Fellows — Local-first workbench for a one-person company" width="100%">
 </p>
 
 <p align="center">
-  <strong>OPC Agent Team</strong> · 一人公司的本地优先工作台<br>
+  <strong>OPC-Fellows</strong> · 一人公司的本地优先工作台<br>
   内核提供外壳、待办与模块契约，职业能力以插件挂上。
 </p>
 
@@ -51,7 +51,7 @@ A local-first Electron workbench for a one-person company: a small kernel (shell
 
 ### 为什么这样拆
 
-对照 [dsh-plugin](https://github.com/topics/dsh-plugin) 上的爆款桌面工作台（[OpenDesign](https://github.com/nexu-io/open-design)、[iPolloWork](https://github.com/Devin-AXIS/iPolloWork)、[dsh-desktop](https://github.com/anywhere-labs/dsh-desktop)、[dsh-web](https://github.com/zhu1090093659/dsh-web)）：它们把 **Harness 当运行时、把能力当插件**。OPC Agent Team 的目标同一条路，外壳是一人公司的花名册，不是再做一个 dsh web 皮肤。
+对照 [dsh-plugin](https://github.com/topics/dsh-plugin) 上的爆款桌面工作台（[OpenDesign](https://github.com/nexu-io/open-design)、[iPolloWork](https://github.com/Devin-AXIS/iPolloWork)、[dsh-desktop](https://github.com/anywhere-labs/dsh-desktop)、[dsh-web](https://github.com/zhu1090093659/dsh-web)）：它们把 **Harness 当运行时、把能力当插件**。OPC-Fellows 的目标同一条路，外壳是一人公司的花名册，不是再做一个 dsh web 皮肤。
 
 H1–H8 已让中栏闲聊走 `dsh --profile opc`。随手记 `notes_add` 挂在 opc 的 dsh `ctx.tools` 上；收款 / 监控 / 选品仍由 Electron `ctx.tools` 执行。见 [ADR 0005](docs/adr/0005-dsh-as-composition-host.md)。
 

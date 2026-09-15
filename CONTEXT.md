@@ -1,6 +1,6 @@
-# OPC Agent Team - Solokit
+# OPC-Fellows
 
-个人桌面 OPC 工作台：用户先选成员或选事。成员有自己的主对话；多人合作走项目。对外点位叫 OPC Agent Team - Solokit。
+个人桌面 OPC 工作台：用户先选成员或选事。成员有自己的主对话；多人合作走项目。对外点位叫 OPC-Fellows。
 
 ## Language
 

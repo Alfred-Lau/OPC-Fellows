@@ -1,4 +1,4 @@
-# OPC Agent Team - Solokit × X(Twitter)推送 — 设计方案
+# OPC-Fellows × X(Twitter)推送 — 设计方案
 
 > 目标:让工作台能把内容**直接发给用户的 X 账号**(DM 给自己 / 公开推文),
 > 优先走浏览器插件通道(免 X API 成本、复用已登录会话),预留 xurl 官方 API 备选。
@@ -29,7 +29,7 @@
 ## 3. 总体架构
 
 ```
-┌───────────────────────── OPC Agent Team - Solokit (Electron) ─────────────────────────┐
+┌───────────────────────── OPC-Fellows (Electron) ─────────────────────────┐
 │ renderer                                                                │
 │  ├─ X 推送面板(新 view 或并入 accounts)                                   │
 │  │    · X 通道状态:插件在线?登录态?最近发送历史                           │

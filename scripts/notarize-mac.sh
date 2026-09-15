@@ -7,9 +7,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP="${1:-dist/mac-arm64/OPC Agent Team - Solokit.app}"
+APP="${1:-dist/mac-arm64/OPC-Fellows.app}"
 VERSION="$(node -p "require('${ROOT}/package.json').version")"
-ZIP="${2:-dist/OPC Agent Team - Solokit-${VERSION}-mac-arm64.zip}"
+ZIP="${2:-dist/OPC-Fellows-${VERSION}-mac-arm64.zip}"
 
 if [[ ! -d "$APP" ]]; then
   echo "找不到 $APP" >&2

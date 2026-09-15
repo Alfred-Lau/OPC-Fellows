@@ -25,7 +25,8 @@ body[data-view='mail'] #view-mail {
   margin: 4px 0 14px;
   color: var(--cream);
   opacity: 0.75;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: keep-all;
 }
 
 #view-mail > .hint.is-error {
@@ -139,12 +140,14 @@ body[data-view='mail'] #view-mail {
 .mail-card h3 {
   margin: 0 0 4px;
   font-size: 15px;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: keep-all;
 }
 
 .mail-card .hint,
 .mail-account .hint {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: keep-all;
 }
 
 .mail-actions,

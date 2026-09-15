@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OPC-Fellows cover</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #070705;
+        --gold: #e8bc6c;
+        --gold-dim: #8a5e22;
+        --fg: #f1f1ef;
+        --muted: #8b8680;
+        --line: #2a2722;
+        --pane: #12110f;
+        --chip: #1c1a16;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      .stage {
+        width: 1600px;
+        height: 900px;
+        display: grid;
+        grid-template-columns: 520px 1fr;
+        padding: 72px 64px 64px 80px;
+        gap: 40px;
+        align-items: center;
+      }
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+      .mark {
+        width: 72px;
+        height: 72px;
+      }
+      h1 {
+        font-size: 58px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .tag {
+        font-size: 18px;
+        color: var(--muted);
+        line-height: 1.45;
+        max-width: 420px;
+      }
+      .sub {
+        font-size: 14px;
+        color: #b9a27a;
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .pill {
+        border: 1px solid #3a342b;
+        color: #d8c7a4;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        letter-spacing: 0.01em;
+      }
+      .window {
+        height: 680px;
+        background: var(--pane);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .titlebar {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .dots {
+        display: flex;
+        gap: 6px;
+        margin-right: 8px;
+      }
+      .dots i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: block;
+      }
+      .dots i:nth-child(1) {
+        background: #ff5f57;
+      }
+      .dots i:nth-child(2) {
+        background: #febc2e;
+      }
+      .dots i:nth-child(3) {
+        background: #28c840;
+      }
+      .cols {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 168px 1fr 220px;
+        min-height: 0;
+      }
+      .rail,
+      .chat,
+      .panel {
+        padding: 16px 14px;
+        min-height: 0;
+      }
+      .rail,
+      .panel {
+        background: #0e0d0b;
+      }
+      .chat {
+        border-left: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+      }
+      .label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .member {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+      .member.active {
+        background: #1b1914;
+      }
+      .ava {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #3a2e18;
+        color: var(--gold);
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .bubble {
+        align-self: flex-end;
+        background: #2a2418;
+        color: #f3ead8;
+        border-radius: 12px 12px 4px 12px;
+        padding: 10px 12px;
+        font-size: 13px;
+        max-width: 86%;
+        margin-bottom: 12px;
+      }
+      .reply {
+        background: #161513;
+        border: 1px solid var(--line);
+        border-radius: 12px 12px 12px 4px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.55;
+        color: #d8d4cc;
+        max-width: 92%;
+      }
+      .reply ol {
+        padding-left: 18px;
+        margin-top: 6px;
+      }
+      .composer {
+        margin-top: auto;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: #6f6a63;
+        font-size: 13px;
+      }
+      .item {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        font-size: 13px;
+        color: #d0ccc4;
+        margin-bottom: 10px;
+      }
+      .box {
+        width: 13px;
+        height: 13px;
+        border: 1px solid #6a5a38;
+        border-radius: 3px;
+        margin-top: 2px;
+        flex: none;
+      }
+      .box.on {
+        background: var(--gold);
+        border-color: var(--gold);
+      }
+      .chart {
+        margin-top: 22px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      svg.spark {
+        display: block;
+        width: 100%;
+        height: 54px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <section class="brand">
+        <svg class="mark" viewBox="0 0 1024 1024" aria-hidden="true">
+          <circle cx="512" cy="512" r="338" fill="#5c4018" />
+          <circle cx="512" cy="512" r="318" fill="#d4a054" />
+          <circle cx="512" cy="512" r="292" fill="none" stroke="#f3e6d0" stroke-width="10" opacity="0.55" />
+          <path
+            d="M512 236 C430 236 392 318 392 368 C392 412 430 448 476 456 L476 668 C430 678 404 716 404 756 C404 808 448 848 512 848 C576 848 620 808 620 756 C620 716 594 678 548 668 L548 456 C594 448 632 412 632 368 C632 318 594 236 512 236 Z M512 292 C548 292 576 328 576 366 C576 398 552 422 512 422 C472 422 448 398 448 366 C448 328 476 292 512 292 Z M512 724 C542 724 564 740 564 758 C564 778 542 796 512 796 C482 796 460 778 460 758 C460 740 482 724 512 724 Z"
+            fill="#f3e6d0"
+          />
+        </svg>
+        <h1>OPC-Fellows</h1>
+        <p class="tag">Local-first workbench for a one-person company.</p>
+        <p class="sub">SoloKit · bitou.tech</p>
+        <div class="pills">
+          <span class="pill">Electron</span>
+          <span class="pill">Cordis</span>
+          <span class="pill">DeepSeek Harness</span>
+          <span class="pill">MIT</span>
+        </div>
+      </section>
+      <section class="window" aria-label="OPC-Fellows workbench">
+        <div class="titlebar">
+          <span class="dots"><i></i><i></i><i></i></span>
+          OPC-Fellows
+        </div>
+        <div class="cols">
+          <aside class="rail">
+            <div class="label">Members</div>
+            <div class="member active"><span class="ava">H</span>Host</div>
+            <div class="member"><span class="ava">N</span>Notes</div>
+            <div class="member"><span class="ava">M</span>Monitor</div>
+            <div class="member"><span class="ava">@</span>Mail</div>
+            <div class="member"><span class="ava">$</span>Payments</div>
+          </aside>
+          <main class="chat">
+            <div class="label">Session</div>
+            <div class="bubble">Draft a service contract outline.</div>
+            <div class="reply">
+              Contract outline
+              <ol>
+                <li>Scope and deliverables</li>
+                <li>Timeline</li>
+                <li>Fees</li>
+                <li>Confidentiality</li>
+              </ol>
+            </div>
+            <div class="composer">Ask the member on duty…</div>
+          </main>
+          <aside class="panel">
+            <div class="label">Today</div>
+            <div class="item"><span class="box on"></span>Contract outline</div>
+            <div class="item"><span class="box on"></span>Client notes</div>
+            <div class="item"><span class="box"></span>First draft</div>
+            <div class="item"><span class="box"></span>Ledger check</div>
+            <div class="chart">
+              Focus · 2.4h
+              <svg class="spark" viewBox="0 0 200 54">
+                <polyline
+                  fill="none"
+                  stroke="#e8bc6c"
+                  stroke-width="2"
+                  points="0,40 30,36 60,38 90,24 120,28 150,16 200,12"
+                />
+              </svg>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

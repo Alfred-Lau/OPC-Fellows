@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-PRODUCT="${PRODUCT_NAME:-OPC Agent Team - Solokit}"
+PRODUCT="${PRODUCT_NAME:-OPC-Fellows}"
 VERSION="$(node -p "require('./package.json').version")"
 APP="dist/mac-arm64/${PRODUCT}.app"
 ZIP="dist/${PRODUCT}-${VERSION}-mac-arm64.zip"

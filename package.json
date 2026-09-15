@@ -4,8 +4,8 @@
   "private": true,
   "author": "bitou.tech",
   "license": "MIT",
-  "productName": "OPC Agent Team - Solokit",
-  "description": "OPC Agent Team — local-first workbench for a one-person company. 一人公司的本地优先工作台。",
+  "productName": "OPC-Fellows",
+  "description": "OPC-Fellows — local-first workbench for a one-person company. 一人公司的本地优先工作台。",
   "homepage": "https://github.com/Alfred-Lau/opc-agent-team-opensource#readme",
   "repository": {
     "type": "git",

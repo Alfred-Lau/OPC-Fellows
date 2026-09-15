@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { Service, type Context } from '@deepseek-ai/cordis'
 import { updateTodo } from '../../../main/todo-store'
+import { PRODUCT_UA } from '../../../shared/brand'
 import { parseOpcToolCall, formatOpcToolsPrompt, TOOL_ROUND_LIMIT } from '../../shared/opc-tools'
 import {
   applyWorkspacePatch,
@@ -262,7 +263,7 @@ async function fetchUrlText(raw: string): Promise<string> {
     method: 'GET',
     redirect: 'follow',
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    headers: { 'User-Agent': 'OPC-Agent-Team/0.6 (read-only fetch)' },
+    headers: { 'User-Agent': `${PRODUCT_UA} (read-only fetch)` },
   })
   const contentType = response.headers.get('content-type') ?? ''
   const body = await response.text()

@@ -1,4 +1,4 @@
-# OPC Agent Team - Solokit 模块化架构 — 功能拆解与系统设计
+# OPC-Fellows 模块化架构 — 功能拆解与系统设计
 
 > 目标：把现在「功能硬编码往上挂」的工作台，改造成**内核 + 可插拔模块**的架构。
 > 每个模块都能独立 enable / disable，用户在设置里按自己的工作情况配置；
@@ -125,7 +125,7 @@ dsh 的核心不是"一个 Agent CLI"，而是它下面那套 **"Everything is a
 
 ## 4. 模块契约（Module Contract）
 
-一个 OPC Agent Team - Solokit 模块 = **一个 Cordis 插件 + 一份 manifest**，可选带一个渲染侧入口。
+一个 OPC-Fellows 模块 = **一个 Cordis 插件 + 一份 manifest**，可选带一个渲染侧入口。
 
 ### 4.1 Manifest
 
@@ -516,7 +516,7 @@ capability 采取白名单枚举而非自由字符串：
 
 ### 9.6 与 dsh 生态的关系
 
-- 模块 manifest 与 dsh 的 `dsh` 字段并存不冲突：一个包可以**同时**是 OPC Agent Team - Solokit 模块和 dsh bundle（`ownworkbuddy` 字段给工作台，`dsh.bundle` 给 Agent 运行时）。
+- 模块 manifest 与 dsh 的 `dsh` 字段并存不冲突：一个包可以**同时**是 OPC-Fellows 模块和 dsh bundle（`ownworkbuddy` 字段给工作台，`dsh.bundle` 给 Agent 运行时）。
 - 第三方示例：`dsh plugin --profile opc add ./examples/hello-module`。已有 `ctx.tools` 的内置职业有 `packages/occupation-*` 标记 bundle（Panel 仍在 `src/modules`）。`workbench.yml` 继续管桌面 Panel 启停；dsh 层栈的权威文件是 `$DSH_HOME/profiles/opc/cordis.patch.yml`（工作台停用会回写 `disabled: true`）。内核服务顺序见 `src/kernel/cordis.patch.yml`。
 - `dsh plugin --profile web add` 仍是官方 web 面自己的插件槽，不要和工作台模块混装。
 

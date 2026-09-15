@@ -1,5 +1,5 @@
 # 界面叫成员，代码和点位仍叫 Agent
 
-用户语言里花名册叫成员，属于这一家 OPC；项目是把成员拉进去做事。对外点位是 OPC Agent Team - Solokit。代码里的 Agent / AgentRecord 不改名，避免和存储、IPC 一次性对砍。
+用户语言里花名册叫成员，属于这一家 OPC；项目是把成员拉进去做事。对外点位是 OPC-Fellows。代码里的 Agent / AgentRecord 不改名，避免和存储、IPC 一次性对砍。
 
 不把 Team 做成可列表的实体。一家 OPC 只有一队人，再开一层团队会和项目抢「编制」这个位置。

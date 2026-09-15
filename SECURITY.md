@@ -6,7 +6,7 @@
 
 ### 信任边界
 
-OPC Agent Team 是本地优先桌面工作台。
+OPC-Fellows 是本地优先桌面工作台。
 
 - 业务数据只写本机 `userData`，不经过本项目自己的服务器。
 - 模型密钥、邮箱专用密码、Creem key 走 Electron `safeStorage` 或环境变量，**仓库里不得出现真值**。
@@ -37,7 +37,7 @@ OPC Agent Team 是本地优先桌面工作台。
 
 ### Trust boundary
 
-OPC Agent Team is a local-first desktop workbench.
+OPC-Fellows is a local-first desktop workbench.
 
 - Business data stays in on-device `userData`. There is no first-party backend for it.
 - Model keys, mailbox app passwords, and Creem keys go through Electron `safeStorage` or environment variables. **Real values must never land in the repo.**

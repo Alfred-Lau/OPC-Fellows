@@ -3,7 +3,7 @@ import { hostname } from 'node:os'
 import { extname, join } from 'node:path'
 import { app, dialog, nativeImage } from 'electron'
 import { Service, type Context } from '@deepseek-ai/cordis'
-import { LEGACY_USER_DATA_NAME, PRODUCT_NAME } from '../../../shared/brand'
+import { LEGACY_PRODUCT_NAMES, LEGACY_USER_DATA_NAME, PRODUCT_NAME } from '../../../shared/brand'
 import {
   defaultProfile,
   normalizeProfile,
@@ -105,6 +105,7 @@ export class ProfileService extends Service {
     }
     const roots = profileLegacyRoots(app.getPath('appData'), app.getPath('userData'), [
       LEGACY_USER_DATA_NAME,
+      ...LEGACY_PRODUCT_NAMES,
       PRODUCT_NAME,
     ])
     for (const root of roots) {

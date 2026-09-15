@@ -1,5 +1,5 @@
 appId: tech.bitou.ownworkbuddy
-productName: OPC Agent Team - Solokit
+productName: OPC-Fellows
 directories:
   output: dist
   buildResources: build
@@ -34,8 +34,8 @@ mac:
   gatekeeperAssess: false
   category: public.app-category.developer-tools
   extendInfo:
-    NSUserNotificationsUsageDescription: OPC Agent Team - Solokit 会在你设定的时间发送待办桌面通知。
-    NSAppleEventsUsageDescription: OPC Agent Team - Solokit 会在你允许后读取本机「邮件」收件箱，只整理、不代发。
+    NSUserNotificationsUsageDescription: OPC-Fellows 会在你设定的时间发送待办桌面通知。
+    NSAppleEventsUsageDescription: OPC-Fellows 会在你允许后读取本机「邮件」收件箱，只整理、不代发。
   target:
     - dmg
     - zip

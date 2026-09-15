@@ -2,7 +2,7 @@
 # 从内向外签 Electron .app。每个 codesign 调用带重试，避开 Apple 时间戳服务抖动。
 set -euo pipefail
 
-APP="${1:-dist/mac-arm64/OPC Agent Team - Solokit.app}"
+APP="${1:-dist/mac-arm64/OPC-Fellows.app}"
 if [[ -z "${CODESIGN_IDENTITY:-}" ]]; then
   echo "请设置 CODESIGN_IDENTITY，例如 Developer ID Application: Your Name (TEAMID)" >&2
   exit 1

@@ -1,4 +1,4 @@
-# OwnWorkBuddy 国际化改造方案
+# OPC-Fellows 国际化改造方案
 
 状态：待评审。本轮只定方案，不改代码。
 默认语言：`zh-CN`（现有文案即源语言）。第一批目标语言：`en`。
@@ -263,7 +263,7 @@ groupKey: 'occupation.group.project'
 | 工作情况 | Catalog | workspace settings |
 | 自媒体运营达人 | Creator hire | fourth content job |
 
-品牌名不译：OwnWorkBuddy、SoloKit、bitou.tech、DeepSeek、Creem、Vercel、微信、小红书、抖音、视频号。
+品牌名不译：OPC-Fellows、SoloKit、bitou.tech、DeepSeek、Creem、Vercel、微信、小红书、抖音、视频号。
 
 ---
 

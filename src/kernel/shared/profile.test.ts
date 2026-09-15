@@ -36,8 +36,9 @@ test('当前档案是空的才认领旧目录里的称呼和头像', () => {
 
 test('旧 userData 目录不含当前目录自己', () => {
   const appData = '/Users/me/Library/Application Support'
-  const current = join(appData, 'OPC Agent Team - Solokit')
-  assert.deepEqual(profileLegacyRoots(appData, current, ['ownworkbuddy', 'OPC Agent Team - Solokit']), [
-    join(appData, 'ownworkbuddy'),
-  ])
+  const current = join(appData, 'OPC-Fellows')
+  assert.deepEqual(
+    profileLegacyRoots(appData, current, ['ownworkbuddy', 'OPC Agent Team - Solokit', 'OPC-Fellows']),
+    [join(appData, 'ownworkbuddy'), join(appData, 'OPC Agent Team - Solokit')],
+  )
 })

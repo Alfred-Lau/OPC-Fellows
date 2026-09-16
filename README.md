@@ -275,4 +275,4 @@ UI copy is still hardcoded Chinese. The i18n plan is [docs/i18n-plan.md](docs/i1
 
 [MIT License](LICENSE). Runtime depends on [Cordis](https://github.com/cordiverse/cordis) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Cover and badges follow the usual desktop-workbench look on [dsh-plugin](https://github.com/topics/dsh-plugin).
 
-Author: [bitou.tech](https://pen.bitou.tech/).
+Website: [OPC-Fellows](https://opc-fellows.solokit.run/)

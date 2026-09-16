@@ -23,6 +23,7 @@
 
 <p align="center">
   <a href="#why">Why</a> ·
+  <a href="#download">Download</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#write-a-module">Write a module</a> ·
   <a href="#built-in-occupations">Built-in occupations</a> ·
@@ -77,6 +78,35 @@ docs/                architecture and ADRs
 
 Credentials travel as env vars or on-device `safeStorage`. The repo has no hardcoded keys. Legacy `~/.dsh` is still readable; new keys should be entered in Settings. After launch the product catalog, social signature, and WeChat author are empty until you fill them in. See [`examples/catalog.example.json`](examples/catalog.example.json).
 
+## Download
+
+A local-first desktop workbench: data stays on your own machine. Latest build: [v0.7.3](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.7.3).
+
+| Platform | Availability |
+| --- | --- |
+| macOS (Apple Silicon) | ✅ Available |
+| Windows | ❌ Not available yet |
+| Linux | ❌ Not available yet |
+
+Direct downloads:
+
+- [OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.dmg) — disk image; drag the app into Applications.
+- [OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.zip) — zip archive; unzip and run.
+
+**First open: you must allow the app.** The current build is not Apple-signed or notarized — the certificate pipeline is not wired up yet. That is not a broken installer. After you put the app in Applications, run:
+
+```sh
+xattr -cr "/Applications/OPC Agent Team - Solokit.app"
+```
+
+Then right-click the app → Open.
+
+The on-screen name is still **OPC Agent Team - Solokit**. Renaming it would migrate the data directory, so that waits for a later release.
+
+[`latest-mac.yml`](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/latest-mac.yml) is the update manifest for a future auto-update source.
+
+To run from source, see [Quick start](#quick-start) below.
+
 ## Quick start
 
 Needs Node.js `^22.19.0` or `>=24.0.0`, and pnpm 10+. Electron 42+ no longer downloads its binary in its own `postinstall`; this repo uses `postinstall: install-electron`, so the first `pnpm install` takes a while.
@@ -98,7 +128,7 @@ pnpm dsh                         # local DeepSeek Harness CLI
 
 Copy [`.env.example`](.env.example) if you prefer a dotenv file. Never commit a real `.env`.
 
-Package with `pnpm pack` (dir), `pnpm dist`, or the signed macOS installer `pnpm dist:mac`.
+Package locally with `pnpm pack` (dir), `pnpm dist`, or `pnpm dist:mac` to produce a macOS installer. The current CI / release pipeline has **not** wired up Apple signing and notarization, so published release artifacts need the Gatekeeper workaround above.
 
 ## Write a module
 

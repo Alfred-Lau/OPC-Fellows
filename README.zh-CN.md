@@ -23,6 +23,7 @@
 
 <p align="center">
   <a href="#定位">定位</a> ·
+  <a href="#下载安装">下载安装</a> ·
   <a href="#快速开始">快速开始</a> ·
   <a href="#写一个模块">写一个模块</a> ·
   <a href="#内置模块参考实现">内置模块</a> ·
@@ -80,6 +81,35 @@ docs/                架构与 ADR
 
 凭据只走环境变量或本机 `safeStorage`（设置 → 模型），仓库里没有硬编码 key。仍可读 `~/.dsh` 遗留配置，但新填写请走设置页。启动后产品目录、社媒签名、公众号作者都是空的，要自己在「工作情况」和各模块设置里填。示例目录见 [`examples/catalog.example.json`](examples/catalog.example.json)。
 
+## 下载安装
+
+本地优先的桌面工作台：数据留在你自己的机器上。最新版见 [v0.7.3 Release](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.7.3)。
+
+| 平台 | 可用性 |
+| --- | --- |
+| macOS（Apple Silicon） | ✅ 可用 |
+| Windows | ❌ 暂无 |
+| Linux | ❌ 暂无 |
+
+直链：
+
+- [OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.dmg) — 磁盘映像，拖进「应用程序」。
+- [OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.zip) — 压缩包，解压即用。
+
+**首次打开必须放行。** 当前构建未做 Apple 签名与公证——证书流程还没接上，不是安装包坏了。装进「应用程序」后先执行：
+
+```sh
+xattr -cr "/Applications/OPC Agent Team - Solokit.app"
+```
+
+然后右键 → 打开。
+
+应用当前显示名仍是 **OPC Agent Team - Solokit**。改名会迁移数据目录，留到后续版本。
+
+[`latest-mac.yml`](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/latest-mac.yml) 是更新清单，供日后接自动更新源。
+
+想跑源码，见下面的[快速开始](#快速开始)。
+
 ## 快速开始
 
 需要 Node.js `^22.19.0` 或 `>=24.0.0`，pnpm 10+。Electron 42+ 不再在自身 `postinstall` 里拉二进制，本仓库用 `postinstall: install-electron` 在依赖装完后下载，所以第一次 `pnpm install` 会多等一会儿。
@@ -99,7 +129,7 @@ pnpm test                        # 内核与 shared 单测
 pnpm dsh                         # 本机 DeepSeek Harness CLI
 ```
 
-打包：`pnpm pack`（目录）、`pnpm dist`，或 macOS 签名安装包 `pnpm dist:mac`。
+打包：`pnpm pack`（目录）、`pnpm dist`，或 `pnpm dist:mac` 可产出 macOS 安装包。当前 CI / 发布流程尚未接入签名与公证，因此 Release 里的产物需要按上面的方式手动放行。
 
 ## 写一个模块
 

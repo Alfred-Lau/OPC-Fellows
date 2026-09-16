@@ -733,7 +733,7 @@ input: { index: 'src/renderer/index.html', pet: 'src/renderer/pet.html' }
 
 直接收益：换一批产品、加一个监控站点，都不用改代码重新打包。
 
-### 15.1 开源快照
+### 15.1 公开仓库约定
 
 - 没有任何硬编码的 API key / token。凭据走「设置 → 模型」的 `safeStorage`、环境变量，或 `~/.dsh` 遗留配置。
 - 打包签名身份不进仓库：`electron-builder.yml` 不写姓名 / Team ID；`scripts/sign-mac.sh` 要求 `CODESIGN_IDENTITY`；公证脚本帮助文本用 `<TEAM_ID>`。

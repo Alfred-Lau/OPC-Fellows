@@ -29,12 +29,12 @@
   <a href="#架构">架构</a> ·
   <a href="#生态">生态</a> ·
   <a href="#贡献">贡献</a> ·
-  <a href="#开源计划">开源计划</a>
+  <a href="#开源与治理">开源与治理</a>
 </p>
 
 A local-first Electron workbench for a one-person company: a small kernel (shell, todos, module contract) plus occupation plugins. Built on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-> 本仓库是正在使用的完整产品。开源将**另起仓库只带主干**；这份 README 按主干来写，个人站点清单、签名、选品栈不再当作产品本身。
+> 产品目录、社媒签名、作者名等业务数据由用户在「工作情况」和模块设置里填写，仓库默认值为空。
 
 ## 定位
 
@@ -220,18 +220,16 @@ pnpm dsh plugin --profile opc add ./packages/occupation-micro
 
 完整列表：[github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
-作者日常用这张工作台跑 [SoloKit](https://www.solokit.run/) 产品线（Studio / PromptMan / SaaS Cost 等）和 [榆关](https://pen.bitou.tech/) 工具墙。那是一份配置，不是主干。
+## 开源与治理
 
-## 开源计划
+本仓库即公开主干：[Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)。仓库首页默认展示 [英文 README](README.md)。
 
-公开主干在 [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)，只有 `main`，不带旧分支和签名历史。仓库首页默认展示 [英文 README](README.md)。
-
-1. 主干：`src/kernel`、模块 SDK、示例模块与治理文件；个人目录默认值不进仓库。
+1. 内核、模块 SDK、示例模块与治理文件随仓库提供；真实目录默认值不进仓库。
 2. [MIT License](LICENSE)，对齐 Cordis / dsh。
-3. 贡献见 [CONTRIBUTING.md](CONTRIBUTING.md) / [CONTRIBUTING.en.md](CONTRIBUTING.en.md)，安全见 [SECURITY.md](SECURITY.md)。UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。
-4. 打包签名身份走环境变量，不进开源快照；不要上传已签名的 `.app` / `.dmg`。
+3. 贡献见 [CONTRIBUTING.md](CONTRIBUTING.md) / [CONTRIBUTING.en.md](CONTRIBUTING.en.md)，安全见 [SECURITY.md](SECURITY.md)。界面国际化方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。
+4. 打包签名身份走环境变量；不要上传已签名的 `.app` / `.dmg`。
 
-欢迎对**主干契约**提 PR：内核服务、模块 manifest、capability、示例模块、文档。不要把个人站点、签名或密钥默认值加进 `src/shared`。
+欢迎对**主干契约**提 PR：内核服务、模块 manifest、capability、示例模块、文档。不要把真实站点、签名或密钥默认值加进 `src/shared`。
 
 ## 贡献
 

@@ -50,7 +50,7 @@ function agent(overrides: Partial<AgentRecord> = {}): AgentRecord {
 function project(overrides: Partial<ThreadRecord> = {}): ThreadRecord {
   return {
     id: 'thread:user:poem',
-    title: '古诗图文素材',
+    title: '示例项目',
     kind: 'user',
     agentIds: ['micro', 'social-ammo'],
     workspaceAgentId: 'micro',
@@ -81,7 +81,7 @@ test('没选项目时标题是发起新项目，不预勾身份', () => {
   assert.equal(page.brief, '')
   assert.deepEqual(
     page.projects.map((item) => item.title),
-    ['古诗图文素材'],
+    ['示例项目'],
   )
 })
 
@@ -95,8 +95,8 @@ test('选了已有项目时标题点名，并带上参与者和主 Agent', () =>
     hostName: 'opc.local',
     projectId: 'thread:user:poem',
   })
-  assert.equal(page.headline, '在「古诗图文素材」里继续？')
-  assert.equal(page.triggerLabel, '古诗图文素材')
+  assert.equal(page.headline, '在「示例项目」里继续？')
+  assert.equal(page.triggerLabel, '示例项目')
   assert.equal(page.isNew, false)
   assert.equal(page.showComposer, true)
   assert.equal(page.emptyHint, '')
@@ -252,7 +252,7 @@ test('点选成员：未选则加入，已选非主则改主，主再点则移�
 })
 
 test('弹窗建项目：要标题和成员，简述可空，标题取用户写的而不是第一句聊天', () => {
-  assert.equal(normalizeProjectTitle('  \n古诗图文素材\n第二行'), '古诗图文素材')
+  assert.equal(normalizeProjectTitle('  \n示例项目\n第二行'), '示例项目')
   assert.equal(normalizeProjectTitle(''), '')
   assert.equal(normalizeProjectTitle('x'.repeat(PROJECT_TITLE_MAX + 4)).length, PROJECT_TITLE_MAX)
   assert.equal(normalizeProjectDescription('  把目录收齐  '), '把目录收齐')
@@ -264,7 +264,7 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
     assert.equal(untitled.error, '先给项目起个标题')
   }
 
-  const empty = planProjectCreate({ title: '古诗图文素材', agentIds: [], clock })
+  const empty = planProjectCreate({ title: '示例项目', agentIds: [], clock })
   assert.equal(empty.ok, true)
   if (empty.ok) {
     assert.deepEqual(empty.thread.agentIds, [HOST_AGENT_ID])
@@ -272,22 +272,22 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
   }
 
   const created = planProjectCreate({
-    title: '古诗图文素材',
+    title: '示例项目',
     description: '把目录和封面图一次收齐',
     agentIds: ['rumi', 'mina'],
     workspaceAgentId: 'mina',
-    folderPath: '/tmp/申城',
+    folderPath: '/tmp/demo-project',
     clock,
   })
   assert.equal(created.ok, true)
   if (created.ok) {
     assert.equal(created.thread.id, 'thread:user:2026-09-10T12:00:00.000Z')
     assert.equal(created.thread.kind, 'user')
-    assert.equal(created.thread.title, '古诗图文素材')
+    assert.equal(created.thread.title, '示例项目')
     assert.equal(created.thread.description, '把目录和封面图一次收齐')
     assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'rumi', 'mina'])
     assert.equal(created.thread.workspaceAgentId, 'mina')
-    assert.equal(created.thread.folderPath, '/tmp/申城')
+    assert.equal(created.thread.folderPath, '/tmp/demo-project')
   }
 
   const bare = planProjectCreate({ title: '周报', agentIds: ['rumi'], clock })

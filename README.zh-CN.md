@@ -250,7 +250,7 @@ pnpm dsh plugin --profile opc add ./packages/occupation-micro
 
 完整列表：[github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
-作者日常用这张工作台跑 [SoloKit](https://www.solokit.run/) 产品线（Studio / PromptMan / SaaS Cost 等）和 [榆关](https://pen.bitou.tech/) 工具墙。那是一份配置，不是主干。
+作者日常用这张工作台跑 [SoloKit](https://www.solokit.run/) 产品线（Studio / PromptMan / SaaS Cost / [CutWeave](https://github.com/Alfred-Lau/cutweave) 等）和 [榆关](https://pen.bitou.tech/) 工具墙。那是一份配置，不是主干。
 
 ## 开源计划
 

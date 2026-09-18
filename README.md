@@ -245,7 +245,7 @@ The module contract follows DeepSeek Harness community conventions. For discover
 
 Full list: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
-The author runs this workbench against the [SoloKit](https://www.solokit.run/) line (Studio / PromptMan / SaaS Cost and the rest) and the [榆关](https://pen.bitou.tech/) tool wall. That is a configuration, not the trunk.
+The author runs this workbench against the [SoloKit](https://www.solokit.run/) line (Studio / PromptMan / SaaS Cost / [CutWeave](https://github.com/Alfred-Lau/cutweave) and the rest) and the [榆关](https://pen.bitou.tech/) tool wall. That is a configuration, not the trunk.
 
 ## Contributing
 

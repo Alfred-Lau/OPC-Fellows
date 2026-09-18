@@ -529,8 +529,8 @@ test('空白对话历史转成 LLM turns；随手记记下，Harness 不再当�
   assert.match(agentSystemPrompt(rumi), new RegExp(PRODUCT_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
   assert.doesNotMatch(agentSystemPrompt(rumi), /台伴/)
   assert.match(agentSystemPrompt(rumi), new RegExp(DEEPSEEK_MODEL_LABEL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
-  assert.match(agentSystemPrompt(rumi, [], { cwd: '/tmp/申城' }), /\/tmp\/申城/)
-  assert.match(agentSystemPrompt(rumi, [], { cwd: '/tmp/申城' }), /dsh-fs/)
+  assert.match(agentSystemPrompt(rumi, [], { cwd: '/tmp/demo-project' }), /\/tmp\/demo-project/)
+  assert.match(agentSystemPrompt(rumi, [], { cwd: '/tmp/demo-project' }), /dsh-fs/)
   assert.match(
     agentSystemPrompt(notes, [
       {

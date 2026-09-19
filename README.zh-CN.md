@@ -33,7 +33,9 @@
   <a href="#开源计划">开源计划</a>
 </p>
 
-A local-first Electron workbench for a one-person company: a small kernel (shell, todos, module contract) plus occupation plugins. Built on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
+**一个人开公司，就一张工作台。** 销售、内容、研究、发票、代码全落在你一个人身上 —— 与其订一整套各攥着你一块业务数据的 SaaS，不如用这张本地优先的桌面工作台：每种职业是一个可以直接对话的**成员**。
+
+业务数据在应用自己的 `userData` 里，模型密钥经 `safeStorage` 进系统钥匙串，**你的使用数据不会回传给我们**：没有账号、不上传、无遥测。基于 Electron + [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 构建；新能力以模块挂上，可启停，也可自己写。
 
 > 本仓库是正在使用的完整产品。开源将**另起仓库只带主干**；这份 README 按主干来写，个人站点清单、签名、选品栈不再当作产品本身。
 

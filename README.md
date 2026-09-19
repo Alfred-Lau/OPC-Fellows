@@ -32,7 +32,9 @@
   <a href="#contributing">Contributing</a>
 </p>
 
-A local-first Electron workbench for a one-person company. Built on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
+**One app for the whole company, because the whole company is you.** Sales, content, research, invoices and code all land on one person — so instead of subscribing to a stack of SaaS tools that each hold a slice of your business, OPC-Fellows gives you one local-first desktop workbench where every occupation is a **member** you actually talk to.
+
+Your business data stays in the app's own `userData`, model keys go to the OS keychain through `safeStorage`, and **nothing about your usage is sent back to us** — no account, no upload, no telemetry. Built with Electron on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness); new capabilities arrive as modules you can enable, disable, or write yourself.
 
 > This tree is the full daily-driver product. The public snapshot keeps the **kernel and contracts**. Personal site catalogs, signing identities, and sourcing stacks stay out of default code.
 

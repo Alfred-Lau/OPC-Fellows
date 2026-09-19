@@ -1,5 +1,0 @@
-# Electron 主进程仍走 src/modules/monitor.ts（项目监控 Panel + monitor_refresh）。
-# dsh --profile opc 只挂这个空入口，避免在 Agent 树上碰 Electron。
-- insert:
-    - id: opc-monitor
-      name: ownworkbuddy-occupation-monitor

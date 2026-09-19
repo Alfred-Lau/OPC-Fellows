@@ -1,5 +1,0 @@
-# Electron 主进程仍走 src/modules/micro.ts（选品 Panel + micro_scan）。
-# dsh --profile opc 只挂这个空入口，避免在 Agent 树上碰 Electron。
-- insert:
-    - id: opc-micro
-      name: ownworkbuddy-occupation-micro

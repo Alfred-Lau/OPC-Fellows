@@ -1,5 +1,0 @@
-# Electron 主进程仍走 src/modules/notes.ts（随手记 Panel）。
-# dsh --profile opc 挂 notes_add（落盘走 note-file.js，不碰 Electron）。
-- insert:
-    - id: opc-notes
-      name: ownworkbuddy-occupation-notes

@@ -34,7 +34,7 @@
 
 A local-first Electron workbench for a one-person company. Built on [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-> This tree is the full daily-driver product. The public snapshot keeps the **kernel and contracts**. Personal site catalogs, signing identities, and sourcing stacks stay out of default code.
+> Product catalogs, social signatures, and author names are filled in by the user under Work situation and module settings. Repository defaults stay empty.
 
 ## Why
 
@@ -60,7 +60,7 @@ H1–H8 already send the center-pane chat through `dsh --profile opc`. Scratch n
 - **Capability allow-list**: a module may call only what its manifest declares; dangerous ones confirm at install
 - **Contracts match dsh**: `apply(ctx)`, custom package.json fields, layered capabilities — easy to port from the Harness ecosystem
 
-## What the trunk keeps
+## What this repository includes
 
 ```
 src/kernel/          trunk: boot, IPC bridge, storage, todos, nav, module registry, members
@@ -245,13 +245,11 @@ The module contract follows DeepSeek Harness community conventions. For discover
 
 Full list: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
-The author runs this workbench against the [SoloKit](https://www.solokit.run/) line (Studio / PromptMan / SaaS Cost / [CutWeave](https://github.com/Alfred-Lau/cutweave) and the rest) and the [榆关](https://pen.bitou.tech/) tool wall. That is a configuration, not the trunk.
-
 ## Contributing
 
-The public trunk is [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows): `main` only, no leftover agent branches or signing history. Chinese docs: [README.zh-CN.md](README.zh-CN.md).
+This repository is the public trunk: [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows). Chinese docs: [README.zh-CN.md](README.zh-CN.md).
 
-PRs against the **trunk contract** are welcome: kernel services, module manifests, capabilities, sample modules, docs. Do not weld personal sites, signing identities, or secret defaults into `src/shared`.
+PRs against the **trunk contract** are welcome: kernel services, module manifests, capabilities, sample modules, docs. Do not add real site catalogs, signing identities, or secret defaults to `src/shared`.
 
 - [CONTRIBUTING.en.md](CONTRIBUTING.en.md) · [CONTRIBUTING.md](CONTRIBUTING.md) (中文)
 - [Code of Conduct](CODE_OF_CONDUCT.md)

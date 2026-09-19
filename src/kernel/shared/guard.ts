@@ -2,13 +2,13 @@
  * 第三方模块能碰到的内核服务。没在这里的属性原样放过（effect / on / emit 等）。
  * 在这里的服务必须有对应能力，否则代理直接拒绝。
  */
-export const PROTECTED_SERVICES = ['storage', 'todos', 'modules', 'repository'] as const
+export const PROTECTED_SERVICES = ['storage', 'moduleStore', 'todos', 'modules', 'repository'] as const
 
 const ALWAYS_ALLOWED = ['bridge', 'workbench', 'effect', 'fiber', 'on', 'emit', 'plugin', 'scope'] as const
 
-/** 能力 → 服务名。一条能力可能打开一个服务。 */
+/** 能力 → 服务名。manifest 的 storage 打开模块库，不开放 dsh 的 ctx.storage。 */
 export const CAPABILITY_GRANTS: Record<string, string> = {
-  storage: 'storage',
+  storage: 'moduleStore',
   'todos:read': 'todos',
   'todos:write': 'todos',
 }

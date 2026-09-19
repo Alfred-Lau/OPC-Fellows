@@ -34,7 +34,7 @@ export function defaultToolPacks(templateId: string, kind: string): ToolPackId[]
   switch (templateId) {
     case 'host':
     case 'engineer':
-      return ['kernel', 'workspace', 'mcp-github', 'mcp-browser']
+      return ['kernel', 'workspace', 'mcp-github']
     case 'blank':
       return ['kernel', 'workspace']
     default:

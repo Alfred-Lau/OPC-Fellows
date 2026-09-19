@@ -4,10 +4,15 @@
  */
 
 import type { ShortListing } from '../../shared/listing.ts'
-import type { ThreadPlan } from './plan-mode.ts'
+import type { ComposerMode, ThreadPlan } from './plan-mode.ts'
 import type { ToolPackId } from './tool-packs.ts'
 
 export type AgentKind = 'conversational' | 'dashboard' | 'window' | 'background'
+
+/** 对话和仪表成员才有身份目录；窗身份没有。 */
+export function hasIdentityDirectory(agent: { kind: AgentKind }): boolean {
+  return agent.kind === 'conversational' || agent.kind === 'dashboard'
+}
 
 export type AgentOrigin = 'builtin-default' | 'user' | 'cloned'
 
@@ -16,6 +21,9 @@ export type AgentStatus = 'ready' | 'needs-module' | 'window' | 'background'
 export type ThreadKind = 'inbox' | 'agent' | 'user'
 
 export type MessageRole = 'user' | 'agent' | 'system'
+
+/** session = 对白投影；seat = 没进模型日志的座位提示。 */
+export type DialogueSource = 'session' | 'seat'
 
 export interface AgentTemplate {
   id: string
@@ -119,6 +127,9 @@ export interface ThreadRecord {
   lastListing?: ShortListing
   /** 计划模式记下的步骤；approved 后才跑写工具。 */
   plan?: ThreadPlan
+  plans?: Partial<Record<string, ThreadPlan>>
+  composerMode?: ComposerMode
+  composerModes?: Partial<Record<string, ComposerMode>>
   /** 置顶时间。有值则进入左栏置顶列表，不进项目列表。 */
   pinnedAt?: string
   /** 左栏项目顺序，越小越靠上。置顶列表和项目列表各自排序。 */
@@ -144,6 +155,8 @@ export interface ThreadMessage {
   text: string
   /** 模型思考过程，气泡里默认收起。 */
   thinking?: string
+  source?: DialogueSource
+  sessionSeq?: number
   createdAt: string
 }
 

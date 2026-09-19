@@ -4,7 +4,7 @@
 
 欢迎改**主干契约**。不要把个人站点、签名或密钥默认值焊进代码。
 
-词表以 [CONTEXT.md](CONTEXT.md) 为准：界面写「成员」不写 Agent，写「项目」不写 Team / Workspace。模块化边界见 [docs/module-architecture-design.md](docs/module-architecture-design.md)。Agent 运行时进 dsh、Electron 只留薄壳，见 [docs/adr/0005-dsh-as-composition-host.md](docs/adr/0005-dsh-as-composition-host.md)。
+词表以 [CONTEXT.md](CONTEXT.md) 为准：界面写「成员」不写 Agent，写「项目」不写 Team / Workspace。模块化边界见 [docs/module-architecture-design.md](docs/module-architecture-design.md)。Agent 运行时进 dsh、Electron 只留薄壳，见 [docs/adr/0005-dsh-as-composition-host.md](docs/adr/0005-dsh-as-composition-host.md)。对齐参考实现时只复制机制，默认值与身份不可进主干，见 [docs/adr/0007-opensource-sanitization.md](docs/adr/0007-opensource-sanitization.md)。身份目录默认落在 `~/OPC-Fellows/agents/{标题}`。
 
 ## 贡献声明
 
@@ -58,6 +58,7 @@ pnpm test
 - 为了一个职业去改 preload 或内核导航白名单。模块自己注册 nav / IPC。
 - 在界面文案里把成员写成 Agent、把项目写成团队。
 - 把本机绝对路径、Apple Team ID、公证钥匙串 profile 写进仓库。
+- 把参考实现里的个人 catalog、上线目标、设计系统或非公开品牌路径焊进主干。机制可以对齐，内容必须重写。
 
 破坏 `ownworkbuddy` manifest 或 `Capability` 联合类型的改动，PR 里必须写清迁移方式。
 

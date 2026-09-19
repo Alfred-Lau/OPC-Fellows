@@ -59,8 +59,9 @@ export function dshSessionId(threadId: string, agentId: string): string {
 }
 
 /**
- * SDK `session/prompt` 只会 `agents.create`，不会 resume。
- * 同一条 OPC 会话在 dsh 重启后会撞上磁盘里的旧 session，所以每棵进程再加一段 runtime id。
+ * SDK `session/prompt` 在会话已存在时会报 already exists。
+ * 续聊应先 `session/resume`（没有则 `session/load`），不要每次换 runtime 后缀另开一份。
+ * 撞上无法 resume 的旧磁盘会话时，才给这条 OPC 会话加一段 uuid 后缀。
  */
 export function dshRuntimeSessionId(sessionId: string, runtimeId: string): string {
   const id = runtimeId.trim()
@@ -72,7 +73,7 @@ export function dshRuntimeSessionId(sessionId: string, runtimeId: string): strin
 
 export function isDshSessionExistsError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)
-  return /session ".*?" already exists/.test(message)
+  return /session ".*?" already exists|already (active|running|loaded)/i.test(message)
 }
 
 export function composeDshTurn(system: string, user: string): string {
@@ -375,6 +376,30 @@ export class DshTurnCollector {
     return this.result().text
   }
 
+  pushEvent(event: Record<string, unknown>): void {
+    if (this.finished) {
+      return
+    }
+    const payload = assistantPayload(event)
+    if (payload.thinking.trim()) {
+      this.thinking = payload.thinking
+    }
+    if (payload.text.trim()) {
+      this.assistant = payload.text
+    }
+    const toolText = toolResultPlainText(event)
+    if (toolText.trim()) {
+      this.tools = this.tools ? `${this.tools}\n${toolText}` : toolText
+    }
+    const failure = turnEndFailure(event)
+    if (failure) {
+      this.failure = failure
+    }
+    if (isTurnEndEvent(event)) {
+      this.finished = true
+    }
+  }
+
   push(frame: DshJsonRpcFrame): void {
     if (this.finished) {
       return
@@ -388,24 +413,7 @@ export class DshTurnCollector {
       if (!event) {
         return
       }
-      const payload = assistantPayload(event)
-      if (payload.thinking.trim()) {
-        this.thinking = payload.thinking
-      }
-      if (payload.text.trim()) {
-        this.assistant = payload.text
-      }
-      const toolText = toolResultPlainText(event)
-      if (toolText.trim()) {
-        this.tools = this.tools ? `${this.tools}\n${toolText}` : toolText
-      }
-      const failure = turnEndFailure(event)
-      if (failure) {
-        this.failure = failure
-      }
-      if (isTurnEndEvent(event)) {
-        this.finished = true
-      }
+      this.pushEvent(event)
       return
     }
     if (frame.method === 'session.status') {

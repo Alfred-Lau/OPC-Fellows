@@ -16,9 +16,3 @@ test('工具栏 CSS 不用 anywhere 把中文拆成单字', () => {
   }
 })
 
-test('成员工具栏目录在窄栏里横滑而不是折行', () => {
-  for (const name of occupationCssFiles()) {
-    const text = fs.readFileSync(path.join(cssDir, name), 'utf8')
-    assert.equal(/\.monitor-nav[^{]*\{[^}]*flex-wrap:\s*wrap;/.test(text), false, name)
-  }
-})

@@ -1,5 +1,4 @@
 import { Notification } from 'electron'
-import { alertPet } from './pet-window'
 import { PRODUCT_NAME } from '../shared/brand'
 import type { TodoItem } from '../shared/todo'
 import { listTodos, updateTodo } from './todo-store'
@@ -66,11 +65,6 @@ export function cancelTodoSchedule(id: string): void {
 }
 
 export function showTodoNotification(todo: TodoItem): void {
-  alertPet({
-    id: todo.id,
-    title: todo.title,
-    note: todo.note,
-  })
   if (Notification.isSupported()) {
     const notification = new Notification({
       title: `${PRODUCT_NAME} 待办提醒`,

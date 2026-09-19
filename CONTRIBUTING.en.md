@@ -4,7 +4,7 @@
 
 Please change the **trunk contract**. Do not weld personal sites, signing identities, or secret defaults into the code.
 
-Vocabulary follows [CONTEXT.md](CONTEXT.md): the UI says “member”, never Agent; it says “project”, never Team / Workspace. Modular boundaries: [docs/module-architecture-design.md](docs/module-architecture-design.md). The agent runtime lives in dsh; Electron stays a thin shell. See [ADR 0005](docs/adr/0005-dsh-as-composition-host.md).
+Vocabulary follows [CONTEXT.md](CONTEXT.md): the UI says “member”, never Agent; it says “project”, never Team / Workspace. Modular boundaries: [docs/module-architecture-design.md](docs/module-architecture-design.md). The agent runtime lives in dsh; Electron stays a thin shell. See [ADR 0005](docs/adr/0005-dsh-as-composition-host.md). When aligning a private reference tree, copy mechanisms only — defaults and identity stay out. See [ADR 0007](docs/adr/0007-opensource-sanitization.md). The default identity directory is `~/OPC-Fellows/agents/{title}`.
 
 ## Contributor statement
 
@@ -58,6 +58,7 @@ Third-party shape: [`examples/hello-module`](examples/hello-module) — `ownwork
 - Change preload or the kernel nav allow-list for one occupation. Modules register their own nav / IPC.
 - Call a member an Agent, or a project a team, in UI copy.
 - Commit machine-absolute paths, an Apple Team ID, or a notarization keychain profile.
+- Weld a personal catalog, deploy target, design system, or non-public brand path from a private reference tree into the trunk. Mechanisms may be aligned; content must be rewritten.
 
 A change that breaks the `ownworkbuddy` manifest or the `Capability` union must describe the migration in the PR.
 

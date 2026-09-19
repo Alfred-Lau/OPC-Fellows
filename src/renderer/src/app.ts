@@ -3,16 +3,7 @@ import './studio-theme.css'
 import './studio.css'
 import './todos.css'
 import './calendar.css'
-import './notes.css'
-import './monitor.css'
 import './social-ammo.css'
-import './micro-sourcing.css'
-import './growth.css'
-import './accounts.css'
-import './wx-draft.css'
-import './wechat-hub.css'
-import './mail.css'
-import './payments.css'
 import './settings.css'
 import './prefs.css'
 import './app.css'
@@ -20,16 +11,7 @@ import { isSameDay, isTomorrow, pad2 } from '../../shared/datetime'
 import type { WorkbenchView } from '../../shared/features'
 import type { NavEntry } from '../../kernel/shared/nav'
 import type { TodoItem } from '../../shared/todo'
-import { activateAccounts } from './accounts'
-import { activateWxDraft } from './wx-draft'
-import { activateMail } from './mail'
-import { activateWechatHub } from './wechat-hub'
-import { activateMonitor } from './monitor'
 import { activateSocial } from './social'
-import { activateMicroSourcing } from './micro-sourcing'
-import { activateGrowth } from './growth'
-import { activateNotes } from './notes'
-import { activatePayments } from './payments'
 import { activatePrefs, hydrateProfile, leavePrefs } from './prefs'
 import { activateSettings } from './settings'
 import { ALL_TAG, collectTags, renderTagFilter, tagChips } from './tags-ui'
@@ -63,16 +45,7 @@ import {
  */
 const VIEWS: Record<string, () => void> = {
   todos: activateTodos,
-  notes: activateNotes,
-  monitor: activateMonitor,
   'social-ammo': activateSocial,
-  micro: activateMicroSourcing,
-  growth: activateGrowth,
-  accounts: activateAccounts,
-  wxdraft: activateWxDraft,
-  wxhub: activateWechatHub,
-  mail: activateMail,
-  payments: activatePayments,
   extensions: activateSettings,
   prefs: activatePrefs,
 }

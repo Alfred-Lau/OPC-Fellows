@@ -15,23 +15,20 @@ test('列出的每个身份都有西游记卡通头像，不用角色名或 mark
   }
 })
 
-test('内置模板都有西游记人物画像，未知身份落到空白助手而不是首字', () => {
+test('内置模板都有西游记人物画像，未知身份落到主理人', () => {
   for (const template of BUILTIN_TEMPLATES) {
     const portrait = agentPortrait(template.id)
     assert.equal(portrait.id, template.id)
     assert.ok(JOURNEY_WEST_CAST[template.id], template.id)
   }
   const fallback = agentPortrait('unknown-agent')
-  assert.equal(fallback.id, 'blank')
-  assert.equal(fallback.file, 'avatars/blank.png')
+  assert.equal(fallback.id, 'host')
+  assert.equal(fallback.file, 'avatars/host.png')
 })
 
-test('一对一的内置模块都能落到自己的画像，而不是空白助手', () => {
-  const moduleIds = ['monitor', 'micro', 'growth', 'payments', 'wxdraft', 'wxhub', 'mail', 'social-ammo', 'accounts', 'notes', 'pet', 'harness', 'x-push']
-  for (const id of moduleIds) {
-    assert.ok(templateForModule(id), id)
-    assert.equal(agentPortrait(id).id, id)
-  }
+test('社媒弹药模块落到自己的画像', () => {
+  assert.ok(templateForModule('social-ammo'))
+  assert.equal(agentPortrait('social-ammo').id, 'social-ammo')
 })
 
 test('每个内置身份的画像文件都在仓库里', () => {

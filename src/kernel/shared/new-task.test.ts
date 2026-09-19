@@ -223,14 +223,14 @@ test('新任务列出可见身份，后台能力不进选择，停用的也不�
       agent(),
       agent({ id: 'harness', title: 'DeepSeek', kind: 'window', templateId: 'harness', moduleIds: ['harness'] }),
       agent({ id: 'pet', title: '台伴', kind: 'window', templateId: 'pet', moduleIds: ['pet'] }),
-      agent({ id: 'pay', title: '收款', kind: 'dashboard', moduleIds: ['payments'], status: 'needs-module' }),
-      agent({ id: 'monitor', title: '项目监控官', kind: 'dashboard', moduleIds: ['monitor'], mark: '监' }),
+      agent({ id: 'ammo', title: '弹药手', kind: 'dashboard', templateId: 'social-ammo', moduleIds: ['social-ammo'], status: 'needs-module' }),
+      agent({ id: 'social-ammo', title: '社媒弹药手', kind: 'dashboard', templateId: 'social-ammo', moduleIds: ['social-ammo'] }),
     ],
     hostName: 'opc.local',
   })
   assert.deepEqual(
     page.agents.map((item) => item.id),
-    ['rumi', 'monitor'],
+    ['rumi', 'social-ammo'],
   )
 })
 

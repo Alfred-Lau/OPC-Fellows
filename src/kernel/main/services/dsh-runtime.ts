@@ -18,6 +18,13 @@ import {
   type DshPromptResult,
 } from '../../shared/dsh-rpc'
 import {
+  dshTreeHasAgentFactory,
+  ensureInProcessOccupationTools,
+  promptDshInProcess,
+  type DshAgentHandle,
+  type DshInProcessContext,
+} from '../../shared/dsh-in-process'
+import {
   occupationDirsToAdd,
   occupationPackageDirsFromRoots,
   occupationPluginAddArgv,
@@ -25,10 +32,28 @@ import {
 } from '../../shared/occupation-bundles'
 import { shouldRestartDsh } from '../../shared/project-context'
 import { dshHome, ensureOpcProfile, OPC_PROFILE_NAME, OPC_USER_DATA_ENV, opcProfileDir } from '../../shared/opc-profile'
+import {
+  pickToolBridgeTurn,
+  scrubSecretEnv,
+  toolBridgeUrl,
+  writeToolBridgeAuth,
+  type OpcToolBridgeTurn,
+} from '../../shared/opc-tool-bridge'
+import {
+  ApprovalGate,
+  nativeWriteApprovalOutcome,
+  sessionIdFromApprovalAgent,
+  type ApprovalOutcome,
+  type ApprovalPrompt,
+} from '../../shared/approval'
+import { LOCAL_API_PORT, localApiToken } from '../../../main/local-api'
+import { identityDirectoryRoot } from '../../shared/identity-directory'
+import { homedir } from 'node:os'
 import { readJson, writeJson } from './storage'
 
 const INIT_TIMEOUT_MS = 180_000
-const TURN_TIMEOUT_MS = 120_000
+const PROMPT_ACCEPT_MS = 120_000
+const TURN_TIMEOUT_MS = 720_000
 
 export interface DshPromptInput {
   sessionId: string
@@ -37,11 +62,8 @@ export interface DshPromptInput {
 }
 
 /**
- * 用 opc profile 跑一轮对话。stdout 是 JSON-RPC（in-box 含 `@deepseek-ai/dsh-sdk-app`）。
- * 中栏闲聊、Local API `/agent/task`、occupation / 第三方 `dsh.bundle` 共用这一棵进程。
- * 随手记 `notes_add` 在 occupation-notes 里挂上 dsh `ctx.tools`；项目选了文件夹时文档副本落在 cwd。
- * cwd 变了会重启 SDK：dsh-fs 在 initialize 时绑死工作目录。
- * session id 带稳定 runtime 后缀，同进程内续聊；撞上磁盘旧 session 时先 load 再 prompt。
+ * 能 in-process 时在同一棵树上 `ctx.agents.create` / `followup` / `whenIdle`。
+ * 缺 host 才 spawn `dsh --profile opc`。职业工具经 defineTool 挂上 dsh `ctx.tools`。
  */
 export class DshRuntimeService extends Service {
   private child: ChildProcess | null = null
@@ -52,9 +74,14 @@ export class DshRuntimeService extends Service {
   private stderr = ''
   private queue: Promise<unknown> = Promise.resolve()
   private occupationsSeeded = false
+  private inProcessEnvStamped = false
+  private occupationToolsEnsured = false
   private runtimeId = ''
   private bootCwd = ''
   private readonly knownSessions = new Set<string>()
+  private readonly turns = new Map<string, OpcToolBridgeTurn>()
+  private readonly agentHandles = new Map<string, DshAgentHandle>()
+  private readonly approvals = new ApprovalGate((prompt) => this.pushApproval(prompt))
 
   constructor(ctx: Context) {
     super(ctx, 'dshRuntime')
@@ -63,9 +90,88 @@ export class DshRuntimeService extends Service {
     } catch {
       // opc 未落下时先跳过；第一次 prompt 还会再 ensure 一次。
     }
+    ctx.on('approval/request', (request: unknown, next: () => unknown) => this.answerApprovalRequest(request, next))
     ctx.effect(() => async () => {
       await this.stop()
     }, 'dshRuntime.stop')
+  }
+
+  beginTurn(turn: OpcToolBridgeTurn): void {
+    this.turns.set(turn.sessionId, turn)
+    this.aliasBoundTurn(turn.sessionId)
+  }
+
+  endTurn(sessionId: string): void {
+    const turn = this.turns.get(sessionId)
+    if (!turn) {
+      this.turns.delete(sessionId)
+      return
+    }
+    for (const [id, row] of this.turns) {
+      if (row === turn) {
+        this.turns.delete(id)
+      }
+    }
+  }
+
+  currentTurn(sessionId?: string): OpcToolBridgeTurn | null {
+    return pickToolBridgeTurn(this.turns, sessionId)
+  }
+
+  decideApproval(id: string, decision: unknown): boolean {
+    return this.approvals.decide(id, decision)
+  }
+
+  async askApproval(input: {
+    sessionId: string
+    toolName: string
+    reason?: string
+    signal?: AbortSignal
+  }): Promise<ApprovalOutcome> {
+    if (!input.sessionId.trim() || !input.toolName.trim()) {
+      return 'unavailable'
+    }
+    const gated = nativeWriteApprovalOutcome(input.toolName, this.currentTurn(input.sessionId)?.writeAllowed)
+    if (gated) {
+      return gated
+    }
+    const turn = this.currentTurn(input.sessionId)
+    return this.approvals.ask(
+      {
+        id: `${input.sessionId}:${input.toolName}:${Date.now().toString(36)}`,
+        sessionId: input.sessionId,
+        toolName: input.toolName,
+        reason: input.reason ?? '',
+        ...(turn ? { threadId: turn.threadId, agentId: turn.agentId } : {}),
+      },
+      input.signal,
+    )
+  }
+
+  private answerApprovalRequest(request: unknown, next: () => unknown): unknown {
+    if (!dshTreeHasAgentFactory(this.ctx)) {
+      return next()
+    }
+    const row = request && typeof request === 'object' ? (request as Record<string, unknown>) : null
+    const toolName = typeof row?.toolName === 'string' ? row.toolName.trim() : ''
+    if (!toolName) {
+      return next()
+    }
+    const sessionId = sessionIdFromApprovalAgent(row?.agent)
+    if (!sessionId) {
+      return 'unavailable'
+    }
+    const reason = typeof row?.reason === 'string' ? row.reason : ''
+    const signal = row?.signal instanceof AbortSignal ? row.signal : undefined
+    return this.askApproval({ sessionId, toolName, reason, signal })
+  }
+
+  private pushApproval(prompt: ApprovalPrompt): void {
+    try {
+      this.ctx.bridge.send('agents:approval', prompt)
+    } catch {
+      // 窗还没起来时不要把主进程打崩。
+    }
   }
 
   hasKey(): boolean {
@@ -89,6 +195,9 @@ export class DshRuntimeService extends Service {
   }
 
   async stop(): Promise<void> {
+    const handles = [...this.agentHandles.values()]
+    this.agentHandles.clear()
+    await Promise.all(handles.map((handle) => handle.dispose().catch(() => undefined)))
     const child = this.child
     this.child = null
     this.ready = null
@@ -119,7 +228,14 @@ export class DshRuntimeService extends Service {
 
   private async promptNow(sessionId: string, text: string, cwd: string): Promise<DshPromptResult> {
     await this.ensure(cwd)
+    if (dshTreeHasAgentFactory(this.ctx)) {
+      return this.promptTurn(sessionId, text, cwd)
+    }
     const bound = this.bindSession(sessionId)
+    this.aliasBoundTurn(sessionId)
+    if (!this.knownSessions.has(bound)) {
+      await this.resumeOrLoad(bound, cwd)
+    }
     try {
       const result = await this.promptTurn(bound, text, cwd)
       this.knownSessions.add(bound)
@@ -129,11 +245,7 @@ export class DshRuntimeService extends Service {
         throw error
       }
       this.knownSessions.add(bound)
-      try {
-        await this.request('session/load', { sessionId: bound, cwd }, TURN_TIMEOUT_MS)
-      } catch {
-        // SDK 若没有 load，下一刀 prompt 仍带同一 id。
-      }
+      await this.resumeOrLoad(bound, cwd)
       try {
         return await this.promptTurn(bound, text, cwd)
       } catch (again) {
@@ -144,10 +256,25 @@ export class DshRuntimeService extends Service {
         this.persistRuntimeId()
         this.knownSessions.clear()
         const fresh = this.bindSession(sessionId)
+        this.aliasBoundTurn(sessionId)
         const result = await this.promptTurn(fresh, text, cwd)
         this.knownSessions.add(fresh)
         return result
       }
+    }
+  }
+
+  private async resumeOrLoad(sessionId: string, cwd: string): Promise<void> {
+    try {
+      await this.request('session/resume', { sessionId, cwd }, PROMPT_ACCEPT_MS)
+      return
+    } catch {
+      // SDK 0.1.5 可能没有 resume。
+    }
+    try {
+      await this.request('session/load', { sessionId, cwd }, PROMPT_ACCEPT_MS)
+    } catch {
+      // 没有旧会话就走 create。
     }
   }
 
@@ -157,6 +284,18 @@ export class DshRuntimeService extends Service {
 
   private async promptTurn(sessionId: string, text: string, cwd: string): Promise<DshPromptResult> {
     const collector = new DshTurnCollector(sessionId)
+    if (dshTreeHasAgentFactory(this.ctx)) {
+      return promptDshInProcess({
+        ctx: this.ctx as DshInProcessContext,
+        sessionId,
+        cwd,
+        blocks: [{ type: 'text', text }],
+        collector,
+        timeoutMs: TURN_TIMEOUT_MS,
+        handles: this.agentHandles,
+        agentOptions: { provider: 'deepseek', model: DEEPSEEK_MODEL },
+      })
+    }
     const watching = (frame: DshJsonRpcFrame): void => {
       collector.push(frame)
     }
@@ -169,7 +308,7 @@ export class DshRuntimeService extends Service {
           cwd,
           contentBlocks: [{ type: 'text', text }],
         },
-        TURN_TIMEOUT_MS,
+        PROMPT_ACCEPT_MS,
       )
       const result = asRecord(accepted.result)
       if (!result || typeof result.messageId !== 'string') {
@@ -193,6 +332,10 @@ export class DshRuntimeService extends Service {
 
   private async ensure(cwd: string): Promise<void> {
     const next = cwd.trim()
+    if (dshTreeHasAgentFactory(this.ctx)) {
+      await this.ensureInProcess(next)
+      return
+    }
     if (this.child && this.ready) {
       if (!shouldRestartDsh(this.bootCwd, next)) {
         await this.ready
@@ -222,21 +365,24 @@ export class DshRuntimeService extends Service {
       const refs = occupationPackageDirsFromRoots(
         occupationSearchRoots(app.getAppPath(), process.resourcesPath),
       )
-      if (refs.length === 0) {
-        return
-      }
       const manifestPath = join(opcProfileDir(home), 'package.json')
       if (!existsSync(manifestPath)) {
         return
       }
       const profilePkg = JSON.parse(readFileSync(manifestPath, 'utf8')) as unknown
-      const dirs = occupationDirsToAdd(profilePkg, refs)
+      const kernelCandidates = [
+        join(app.getAppPath(), 'packages', 'opc-kernel'),
+        process.resourcesPath ? join(process.resourcesPath, 'opc-kernel') : '',
+      ]
+      const kernelDir = kernelCandidates.find((dir) => dir && existsSync(join(dir, 'dsh-plugin.js')))
+      const extra = kernelDir && !profileDependencyNamesHas(profilePkg, 'ownworkbuddy-kernel') ? [kernelDir] : []
+      const dirs = [...occupationDirsToAdd(profilePkg, refs), ...extra]
       if (dirs.length === 0) {
         return
       }
       spawnSync(resolveNodeBinary(), [resolveDshBin(), ...occupationPluginAddArgv(dirs)], {
         env: {
-          ...process.env,
+          ...scrubSecretEnv(process.env),
           DSH_HOME: home,
           DSH_TELEMETRY_DISABLED: '1',
         },
@@ -247,8 +393,45 @@ export class DshRuntimeService extends Service {
       // `dsh plugin add` 会按无名模板 init，可能只留下 dsh-base；装完再补 sdk-app。
       ensureOpcProfile(home)
     } catch {
-      // 职业包进 opc 失败不挡对话：记下 / 刷新态势仍走 Electron ctx.tools。
+      // 职业包进 opc 失败不挡对话：社媒弹药仍走 Electron ctx.opcTools。
     }
+  }
+
+  private async ensureInProcess(cwd: string): Promise<void> {
+    this.stampInProcessEnv()
+    if (!this.occupationToolsEnsured) {
+      this.occupationToolsEnsured = true
+      await ensureInProcessOccupationTools(this.ctx)
+    }
+    if (!this.bootCwd) {
+      this.bootCwd = cwd
+    }
+  }
+
+  private stampInProcessEnv(): void {
+    if (this.inProcessEnvStamped) {
+      return
+    }
+    this.inProcessEnvStamped = true
+    const userData = app.getPath('userData')
+    const key = readDeepSeekApiKey()
+    if (key) {
+      process.env.DEEPSEEK_API_KEY = key
+    }
+    process.env[OPC_USER_DATA_ENV] = userData
+    process.env.DSH_TELEMETRY_DISABLED = '1'
+    process.env.DSH_PERMISSION_MODE = 'workspace-write'
+    writeToolBridgeAuth(userData, { url: toolBridgeUrl(LOCAL_API_PORT), token: localApiToken() })
+    delete process.env.OPC_TOOL_BRIDGE_TOKEN
+  }
+
+  private aliasBoundTurn(sessionId: string): void {
+    const turn = this.turns.get(sessionId)
+    const bound = this.bindSession(sessionId)
+    if (!turn || bound === sessionId) {
+      return
+    }
+    this.turns.set(bound, turn)
   }
 
   private async boot(cwd: string): Promise<void> {
@@ -259,13 +442,15 @@ export class DshRuntimeService extends Service {
     this.seedOpcOccupations()
     const node = resolveNodeBinary()
     const bin = resolveDshBin()
+    const userData = app.getPath('userData')
+    writeToolBridgeAuth(userData, { url: toolBridgeUrl(LOCAL_API_PORT), token: localApiToken() })
     const child = spawn(node, [bin, '--profile', OPC_PROFILE_NAME], {
       cwd,
       env: {
-        ...withDeepSeekApiKey(),
-        [OPC_USER_DATA_ENV]: app.getPath('userData'),
+        ...withDeepSeekApiKey(scrubSecretEnv(process.env)),
+        [OPC_USER_DATA_ENV]: userData,
         DSH_TELEMETRY_DISABLED: '1',
-        DSH_PERMISSION_MODE: 'danger-full-access',
+        DSH_PERMISSION_MODE: 'workspace-write',
       },
       stdio: ['pipe', 'pipe', 'pipe'],
     })
@@ -407,7 +592,18 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 }
 
 export function defaultDshCwd(): string {
-  return app.getPath('userData')
+  return identityDirectoryRoot(homedir())
+}
+
+function profileDependencyNamesHas(profilePkg: unknown, name: string): boolean {
+  if (!profilePkg || typeof profilePkg !== 'object') {
+    return false
+  }
+  const dependencies = (profilePkg as { dependencies?: unknown }).dependencies
+  if (!dependencies || typeof dependencies !== 'object') {
+    return false
+  }
+  return name in (dependencies as Record<string, unknown>)
 }
 
 declare module '@deepseek-ai/cordis' {

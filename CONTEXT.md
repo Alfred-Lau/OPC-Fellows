@@ -48,6 +48,22 @@ _Avoid_: 职业 Skill、插件商店、模块、capability
 不属于任何职业、全局可唤的 SOP。当前只有「拆成待办」。
 _Avoid_: 职业 Skill、写待办（各职业 SOP 里对内核的调用，不是第二条全局 Skill）
 
+**运行环境**:
+成员开口时共用的本机进程面。密钥、模型和权限挂在这里，不是某条主对话私有。能 in-process 时是官方 `boot()` 的同一棵树；`dsh-base` 持有 `ctx.agents` / `ctx.tools` / `ctx.sessions` / `ctx.storage`，花名册在 `ctx.roster`，模块 JSON 库在 `ctx.moduleStore`。
+_Avoid_: 执行上下文、每轮初始化、自建第二套 agent loop
+
+**执行上下文**:
+一条主对话或项目上，该成员能看见的会话面。人设、可用工具、当前工作目录和至此的对话都在这里。
+_Avoid_: 运行环境、prompt、Thread
+
+**开口模式**:
+带工作区写工具或 `planMode` 的成员，输入框上可见的问 / 计划 / 动手。今日和职业口令不套这三档。
+_Avoid_: 每句强制计划、把口令职业做成编码 Agent
+
+**身份目录**:
+某个成员自己的本机文件夹，默认 `~/OPC-Fellows/agents/{标题}`。雇进来时选定，之后可改绑；不自动搬家。
+_Avoid_: Workspace、项目文件夹
+
 **Trigger**:
 把一条 Skill 唤进当前主对话或项目的入口：`/` 插入、口语，或今日里的 `@成员` 加口语。
 _Avoid_: Skill、命令

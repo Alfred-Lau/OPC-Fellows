@@ -7,13 +7,11 @@ test('模板默认工具包：主理人和工程全开，空白有工作区，�
     'kernel',
     'workspace',
     'mcp-github',
-    'mcp-browser',
   ])
   assert.deepEqual(defaultToolPacks('engineer', 'conversational'), [
     'kernel',
     'workspace',
     'mcp-github',
-    'mcp-browser',
   ])
   assert.deepEqual(defaultToolPacks('blank', 'conversational'), ['kernel', 'workspace'])
   assert.deepEqual(defaultToolPacks('monitor', 'dashboard'), ['kernel'])

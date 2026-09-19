@@ -4,6 +4,20 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { join } from 'node:path'
 import { app } from 'electron'
 import type { TodoItem } from '../shared/todo'
+import { LOCAL_API_PORT } from './local-api-port'
+import {
+  isAllowedBridgeTool,
+  invokeBodySessionId,
+  stringifyToolArgs,
+  toBridgeCatalogItem,
+  type OpcToolBridgeTurn,
+  OPC_TOOL_BRIDGE_APPROVAL_PATH,
+  OPC_TOOL_BRIDGE_CATALOG_PATH,
+  OPC_TOOL_BRIDGE_INVOKE_PATH,
+} from '../kernel/shared/opc-tool-bridge'
+import { parseApprovalAskBody, type ApprovalOutcome } from '../kernel/shared/approval'
+import type { OpcToolInfo } from '../kernel/shared/opc-tools'
+import type { ToolInvokeMeta, ToolInvokeResult } from '../kernel/main/services/tools'
 import {
   composeLocalApiTask,
   formatAgentTaskJob,
@@ -13,7 +27,7 @@ import { broadcastTodosChanged } from './todo-broadcast'
 import { cancelTodoSchedule, scheduleTodo } from './todo-notify'
 import { addTodos, listTodos, updateTodo } from './todo-store'
 
-export const LOCAL_API_PORT = 18755
+export { LOCAL_API_PORT } from './local-api-port'
 
 const HOST = '127.0.0.1'
 const APP_ID = 'ownworkbuddy'
@@ -23,6 +37,15 @@ const MAX_STREAM_BYTES = 64 * 1024
 
 export interface LocalApiRuntime {
   prompt: (input: { sessionId: string; text: string; cwd: string }) => Promise<{ text: string }>
+  catalog: () => OpcToolInfo[]
+  currentTurn: (sessionId?: string) => OpcToolBridgeTurn | null
+  invoke: (name: string, args: Record<string, string>, meta: ToolInvokeMeta) => Promise<ToolInvokeResult>
+  askApproval: (input: {
+    sessionId: string
+    toolName: string
+    reason?: string
+    signal?: AbortSignal
+  }) => Promise<ApprovalOutcome>
 }
 
 type JobStatus = 'running' | 'done' | 'error'
@@ -51,6 +74,13 @@ let closed = false
 let runtime: LocalApiRuntime | null = null
 const jobs = new Map<string, AgentJob>()
 
+export function localApiToken(): string {
+  if (!token) {
+    token = randomBytes(32).toString('hex')
+  }
+  return token
+}
+
 export function startLocalApi(next: LocalApiRuntime): void {
   runtime = next
   closed = false
@@ -58,7 +88,7 @@ export function startLocalApi(next: LocalApiRuntime): void {
     return
   }
   try {
-    token = randomBytes(32).toString('hex')
+    token = localApiToken()
     startedAtMs = Date.now()
     server = createServer((req, res) => {
       void handleRequest(req, res)
@@ -197,6 +227,81 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
       cancelTodoSchedule(next.id)
       broadcastTodosChanged()
       sendJson(res, 200, { ok: true, item: toApiTodo(next) })
+      return
+    }
+
+    if (method === 'GET' && path === OPC_TOOL_BRIDGE_CATALOG_PATH) {
+      const current = runtime
+      if (!current) {
+        sendJson(res, 503, { ok: false, error: '内核未就绪。' })
+        return
+      }
+      sendJson(res, 200, { ok: true, tools: current.catalog().map(toBridgeCatalogItem) })
+      return
+    }
+
+    if (method === 'POST' && path === OPC_TOOL_BRIDGE_INVOKE_PATH) {
+      const current = runtime
+      if (!current) {
+        sendJson(res, 503, { ok: false, error: '内核未就绪。' })
+        return
+      }
+      const body = await readJsonBody(req)
+      const name = asNonEmptyString(body.name)
+      if (!name) {
+        sendJson(res, 400, { ok: false, error: 'name required', code: 'invalid_body' })
+        return
+      }
+      const turn = current.currentTurn(invokeBodySessionId(body))
+      if (!turn) {
+        sendJson(res, 409, { ok: false, error: '没有进行中的对话回合。', code: 'no_turn' })
+        return
+      }
+      if (!isAllowedBridgeTool(turn, name)) {
+        sendJson(res, 403, { ok: false, error: `当前成员不能调用「${name}」。`, code: 'forbidden_tool' })
+        return
+      }
+      const args = stringifyToolArgs(body.args)
+      const result = await current.invoke(name, args, {
+        threadId: turn.threadId,
+        agentId: turn.agentId,
+        workspaceRoot: turn.cwd,
+        identityDirectory: turn.identityDirectory,
+        writeAllowed: turn.writeAllowed,
+      })
+      sendJson(res, 200, { ok: true, text: result.text })
+      return
+    }
+
+    if (method === 'POST' && path === OPC_TOOL_BRIDGE_APPROVAL_PATH) {
+      const current = runtime
+      if (!current) {
+        sendJson(res, 503, { ok: false, error: '内核未就绪。' })
+        return
+      }
+      const parsed = parseApprovalAskBody(await readJsonBody(req))
+      if (!parsed) {
+        sendJson(res, 400, { ok: false, error: 'sessionId and toolName required', code: 'invalid_body' })
+        return
+      }
+      const abort = new AbortController()
+      const onClose = (): void => {
+        if (!res.writableEnded) {
+          abort.abort()
+        }
+      }
+      req.on('close', onClose)
+      try {
+        const outcome = await current.askApproval({
+          sessionId: parsed.sessionId,
+          toolName: parsed.toolName,
+          reason: parsed.reason,
+          signal: abort.signal,
+        })
+        sendJson(res, 200, { ok: true, outcome })
+      } finally {
+        req.off('close', onClose)
+      }
       return
     }
 

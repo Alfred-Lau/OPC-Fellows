@@ -197,50 +197,6 @@ function copyCard(draft: SocialDraft): HTMLElement {
   })
   actions.append(copyBtn)
 
-  if (draft.platform === 'x' && !draft.publishedAt) {
-    const dmBtn = document.createElement('button')
-    dmBtn.type = 'button'
-    dmBtn.className = 'is-dm'
-    dmBtn.textContent = 'DM 草稿给我'
-    dmBtn.addEventListener('click', () => {
-      dmBtn.disabled = true
-      dmBtn.textContent = '排队中…'
-      void window.ownworkbuddy.xBridge.dmDraft(draft.id).then((result) => {
-        if (result.ok) {
-          dmBtn.textContent = '已排队 ✓'
-          window.alert('已加入 X 私信队列(30 秒内由插件投递)。\n请保持 Chrome 打开并已登录 x.com。')
-        } else {
-          dmBtn.disabled = false
-          dmBtn.textContent = '重试'
-          window.alert(`DM 投递失败:${result.error}`)
-        }
-      })
-    })
-    actions.append(dmBtn)
-  }
-
-  if (draft.platform === 'x' && !draft.publishedAt) {
-    const xBtn = document.createElement('button')
-    xBtn.type = 'button'
-    xBtn.className = 'is-x'
-    xBtn.textContent = '发到 X'
-    xBtn.addEventListener('click', () => {
-      xBtn.disabled = true
-      xBtn.textContent = '发布中…'
-      void window.ownworkbuddy.xPush.send(draft.id).then((result) => {
-        if (result.ok) {
-          xBtn.textContent = '已排队 ✓'
-          window.alert('已加入 X 发布队列(30 秒内由插件发布)。\n发布后请在下方的「发布后贴链接」框填写推文链接,并点「已发布」。')
-        } else {
-          xBtn.disabled = false
-          xBtn.textContent = result.code === 'BRIDGE_OFFLINE' ? '桥离线' : '重试'
-          window.alert(`发到 X 失败:${result.error}`)
-        }
-      })
-    })
-    actions.append(xBtn)
-  }
-
   if (!draft.publishedAt) {
     const url = document.createElement('input')
     url.type = 'url'

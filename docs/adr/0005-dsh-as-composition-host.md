@@ -115,6 +115,18 @@ Electron 薄壳（窗 / 托盘 / 台伴 / 通知 / safeStorage）
 **H8 · 随手记挂上 dsh `ctx.tools`（已落地）**  
 `packages/occupation-notes` 用官方 `defineTool` 注册 `notes_add`。落盘是不碰 Electron 的 `note-file.js`；工作台把 `OPC_USER_DATA` 传给 opc 子进程，Panel 读同一份 `userData/notes.json`。不在这一刀重写收款 / 监控。Electron 仍保留 JSON 点名作为模型不用 native tool 时的退路。
 
+**H8.1 · 工作台工具经 opc-kernel 代理上 dsh `ctx.tools`（已落地）**  
+`packages/opc-kernel` 用 `defineTool` 把 Electron 工具目录挂上 dsh，执行 POST Local API `/agent/tools/invoke`。JSON 点名只作一轮退路。
+
+**H9 · 续聊 resume，人设只在新建时塞一次（已落地）**  
+会话 id 稳定为 `opc:<thread>:<agent>`。人设写进 preset，由 opc-kernel `systemPrompt.section` 读。进程重启先 `session/resume`，没有则 `session/load`。
+
+**H10–H12 · dsh-base 当唯一文件系统 / 网页工具（已落地）**  
+默认 `workspace-write`。Electron 不再注册撞名的 `fs_*` / `bash` / `web_fetch`。opc-kernel 覆盖 `subagent` 为只读、`maxDepth: 1`。
+
+**0017 · extraResources host 门闩 + 让出官方槽位（已落地）**  
+花名册是 `ctx.roster`，职业工具是 `ctx.opcTools`，分类 Completions 是 `ctx.completions`，模块 JSON 库是 `ctx.moduleStore`。官方 `boot()` 不再被花名册 / 模块库撞名。见 [0017](0017-dsh-boot-in-electron.md)。
+
 约束：
 
 - H1 之前不要删职业 Panel，用户仍要能从左栏点到收款和监控。

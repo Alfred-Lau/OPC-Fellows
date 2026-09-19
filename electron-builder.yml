@@ -11,16 +11,9 @@ files:
   - package.json
   - "!node_modules/**"
 # dsh 的 node_modules 不能走 extraResources（builder 会丢掉），afterPack 再拷。
-# 职业包没有 node_modules，可以直接 extraResources。
 extraResources:
-  - from: packages/occupation-notes
-    to: packages/occupation-notes
-  - from: packages/occupation-monitor
-    to: packages/occupation-monitor
-  - from: packages/occupation-payments
-    to: packages/occupation-payments
-  - from: packages/occupation-micro
-    to: packages/occupation-micro
+  - from: packages/opc-kernel
+    to: opc-kernel
 asar: true
 artifactName: ${productName}-${version}-${os}-${arch}.${ext}
 mac:
@@ -35,7 +28,6 @@ mac:
   category: public.app-category.developer-tools
   extendInfo:
     NSUserNotificationsUsageDescription: OPC-Fellows 会在你设定的时间发送待办桌面通知。
-    NSAppleEventsUsageDescription: OPC-Fellows 会在你允许后读取本机「邮件」收件箱，只整理、不代发。
   target:
     - dmg
     - zip

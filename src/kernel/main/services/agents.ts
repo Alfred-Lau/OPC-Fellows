@@ -1,11 +1,12 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs'
-import { hostname } from 'node:os'
+import { homedir, hostname } from 'node:os'
 import { join } from 'node:path'
 import { app, dialog, shell } from 'electron'
 import { Service, type Context } from '@deepseek-ai/cordis'
-import { writeNoteDocument } from '../../../../packages/occupation-notes/note-file.js'
+import { writeWorkspaceDocument } from '../../shared/workspace-note'
 import { getWorkbenchWindow } from '../../../main/workbench-window'
 import {
+  hasIdentityDirectory,
   INBOX_THREAD_ID,
   type AgentRecord,
   type AgentSnapshot,
@@ -37,6 +38,8 @@ import {
   slugify,
   refreshAgentStatus,
   upsertAgentThread,
+  keepOpensourceRoster,
+  keepOpensourceThreads,
   upsertDefaultAgents,
   visibleAgents,
   type DispatchAction,
@@ -65,17 +68,29 @@ import {
   planRevokeSkill,
   workbenchSkillById,
 } from '../../shared/workbench-skills'
-import { composeDshTurn, composeToolFollowUp, dshSessionId } from '../../shared/dsh-rpc'
+import { composeToolFollowUp, dshSessionId } from '../../shared/dsh-rpc'
 import { parseOpcToolCall, TOOL_ROUND_LIMIT } from '../../shared/opc-tools'
 import { defaultToolPacks, normalizeToolPacks, WORKSPACE_TOOL_PACK, type ToolPackId } from '../../shared/tool-packs'
-import { isExecutePlanPhrase, planOnlySystemPrompt, planSavedReply } from '../../shared/plan-mode'
-import { skipsPlanGate } from '../../shared/coding-skills'
+import {
+  composerModePrompt,
+  offersComposerModes,
+  parseChatTurnOptions,
+  parseComposerMode,
+  planSavedReply,
+  resolveComposerTurn,
+  storedComposerModeOf,
+  threadPlanOf,
+  type ChatTurnOptions,
+  type ComposerMode,
+} from '../../shared/plan-mode'
 import { composeRepoBrief } from '../../shared/coding-context'
+import { writeMemberPreset } from '../../shared/member-preset'
+import { citeAttachments, composeAttachmentCiteText } from '../../shared/dsh-attachment'
+import { resolveAgentWorkspacePath } from '../../shared/identity-directory'
 import { readJson, writeJson } from './storage'
 import { defaultDshCwd } from './dsh-runtime'
 import {
   canBindProjectFolder,
-  composeAttachedFilesPrompt,
   isPathInside,
   planAttachProjectFiles,
   planClearProjectFolder,
@@ -101,14 +116,14 @@ interface ThreadStoreFile {
  * 这里只负责身份实例、默认会话和本地工作目录。
  */
 export class AgentsService extends Service {
-  static inject = ['bridge', 'llm', 'dshRuntime', 'tools']
+  static inject = ['bridge', 'completions', 'dshRuntime', 'opcTools']
 
   private agents: AgentRecord[] = []
   private threads: ThreadRecord[] = []
   private messages: ThreadMessage[] = []
 
   constructor(ctx: Context) {
-    super(ctx, 'agents')
+    super(ctx, 'roster')
     this.hydrate()
   }
 
@@ -158,8 +173,11 @@ export class AgentsService extends Service {
   /** 按当前模块启停表补齐默认实例、刷新 needs-module。 */
   syncFromModules(): AgentRecord[] {
     const modules = this.ctx.modules.list().map((info) => ({ id: info.manifest.id, enabled: info.enabled }))
-    this.agents = ensureRosterSortOrder(upsertDefaultAgents(this.agents, modules))
-    this.threads = ensureProjectSortOrder(ensureHostOnUserProjects(ensureInboxThread(this.threads)))
+    this.agents = ensureRosterSortOrder(keepOpensourceRoster(upsertDefaultAgents(this.agents, modules)))
+    this.threads = keepOpensourceThreads(
+      ensureProjectSortOrder(ensureHostOnUserProjects(ensureInboxThread(this.threads))),
+      this.agents,
+    )
     for (const agent of this.agents) {
       this.threads = upsertAgentThread(this.threads, agent)
       this.ensureWorkspace(agent)
@@ -382,6 +400,20 @@ export class AgentsService extends Service {
     return agent
   }
 
+  setComposerMode(threadId: string, agentId: string, mode: ComposerMode): ThreadRecord {
+    const thread = this.thread(threadId)
+    if (!thread) {
+      throw new Error('没有这条会话')
+    }
+    const next: ThreadRecord = {
+      ...thread,
+      composerMode: mode,
+      composerModes: { ...thread.composerModes, [agentId]: mode },
+      updatedAt: new Date().toISOString(),
+    }
+    return this.commitThread(next)
+  }
+
   removeAgent(agentId: string): boolean {
     const planned = planRemoveAgent(this.agents, this.threads, this.messages, agentId)
     if (!planned.ok) {
@@ -516,7 +548,7 @@ export class AgentsService extends Service {
     return {
       thread: latest,
       messages: this.messagesOf(threadId),
-      actions: promoteToClassify(dispatch.actions, this.agents, { hasKey: this.ctx.llm.hasKey() }),
+      actions: promoteToClassify(dispatch.actions, this.agents, { hasKey: this.ctx.completions.hasKey() }),
     }
   }
 
@@ -527,7 +559,7 @@ export class AgentsService extends Service {
     }
     const skills = routableSkills(agent)
     try {
-      const raw = await this.ctx.llm.complete({
+      const raw = await this.ctx.completions.complete({
         system: allocateIntentSystemPrompt(agent.title, skills),
         messages: [{ role: 'user', content: text }],
         temperature: 0,
@@ -579,7 +611,7 @@ export class AgentsService extends Service {
     return this.chat(threadId, agentId)
   }
 
-  async chat(threadId: string, agentId: string): Promise<ThreadMessage> {
+  async chat(threadId: string, agentId: string, options: ChatTurnOptions = {}): Promise<ThreadMessage> {
     const agent = this.get(agentId)
     if (!agent) {
       throw new Error('没有这个成员')
@@ -592,71 +624,94 @@ export class AgentsService extends Service {
         'system',
       )
     }
+    const sessionId = dshSessionId(threadId, agentId)
     try {
       const userBase = latestUserText(this.messagesOf(threadId))
       const packs = normalizeToolPacks(agent.toolPacks).length
         ? normalizeToolPacks(agent.toolPacks)
         : defaultToolPacks(agent.templateId, agent.kind)
-      const tools = this.ctx.tools.catalog(agent.moduleIds, packs)
+      const tools = this.ctx.opcTools.catalog(agent.moduleIds, packs)
       const cwd = this.projectCwd(threadId, agentId)
-      const sessionId = dshSessionId(threadId, agentId)
       const thread = this.thread(threadId)
-      const attached = composeAttachedFilesPrompt(thread?.folderPath, this.readAttachedContents(thread))
-      const user = attached ? `${attached}\n\n${userBase}` : userBase
-      let writeAllowed = true
-      const repoBrief = packs.includes(WORKSPACE_TOOL_PACK) ? composeRepoBrief(cwd) : ''
-      let persona = agentSystemPrompt(agent, tools, { cwd, repoBrief })
-      const skipPlan = skipsPlanGate(userBase)
-      if (agent.planMode && thread?.plan?.status !== 'approved' && !isExecutePlanPhrase(userBase) && !skipPlan) {
-        writeAllowed = false
-        persona = `${persona}\n${planOnlySystemPrompt()}`
-      }
-      if (agent.planMode && isExecutePlanPhrase(userBase)) {
+      const cites = citeAttachments(thread?.folderPath ?? cwd, thread?.attachedFiles ?? [])
+      const citeText = composeAttachmentCiteText(cites)
+      const user = citeText ? `${citeText}\n\n${userBase}` : userBase
+      const composer = offersComposerModes(agent)
+        ? resolveComposerTurn({
+            requested: options.mode ?? parseComposerMode(thread?.composerMode),
+            stored: storedComposerModeOf(thread, agentId),
+            userText: userBase,
+            agent,
+          })
+        : { mode: 'agent' as const, writeAllowed: true, savePlan: false, injectPlan: false }
+      if (composer.injectPlan) {
+        const existing = threadPlanOf(thread, agentId)
         this.threads = applyThreadPlan(this.threads, threadId, {
           status: 'approved',
-          text: thread?.plan?.text ?? userBase,
+          text: existing?.text ?? userBase,
+          agentId,
         })
-        writeAllowed = true
       }
-      let text = composeDshTurn(persona, user)
-      for (let round = 0; round < TOOL_ROUND_LIMIT; round += 1) {
-        const turn = await this.ctx.dshRuntime.prompt({ sessionId, text, cwd })
-        const call = parseOpcToolCall(turn.text)
-        if (!call) {
-          if (agent.planMode && !writeAllowed) {
-            this.threads = applyThreadPlan(this.threads, threadId, { status: 'draft', text: turn.text })
-            this.persist()
-            return this.reply(threadId, planSavedReply(turn.text), agentId, 'agent', undefined, turn.thinking)
-          }
-          return this.reply(threadId, turn.text, agentId, 'agent', undefined, turn.thinking)
-        }
-        const allowed = tools.some((tool) => tool.name === call.name)
-        let result: string
-        try {
-          if (!allowed) {
-            throw new Error(`当前成员不能调用「${call.name}」。`)
-          }
-          result = (
-            await this.ctx.tools.invoke(call.name, call.args, {
-              threadId,
-              agentId,
-              workspaceRoot: cwd,
-              writeAllowed,
-            })
-          ).text
-          if (call.name === 'notes_add') {
-            const doc = this.writeWorkspaceNote(threadId, call.args.text ?? '')
-            if (doc) {
-              result = `${result} 文档已写入 ${doc}`
+      const repoBrief = packs.includes(WORKSPACE_TOOL_PACK) ? composeRepoBrief(cwd) : ''
+      const persona = [
+        agentSystemPrompt(agent, tools, { cwd, repoBrief }),
+        composerModePrompt(composer, threadPlanOf(this.thread(threadId), agentId)?.text ?? ''),
+      ]
+        .filter(Boolean)
+        .join('\n')
+      writeMemberPreset(app.getPath('userData'), sessionId, persona)
+      this.ctx.dshRuntime.beginTurn({
+        sessionId,
+        threadId,
+        agentId,
+        cwd,
+        writeAllowed: composer.writeAllowed,
+        ...(hasIdentityDirectory(agent) ? { identityDirectory: this.workspaceRoot(agent.id) } : {}),
+        allowedTools: tools.map((tool) => tool.name),
+      })
+      let text = user
+      try {
+        for (let round = 0; round < TOOL_ROUND_LIMIT; round += 1) {
+          const turn = await this.ctx.dshRuntime.prompt({ sessionId, text, cwd })
+          const call = parseOpcToolCall(turn.text)
+          if (!call) {
+            if (composer.savePlan && !composer.writeAllowed) {
+              this.threads = applyThreadPlan(this.threads, threadId, {
+                status: 'draft',
+                text: turn.text,
+                agentId,
+              })
+              this.persist()
+              return this.reply(threadId, planSavedReply(turn.text), agentId, 'agent', undefined, turn.thinking)
             }
+            return this.reply(threadId, turn.text, agentId, 'agent', undefined, turn.thinking)
           }
-        } catch (error) {
-          result = error instanceof Error ? error.message : String(error)
+          const allowed = tools.some((tool) => tool.name === call.name)
+          let result: string
+          try {
+            if (!allowed) {
+              throw new Error(`当前成员不能调用「${call.name}」。`)
+            }
+            result = (
+              await this.ctx.opcTools.invoke(call.name, call.args, {
+                threadId,
+                agentId,
+                workspaceRoot: cwd,
+                identityDirectory: hasIdentityDirectory(agent) ? this.workspaceRoot(agent.id) : undefined,
+                writeAllowed: composer.writeAllowed,
+              })
+            ).text
+          } catch (error) {
+            result = error instanceof Error ? error.message : String(error)
+          }
+          text = composeToolFollowUp(persona, user, call.name, result)
         }
-        text = composeToolFollowUp(persona, user, call.name, result)
+        return this.reply(threadId, '工具调用次数过多，先停在这里。', agentId, 'system')
+      } finally {
+        this.ctx.dshRuntime.endTurn(sessionId)
       }
-      return this.reply(threadId, '工具调用次数过多，先停在这里。', agentId, 'system')
     } catch (error) {
+      this.ctx.dshRuntime.endTurn(sessionId)
       const message = error instanceof Error ? error.message : String(error)
       return this.reply(threadId, `没法接上：${message}`, agentId, 'system')
     }
@@ -731,7 +786,7 @@ export class AgentsService extends Service {
     if (!cwd || !shouldWriteWorkspaceDocument(cwd, app.getPath('userData'))) {
       return undefined
     }
-    return writeNoteDocument(cwd, text, new Date().toISOString(), `note-${Date.now().toString(36)}`) ?? undefined
+    return writeWorkspaceDocument(cwd, text, new Date().toISOString(), `note-${Date.now().toString(36)}`) ?? undefined
   }
 
   projectCwd(threadId?: string, agentId?: string): string {
@@ -765,12 +820,30 @@ export class AgentsService extends Service {
   }
 
   workspaceRoot(agentId?: string): string {
+    const userData = app.getPath('userData')
     if (!agentId) {
-      return join(app.getPath('userData'), 'workspaces')
+      return join(userData, 'workspaces')
     }
     const agent = this.get(agentId)
-    const slug = slugify(agent?.id ?? agentId)
-    return join(app.getPath('userData'), 'workspaces', slug)
+    if (!agent || !hasIdentityDirectory(agent)) {
+      return join(userData, 'workspaces', slugify(agent?.id ?? agentId))
+    }
+    const legacy = join(userData, 'workspaces', slugify(agent.id))
+    const resolved =
+      resolveAgentWorkspacePath({
+        kind: agent.kind,
+        workspacePath: agent.workspacePath,
+        title: agent.title,
+        agentId: agent.id,
+        home: homedir(),
+        userData,
+        legacyExists: existsSync(legacy),
+      }) ?? legacy
+    mkdirSync(resolved, { recursive: true })
+    if (agent.workspacePath !== resolved) {
+      agent.workspacePath = resolved
+    }
+    return resolved
   }
 
   private commitThread(thread: ThreadRecord): ThreadRecord {
@@ -828,23 +901,31 @@ export class AgentsService extends Service {
     const threadStore = readJson<ThreadStoreFile>(this.threadsPath(), { threads: [], messages: [] })
     const loaded = Array.isArray(stored.agents) ? stored.agents : []
     this.agents = ensureRosterSortOrder(
-      loaded.map((agent) => {
-        const skillIds = normalizeSkillIds(agent.skillIds)
-        const toolPacks = normalizeToolPacks(agent.toolPacks)
-        const packs = toolPacks.length > 0 ? toolPacks : defaultToolPacks(agent.templateId, agent.kind)
-        return {
-          ...agent,
-          skillIds: skillIds.length > 0 ? skillIds : undefined,
-          toolPacks: packs,
-          planMode: agent.planMode === true,
-        }
-      }),
+      keepOpensourceRoster(
+        loaded.map((agent) => {
+          const skillIds = normalizeSkillIds(agent.skillIds)
+          const toolPacks = normalizeToolPacks(agent.toolPacks)
+          const packs = toolPacks.length > 0 ? toolPacks : defaultToolPacks(agent.templateId, agent.kind)
+          return {
+            ...agent,
+            skillIds: skillIds.length > 0 ? skillIds : undefined,
+            toolPacks: packs,
+            planMode: agent.planMode === true,
+          }
+        }),
+      ),
     )
     const loadedThreads = Array.isArray(threadStore.threads) ? threadStore.threads : []
-    this.threads = ensureProjectSortOrder(ensureHostOnUserProjects(ensureInboxThread(loadedThreads)))
+    this.threads = keepOpensourceThreads(
+      ensureProjectSortOrder(ensureHostOnUserProjects(ensureInboxThread(loadedThreads))),
+      this.agents,
+    )
     this.messages = Array.isArray(threadStore.messages) ? threadStore.messages : []
-    const agentsDirty = this.agents.some((agent, index) => agent !== loaded[index])
-    const threadsDirty = this.threads.some((thread) => {
+    const agentsDirty =
+      this.agents.length !== loaded.length || this.agents.some((agent, index) => agent !== loaded[index])
+    const threadsDirty =
+      this.threads.length !== loadedThreads.length ||
+      this.threads.some((thread) => {
       const prev = loadedThreads.find((item) => item.id === thread.id)
       if (!prev) {
         return true
@@ -925,6 +1006,6 @@ function readTree(dir: string, depth: number): WorkspaceEntry[] {
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
-    agents: AgentsService
+    roster: AgentsService
   }
 }

@@ -2,14 +2,16 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { allowedServices, denyService } from './guard.ts'
 
-test('没声明 storage 就拿不到存储，声明了才能拿', () => {
+test('没声明 storage 就拿不到模块库；dsh 的 storage 始终不开放', () => {
   const bare = allowedServices([])
+  assert.equal(denyService('demo', 'moduleStore', bare), '模块 demo 未声明使用 moduleStore 所需的能力')
   assert.equal(denyService('demo', 'storage', bare), '模块 demo 未声明使用 storage 所需的能力')
   assert.equal(denyService('demo', 'todos', bare), '模块 demo 未声明使用 todos 所需的能力')
   assert.equal(denyService('demo', 'modules', bare), '模块 demo 未声明使用 modules 所需的能力')
 
   const granted = allowedServices(['storage', 'todos:write'])
-  assert.equal(denyService('demo', 'storage', granted), null)
+  assert.equal(denyService('demo', 'moduleStore', granted), null)
+  assert.equal(denyService('demo', 'storage', granted), '模块 demo 未声明使用 storage 所需的能力')
   assert.equal(denyService('demo', 'todos', granted), null)
 })
 

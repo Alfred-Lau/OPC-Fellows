@@ -483,6 +483,26 @@ body[data-view='home'] .thread-home {
   gap: 8px;
 }
 
+.composer-modes {
+  display: flex;
+  gap: 4px;
+}
+
+.composer-mode {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  font: 12px/1 var(--font-sans);
+}
+
+.composer-mode.is-current {
+  color: var(--fg);
+  border-color: var(--fg);
+}
+
 .composer-context {
   position: relative;
   display: flex;

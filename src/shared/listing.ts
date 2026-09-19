@@ -1,4 +1,4 @@
-export type ListingKind = 'idea' | 'ammo' | 'wx' | 'account' | 'note' | 'experiment'
+export type ListingKind = 'ammo'
 
 export interface ShortListing {
   kind: ListingKind
@@ -21,7 +21,7 @@ export function asSkillReply(text: string, listing?: ShortListing): SkillReply {
   return listing && listing.ids.length > 0 ? { text, listing } : { text }
 }
 
-const LISTING_KINDS: readonly ListingKind[] = ['idea', 'ammo', 'wx', 'account', 'note', 'experiment']
+const LISTING_KINDS: readonly ListingKind[] = ['ammo']
 
 export function isShortListing(value: unknown): value is ShortListing {
   if (!value || typeof value !== 'object') {

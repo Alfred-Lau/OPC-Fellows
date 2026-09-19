@@ -1,8 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import type { ModuleDefinition } from '../kernel/main/services/modules'
-import { generateSocialAmmo, registerSocialIpc } from '../main/monitor-ipc'
+import { generateSocialAmmo, registerSocialIpc } from '../main/social-ipc'
 import { setSocialAmmoEnabled } from '../main/module-flags'
-import { loadMicroSourcing, microState } from '../main/micro-sourcing-store'
 import { loadSocial, socialState, publishSocialDraft, recordSocialMetrics } from '../main/social-store'
 import {
   formatAmmoLoad,
@@ -10,7 +9,6 @@ import {
   parseAmmoMetrics,
   parsePublish,
   pickIndexed,
-  planAmmoLoad,
 } from '../shared/skill-route'
 import { parsePinnedArg } from '../kernel/shared/occupation-tools'
 
@@ -20,13 +18,12 @@ export const socialAmmoModule: ModuleDefinition = {
     id: 'social-ammo',
     title: '社媒弹药',
     mark: '弹',
-    description: '按最新产品能力生成六平台文案草稿，记录发布与互动数据。',
+    description: '按产品目录生成六平台文案草稿，记录发布与互动数据。',
     kind: 'view',
     version: '1.0.0',
     group: '内容',
     order: 45,
-    inject: ['bridge', 'workbench', 'todos', 'tools'],
-    optional: ['monitor'],
+    inject: ['bridge', 'workbench', 'todos', 'opcTools'],
     capabilities: ['storage', 'todos:write'],
     namespaces: ['social'],
     removable: false,
@@ -37,22 +34,17 @@ export const socialAmmoModule: ModuleDefinition = {
     registerSocialIpc((channel, listener) => {
       ctx.bridge.handle(channel, listener)
     })
-    ctx.tools.register({
+    ctx.opcTools.register({
       name: 'social_load',
-      description: '按 Idea 或产品能力装填六平台弹药。没有指针就问装填哪一条，不从监控偷偷写弹药。',
+      description: '按产品目录装填六平台弹药。目录为空就请用户先登记站点。',
       moduleId: 'social-ammo',
-      parameters: { text: { type: 'string', description: '用户原话，可含第几条 Idea', required: false } },
-      execute: async (args) => {
-        loadMicroSourcing()
-        const planned = planAmmoLoad(args.text || '', microState().ideas)
-        if (planned.reply && !planned.idea) {
-          return planned.reply
-        }
-        const state = await generateSocialAmmo(planned.idea?.id)
-        return formatAmmoLoad(state, planned.idea)
+      parameters: { text: { type: 'string', description: '用户原话', required: false } },
+      execute: async () => {
+        const state = await generateSocialAmmo()
+        return formatAmmoLoad(state)
       },
     })
-    ctx.tools.register({
+    ctx.opcTools.register({
       name: 'social_recap',
       description: '复盘有评论的已发稿。没有带评论的已发稿，不拿未发草稿充数。',
       moduleId: 'social-ammo',
@@ -60,7 +52,7 @@ export const socialAmmoModule: ModuleDefinition = {
       parameters: { text: { type: 'string', description: '用户原话', required: false } },
       execute: async (args) => formatAmmoRecap(socialState(), args.text || ''),
     })
-    ctx.tools.register({
+    ctx.opcTools.register({
       name: 'social_publish',
       description: '记下已发链接。不代发。缺链接就问。',
       moduleId: 'social-ammo',
@@ -79,7 +71,7 @@ export const socialAmmoModule: ModuleDefinition = {
         return parsed.reply
       },
     })
-    ctx.tools.register({
+    ctx.opcTools.register({
       name: 'social_metrics',
       description: '记下一条已发弹药的浏览、赞评转发收藏。没有数字就不写 0 充数。',
       moduleId: 'social-ammo',

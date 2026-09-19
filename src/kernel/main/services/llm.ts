@@ -36,7 +36,7 @@ export class LlmService extends Service {
   static inject = ['bridge']
 
   constructor(ctx: Context) {
-    super(ctx, 'llm')
+    super(ctx, 'completions')
     active = this
     loadLlmCredentials()
     ctx.bridge.handle('llm:settings', () => llmSettings())
@@ -99,6 +99,6 @@ export class LlmService extends Service {
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
-    llm: LlmService
+    completions: LlmService
   }
 }

@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="docs/cover.png" alt="OPC-Fellows — Local-first workbench for a one-person company" width="100%">
+  <img src="docs/cover.png" alt="OPC-Fellows — 一人公司的本地优先工作台" width="100%">
 </p>
 
 <p align="center">
-  <strong>OPC-Fellows</strong> · 一人公司的本地优先工作台<br>
-  内核提供外壳、待办与模块契约，职业能力以插件挂上。
+  <strong>OPC-Fellows</strong> · 把职业做成能对话的成员，接到你自己的业务上<br>
+  内核只留外壳、待办与契约；开源花名册默认是主理人和社媒弹药手。
 </p>
 
 <p align="center">
@@ -22,122 +22,85 @@
 </p>
 
 <p align="center">
-  <a href="#定位">定位</a> ·
-  <a href="#下载安装">下载安装</a> ·
-  <a href="#快速开始">快速开始</a> ·
-  <a href="#写一个模块">写一个模块</a> ·
-  <a href="#内置模块参考实现">内置模块</a> ·
+  <a href="#十五分钟接到你的业务">接到你的业务</a> ·
+  <a href="#你的活对应哪个职业">职业对照</a> ·
+  <a href="#下载安装包">安装包</a> ·
+  <a href="#缺能力就写模块">写模块</a> ·
   <a href="#架构">架构</a> ·
-  <a href="#生态">生态</a> ·
-  <a href="#贡献">贡献</a> ·
-  <a href="#开源计划">开源计划</a>
+  <a href="#贡献">贡献</a>
 </p>
 
-**一个人开公司，就一张工作台。** 销售、内容、研究、发票、代码全落在你一个人身上 —— 与其订一整套各攥着你一块业务数据的 SaaS，不如用这张本地优先的桌面工作台：每种职业是一个可以直接对话的**成员**。
+你是开发者，同时一个人扛销售、内容、研究和账。这张工作台不是再介绍一遍「本地优先桌面应用」，而是让你 **clone 之后，把成员雇到自己的文件夹和站点上，当天就能干活**。
 
-业务数据在应用自己的 `userData` 里，模型密钥经 `safeStorage` 进系统钥匙串，**你的使用数据不会回传给我们**：没有账号、不上传、无遥测。基于 Electron + [Cordis](https://github.com/cordiverse/cordis) / [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 构建；新能力以模块挂上，可启停，也可自己写。
+数据在本机 `userData`，模型密钥走「设置 → 模型」的 `safeStorage`，没有账号、不上传、无遥测。默认产品目录是空的——填你自己的站，不要用别人的。
 
-> 本仓库是正在使用的完整产品。开源将**另起仓库只带主干**；这份 README 按主干来写，个人站点清单、签名、选品栈不再当作产品本身。
+## 十五分钟接到你的业务
 
-## 定位
+需要 Node.js `^22.19.0` 或 `>=24.0.0`，pnpm 10+。第一次 `pnpm install` 会下载 Electron，会多等一会儿。
 
-一人公司只有一张工作台。用户先选**成员**（职业身份）或**项目**（一件多人合作的事），在会话里推进，右侧是该身份正在盯的 Panel。新功能加模块，不改内核联合类型。
-
-| 概念 | 含义 |
-| --- | --- |
-| **内核** | 不可禁用：外壳、待办、搜索、设置、模块仓库、成员 / 项目 |
-| **模块** | 一份 Cordis 插件 + 一份 manifest。可 enable / disable，第三方可从本地目录或 Git 安装 |
-| **成员** | 模块的一次具身：人设、主 Panel、推荐 Skill。界面不写 Agent |
-| **待办** | 内核服务。任意模块经 `todos.ingestAgent` 写入，按 `dedupeKey` 去重 |
-
-约定见 [CONTEXT.md](CONTEXT.md)，模块化设计见 [docs/module-architecture-design.md](docs/module-architecture-design.md)。
-
-### 为什么这样拆
-
-对照 [dsh-plugin](https://github.com/topics/dsh-plugin) 上的爆款桌面工作台（[OpenDesign](https://github.com/nexu-io/open-design)、[iPolloWork](https://github.com/Devin-AXIS/iPolloWork)、[dsh-desktop](https://github.com/anywhere-labs/dsh-desktop)、[dsh-web](https://github.com/zhu1090093659/dsh-web)）：它们把 **Harness 当运行时、把能力当插件**。OPC-Fellows 的目标同一条路，外壳是一人公司的花名册，不是再做一个 dsh web 皮肤。
-
-H1–H8 已让中栏闲聊走 `dsh --profile opc`。随手记 `notes_add` 挂在 opc 的 dsh `ctx.tools` 上；收款 / 监控 / 选品仍由 Electron `ctx.tools` 执行。见 [ADR 0005](docs/adr/0005-dsh-as-composition-host.md)。
-
-- **本地优先**：业务数据在本机 `userData`，模型密钥在「设置 → 模型」走 `safeStorage`
-- **万物可插**：职业、Panel、Skill 都是模块；内核只保留契约
-- **权限白名单**：模块只能调用 manifest 声明的 capability，高危项安装前确认
-- **契约对齐 dsh**：`apply(ctx)`、package.json 自定义字段、capability 分层，方便从 Harness 生态平移
-
-## 主干会带走什么
-
-抽仓库时，开源主干只保留通用层。个人业务数据走配置，不进默认代码。
-
-```
-src/kernel/          主干：启动、IPC 桥、存储、待办、导航、模块仓库、成员
-src/modules/         内置职业（参考实现，开源仓库会做成可选包或示例）
-examples/            第三方模块最小示例
-docs/                架构与 ADR
+```sh
+git clone git@github.com:Alfred-Lau/OPC-Fellows.git
+cd OPC-Fellows
+pnpm install
+pnpm dev
 ```
 
-| 留下（主干） | 不进主干默认值 |
+然后按这个顺序接到**你的**业务，不要先读架构：
+
+1. **钥匙** — 设置 → 模型，粘贴 DeepSeek API Key。也可以 `export DEEPSEEK_API_KEY=…`（环境变量优先）。没 key 成员开不了口。
+2. **雇人** — 开源花名册默认只有 **主理人** 和 **社媒弹药手**。点开即进主对话。左栏 `+` 目前只能再打开社媒弹药手（单例）。
+3. **绑目录** — 雇进来时选定身份目录。默认 `~/OPC-Fellows/agents/{标题}`，更好的做法是绑到你真正改代码、写稿、对账的文件夹。之后可改绑，不自动搬家。
+4. **登记你的站** — 设置 → 工作情况 → 添加产品。社媒弹药认的是这里，不是仓库里的示例。形状见 [`examples/catalog.example.json`](examples/catalog.example.json)。
+5. **开口** — 输入框三档：**问**（只读）、**计划**（先方案，回复「按计划执行」才改文件）、**动手**（直接改工作区）。先用「问」摸底，确认后再动手。
+
+可选：
+
+```sh
+cp .env.example .env          # 不要把真实 .env 提交上去
+pnpm test                     # 内核与 shared 单测
+pnpm dsh                      # 本机 DeepSeek Harness CLI
+```
+
+打包用 `pnpm run pack`（目录）或 `pnpm dist:mac`。不要写 `pnpm pack`，那会打出 npm tarball。
+
+词表（成员 / 项目 / 身份目录 / 开口模式）见 [CONTEXT.md](CONTEXT.md)。
+
+## 你的活对应哪个成员
+
+开源版本花名册只留两个身份。其它职业模块还在仓库里，默认停用，不会再自动长成成员。
+
+| 你手头的事 | 谁来做 |
 | --- | --- |
-| 模块契约、capability、仓库安装 | 个人站点清单（工作情况里自填） |
-| 待办 / 提醒 / Agent 收件箱 | 社媒签名、公众号作者、扣子工作流 ID |
-| 本机存储与 `safeStorage` | 打包签名身份、公证 Team ID |
-| `examples/hello-module` | 真实产品目录（示例见 `examples/catalog.example.json`） |
+| 读改工作区、跑命令、先计划再动手 | 主理人（每个项目的默认主成员） |
+| 按产品能力出多平台文案 | 社媒弹药手（先在工作情况里登记你的站） |
 
-凭据只走环境变量或本机 `safeStorage`（设置 → 模型），仓库里没有硬编码 key。仍可读 `~/.dsh` 遗留配置，但新填写请走设置页。启动后产品目录、社媒签名、公众号作者都是空的，要自己在「工作情况」和各模块设置里填。示例目录见 [`examples/catalog.example.json`](examples/catalog.example.json)。
+工作情况里登记站点后，弹药手才认你的产品。环境变量备忘：
 
-## 下载安装
-
-本地优先的桌面工作台：数据留在你自己的机器上。最新版见 [v0.7.3 Release](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.7.3)。
-
-| 平台 | 可用性 |
+| 变量 | 用途 |
 | --- | --- |
-| macOS（Apple Silicon） | ✅ 可用 |
-| Windows | ❌ 暂无 |
-| Linux | ❌ 暂无 |
+| `DEEPSEEK_API_KEY` | 覆盖「设置 → 模型」；仍可读 `~/.dsh` 遗留 |
+| `OPC_USER_DATA` | 传给运行时的 userData |
 
-直链：
+多人合作的一件事走**项目**：至少一名成员，没 @ 时只有主成员听见。今日是全局收件箱，不是项目。
 
-- [OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.dmg) — 磁盘映像，拖进「应用程序」。
-- [OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.zip) — 压缩包，解压即用。
+## 下载安装包
 
-**首次打开必须放行。** 当前构建未做 Apple 签名与公证——证书流程还没接上，不是安装包坏了。装进「应用程序」后先执行：
+不想跑源码时，用 [v0.7.3](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.7.3)（目前只有 macOS Apple Silicon）。
+
+- [dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.dmg) — 拖进「应用程序」
+- [zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.zip)
+
+构建未签名、未公证。装完先执行，再右键打开：
 
 ```sh
 xattr -cr "/Applications/OPC Agent Team - Solokit.app"
 ```
 
-然后右键 → 打开。
+屏幕上的名字仍是 **OPC Agent Team - Solokit**（改名会迁移 `userData`，留到后续版本）。接到业务的步骤和从源码启动相同：模型 key → 雇成员 → 绑目录 → 工作情况。
 
-应用当前显示名仍是 **OPC Agent Team - Solokit**。改名会迁移数据目录，留到后续版本。
+## 缺能力就写模块
 
-[`latest-mac.yml`](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/latest-mac.yml) 是更新清单，供日后接自动更新源。
-
-想跑源码，见下面的[快速开始](#快速开始)。
-
-## 快速开始
-
-需要 Node.js `^22.19.0` 或 `>=24.0.0`，pnpm 10+。Electron 42+ 不再在自身 `postinstall` 里拉二进制，本仓库用 `postinstall: install-electron` 在依赖装完后下载，所以第一次 `pnpm install` 会多等一会儿。
-
-```sh
-pnpm install
-pnpm dev
-```
-
-启动后工作台默认最大化。
-
-可选：
-
-```sh
-export DEEPSEEK_API_KEY=sk-...   # 可选；覆盖「设置 → 模型」里保存的 key
-pnpm test                        # 内核与 shared 单测
-pnpm dsh                         # 本机 DeepSeek Harness CLI
-```
-
-打包：`pnpm pack`（目录）、`pnpm dist`，或 `pnpm dist:mac` 可产出 macOS 安装包。当前 CI / 发布流程尚未接入签名与公证，因此 Release 里的产物需要按上面的方式手动放行。
-
-## 写一个模块
-
-第三方模块是一个 npm 包。桌面工作台读 `ownworkbuddy` 字段（主进程 `apply(ctx)`，可选 UI `mount(root, api)`）；Agent 运行时读官方 `dsh.bundle`。过渡期两份都写。不必改 preload。
-
-仓库里有最小示例 [`examples/hello-module`](examples/hello-module)：
+内置职业盖不住你的业务时，加一个 npm 包，不要改内核联合类型。工作台读 `ownworkbuddy`（`apply(ctx)` + 可选 `mount`）；运行时读 `dsh.bundle`。过渡期两份都写。最小示例：[`examples/hello-module`](examples/hello-module)。
 
 ```json
 {
@@ -163,127 +126,50 @@ export default function apply(ctx) {
 }
 ```
 
-工作台「扩展」页可从本地目录或 Git 安装。进 dsh 层栈用官方 CLI（会初始化 `$DSH_HOME/profiles/opc`）：
+「扩展」页从本地目录或 Git 安装。进 Harness 层栈：
 
 ```sh
 pnpm dsh plugin --profile opc add ./examples/hello-module
-pnpm dsh plugin --profile opc add ./packages/opc-kernel
-pnpm dsh plugin --profile opc add ./packages/occupation-notes
-pnpm dsh plugin --profile opc add ./packages/occupation-monitor
-pnpm dsh plugin --profile opc add ./packages/occupation-payments
-pnpm dsh plugin --profile opc add ./packages/occupation-micro
 ```
 
-工作台里停用带 `dsh.bundle` 的模块（含随手记 / 监控 / 收款 / 选品）时，会在 opc profile 的 `cordis.patch.yml` 加上 `{ id: opc-<模块>, disabled: true }`。
-
-模块只能使用 manifest 里声明的 capability（`storage` / `todos:write` / `secrets` / `subprocess` …），未声明的调用会被内核拒绝。`subprocess` 与 `secrets` 安装时会单独提示。
-
-内置模块构建期静态注册（`builtin:<id>`），避开 asar 动态 import 限制。模块之间不要直连 store，跨模块只走内核服务。
-
-## 内置模块（参考实现）
-
-这些是当前产品里的职业，用来验证契约，不是主干的一部分。没配密钥时降级为本地功能，不发未认证请求。
-
-| 模块 | 做什么 |
-| --- | --- |
-| 随手记 | 本机笔记 |
-| 台伴 | 独立窗提醒；待办到点跳到屏幕中间 |
-| 项目监控 | 仓库 / 站点态势；可选拉取站点 `GET /api/stats` |
-| 社媒弹药 | 按产品能力生成多平台文案 |
-| Micro 选品 | 从公开论坛捞痛点，聚成产品 idea |
-| 增长黑客 | 实验、增长环与渠道表；不写文案、不刷新流量 |
-| 自媒体账号 | 国内平台账号与日记（数据手录） |
-| 微信情报 | 本机只读对接 [WeChat Intelligence Hub](https://github.com/Rion-Wu-tech/wechat-intelligence-hub)；不发微信、聊天不出本机 |
-| 邮件整理 | 本机「邮件」+ iCloud / Gmail / QQ IMAP；只整理、写草稿，不代发 |
-| 收款管理 | 本机台账；可选同步 [Creem](https://creem.io) |
-| DeepSeek Harness | 中栏对话与 Local API 共用 SDK session；不当可雇职业，不再起官方 UI |
-
-站点统计、选品代理、Creem key 等都是**模块配置**，详见各模块设置页。环境变量备忘：
-
-| 变量 | 用途 |
-| --- | --- |
-| `DEEPSEEK_API_KEY` | LLM（覆盖「设置 → 模型」；仍可读 `~/.dsh` 遗留） |
-| `OPC_USER_DATA` | 工作台传给 opc 子进程的 userData（随手记 `notes.json`） |
-| `OWNWORKBUDDY_STATS_KEY` | 项目监控请求站点 `/api/stats` 的共享密钥 |
-| `CREEM_API_KEY` | 收款模块覆盖本机保存的 key |
-| `HTTPS_PROXY` | 选品扫描走代理（国内访问 Reddit 时） |
+模块只能调用 manifest 声明的 capability。未声明的调用会被拒绝；`subprocess` / `secrets` 安装时单独确认。跨模块不要直连 store，只走内核服务（例如 `todos.ingestAgent`）。
 
 ## 架构
 
-```
-目标（ADR 0005）
-  Electron 薄壳（窗 / 托盘 / 台伴）
-    dsh --profile opc
-      dsh-base（llm / tools / sessions / agent-loop）
-      OPC 内核 bundle（todos、成员、项目）
-      职业 bundle → ctx.tools + 右栏 Panel
+Electron 是薄壳。对话和工具走 DeepSeek Harness；内核花名册、待办、模块仓库挂在同一棵树上。设计见 [ADR 0005](docs/adr/0005-dsh-as-composition-host.md) 和 [docs/module-architecture-design.md](docs/module-architecture-design.md)。外壳心智（成员 / 项目 / Skill）见 [docs/agent-workspace-design.md](docs/agent-workspace-design.md)。
 
-现状（H8）
-  Electron 主进程
-    applyOpcKernel（cordis.patch.yml 顺序）
-      服务：modules / workbench / bridge / storage / secrets
-            todos / llm / tools / dshRuntime / scheduler / notify / search / repository / agents
-      内置模块（in-process）+ 已装第三方模块
-        notes_add：dsh ctx.tools（occupation-notes）+ Electron JSON 退路
-        monitor_refresh / payments_sync / micro_scan → Electron ctx.tools
-    同一 dsh --profile opc：中栏闲聊与 Local API /agent/task（in-box 含 dsh-sdk-app）
-    `$DSH_HOME/profiles/opc`：occupation-* + 第三方 dsh.bundle；工作台停用回写用户 patch
-    Completions 只走 ctx.llm（拆解 / 选品润色 / 弹药 / 公众号）
-  preload：workbench.invoke / subscribe（按模块校验）
-  渲染进程：左栏成员与项目 · 中栏会话 · 右栏 Panel
+```
+src/kernel/     启动、IPC、存储、待办、导航、模块仓库、成员
+src/modules/    内置职业（参考实现）
+examples/       第三方模块最小示例
+docs/           架构与 ADR
 ```
 
-外壳心智（成员 / 项目 / Skill，而不是侧栏功能页）见 [docs/agent-workspace-design.md](docs/agent-workspace-design.md)。运行时宿主见 [docs/adr/0005-dsh-as-composition-host.md](docs/adr/0005-dsh-as-composition-host.md)。
+运行时是 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。同类桌面宿主见 [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
-## 生态
-
-模块契约对齐 DeepSeek Harness 社区约定。发现、安装、对照实现时，优先看官方话题和星标靠前的桌面 / 插件项目：
-
-| 项目 | 星标量级 | 和本仓库的关系 |
-| --- | --- | --- |
-| [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) | 运行时本体 | 本机 `pnpm dsh`；现状是 `dsh --profile opc` 一棵进程 |
-| [nexu-io/open-design](https://github.com/nexu-io/open-design) | 设计工作台 | 同样是本地优先桌面 + dsh 一等运行时 |
-| [Devin-AXIS/iPolloWork](https://github.com/Devin-AXIS/iPolloWork) | 多引擎 Agent 工作台 | 成员 / 项目 / 插件生命周期可对照 |
-| [anywhere-labs/dsh-desktop](https://github.com/anywhere-labs/dsh-desktop) | DSH 桌面宿主 | 把 Harness 装进可分发客户端 |
-| [zhu1090093659/dsh-web](https://github.com/zhu1090093659/dsh-web) | Web GUI 插件全家桶 | 任务看板、远程、皮肤的插件切法 |
-| [liustack/modlens](https://github.com/liustack/modlens) | 视觉插件 | 单能力插件的 README / 安装体验 |
-| [dsh-market/dsh-market](https://github.com/dsh-market/dsh-market) | 应用内插件市场 | 扩展页的发现与一键安装可对照 |
-| [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | 精选列表 | 社区插件目录 |
-
-完整列表：[github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
-
-作者日常用这张工作台跑 [SoloKit](https://www.solokit.run/) 产品线（Studio / PromptMan / SaaS Cost / [CutWeave](https://github.com/Alfred-Lau/cutweave) 等）和 [榆关](https://pen.bitou.tech/) 工具墙。那是一份配置，不是主干。
-
-## 开源计划
-
-公开主干在 [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)，只有 `main`，不带旧分支和签名历史。仓库首页默认展示 [英文 README](README.md)。
-
-1. 主干：`src/kernel`、模块 SDK、示例模块与治理文件；个人目录默认值不进仓库。
-2. [MIT License](LICENSE)，对齐 Cordis / dsh。
-3. 贡献见 [CONTRIBUTING.md](CONTRIBUTING.md) / [CONTRIBUTING.en.md](CONTRIBUTING.en.md)，安全见 [SECURITY.md](SECURITY.md)。UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。
-4. 打包签名身份走环境变量，不进开源快照；不要上传已签名的 `.app` / `.dmg`。
-
-欢迎对**主干契约**提 PR：内核服务、模块 manifest、capability、示例模块、文档。不要把个人站点、签名或密钥默认值加进 `src/shared`。
+作者用这张台跑 [SoloKit](https://www.solokit.run/) 和 [榆关](https://pen.bitou.tech/)。那是一份配置，不是主干默认值。
 
 ## 贡献
 
-- [贡献指南](CONTRIBUTING.md) · [Contributing (English)](CONTRIBUTING.en.md)
-- [行为准则](CODE_OF_CONDUCT.md)
-- [安全披露](SECURITY.md)
-- 好上手的第一刀：补英文词条、写 `examples/` 模块、给某个职业加测试、给 Issue 标 `good first issue`
+公开主干：[Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)。欢迎改内核服务、模块 manifest、capability、示例和文档。
 
-提交即按 [MIT License](LICENSE) 授权给本项目。版权声明见许可证全文。
+不要把个人站点清单、签名身份、真实密钥或本机绝对路径写进 `src/shared`。身份目录默认 `~/OPC-Fellows/agents/{标题}`。对齐私有参考树只复制机制，见 [ADR 0007](docs/adr/0007-opensource-sanitization.md)。
+
+- [贡献指南](CONTRIBUTING.md) · [Contributing (English)](CONTRIBUTING.en.md)
+- [行为准则](CODE_OF_CONDUCT.md) · [安全披露](SECURITY.md)
+- 好上手：补英文词条、写 `examples/` 模块、给某个职业加测试
+
+UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。提交即按 [MIT License](LICENSE) 授权。
 
 ## 安全
 
 - 业务数据在本机 `userData`，不经过项目自己的服务器。
-- 微信情报只读本机索引，不上传聊天、不把 key 送出本机、不代发消息。
-- 邮件整理只读收件箱并写本机草稿；线上邮箱用专用密码，走 `safeStorage`，不代发。
-- 第三方模块按 capability 白名单运行；高危权限安装前确认。
-- 发现漏洞请走 [SECURITY.md](SECURITY.md)，不要在公开 Issue 里贴凭据或用户数据。
+- 微信情报只读本机索引；邮件只整理、写草稿，不代发。
+- 第三方模块按 capability 白名单运行。
+- 漏洞走 [SECURITY.md](SECURITY.md)，不要在公开 Issue 里贴凭据。
 
-## 许可与致谢
+## 许可
 
-[MIT License](LICENSE)。运行时依赖 [Cordis](https://github.com/cordiverse/cordis) 与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。封面与徽章对齐 [dsh-plugin](https://github.com/topics/dsh-plugin) 生态里桌面工作台的常见呈现。
+[MIT License](LICENSE)。运行时依赖 [Cordis](https://github.com/cordiverse/cordis) 与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。
 
-作者 [bitou.tech](https://pen.bitou.tech/)。想一起改主干，见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+站点：[OPC-Fellows](https://opc-fellows.solokit.run/) · 维护者 [bitou.tech](https://pen.bitou.tech/)

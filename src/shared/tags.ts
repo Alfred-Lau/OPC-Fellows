@@ -1,4 +1,3 @@
-export const MONITOR_AGENT_ID = 'monitor'
 export const OPC_PROJECT_TAG = 'OPC项目'
 
 /** 待办上的默认项目标签，设置里可改。 */

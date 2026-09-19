@@ -10,6 +10,7 @@ import {
   type ModuleSource,
   type ModuleStatus,
 } from '../../shared/module'
+import { isOpensourceDefaultModule } from '../../shared/templates'
 import { readConfig, writeConfig } from '../config'
 import { dshHome, writeOpcWorkbenchPatch } from '../../shared/opc-profile'
 
@@ -347,7 +348,7 @@ export class ModulesService extends Service {
         definition.source === 'builtin'
           ? builtinSpecifier(definition.manifest.id)
           : (definition.path ?? builtinSpecifier(definition.manifest.id)),
-      disabled: false,
+      disabled: definition.source === 'builtin' && !isOpensourceDefaultModule(definition.manifest.id),
       config: {},
     }
   }

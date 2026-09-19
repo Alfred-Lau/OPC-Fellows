@@ -19,7 +19,7 @@ export interface ModuleStore {
  */
 export class StorageService extends Service {
   constructor(ctx: Context) {
-    super(ctx, 'storage')
+    super(ctx, 'moduleStore')
   }
 
   open(namespace: string): ModuleStore {
@@ -57,6 +57,6 @@ export function writeJson(path: string, data: unknown): void {
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
-    storage: StorageService
+    moduleStore: StorageService
   }
 }

@@ -2,6 +2,7 @@ node_modules
 out
 dist
 resources/dsh
+build/dsh-host
 .DS_Store
 *.log
 *.tsbuildinfo
@@ -14,3 +15,4 @@ resources/dsh
 *.mobileprovision
 .idea
 *.local
+*.tgz

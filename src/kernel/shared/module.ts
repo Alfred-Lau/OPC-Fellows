@@ -59,7 +59,7 @@ export interface ModuleManifest {
   capabilities: Capability[]
   /**
    * 允许注册的 IPC 通道前缀，缺省为模块 id 本身。
-   * 少数模块的历史通道名和 id 对不上（如 x-push 用 xpush / xbridge），
+   * 少数模块的历史通道名和 id 对不上时，
    * 显式列出来，顺便挡住模块注册到别人命名空间的可能。
    */
   namespaces?: string[]

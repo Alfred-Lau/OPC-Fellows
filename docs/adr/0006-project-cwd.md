@@ -15,10 +15,10 @@ dsh 在 `initialize` 时把 `cwd` 交给 `@deepseek-ai/dsh-fs` / `dsh-shell` / `
 | OPC | 落在 |
 |---|---|
 | 项目文件夹 | `ThreadRecord.folderPath`；`DshRuntimeService.prompt({ cwd })`；cwd 变了就停掉 SDK 再 `initialize` |
-| 引用文件 | `ThreadRecord.attachedFiles`；拼进 `composeDshTurn` 的用户段 |
+| 引用文件 | `ThreadRecord.attachedFiles`；路径指针进 prompt，由 dsh-fs 读正文 |
 | 引用技能 | 海框第三项 → 现有 `listComposerSkills` / `/` 插入 |
 | Workspace File | 右栏树和 dsh-fs 都读这个文件夹；随手记 JSON 仍是 Artifact，项目会话里会多写一份 `notes/*.md` |
-| 成员默认工作区 | 没选文件夹时的回落，仍是 `userData/workspaces/<slug>` |
+| 成员默认工作区 | 没选文件夹时回落身份目录 `~/OPC-Fellows/agents/{标题}`；旧 `userData/workspaces` 不自动搬家 |
 
 今日（inbox）不是项目，海框里选文件夹 / 文件会提示去开项目；引用技能仍可用。
 

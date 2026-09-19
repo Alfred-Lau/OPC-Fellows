@@ -5,7 +5,7 @@
  */
 export type WorkbenchView = string
 
-export type FeatureKind = 'view' | 'harness'
+export type FeatureKind = 'view'
 
 export interface WorkbenchFeature {
   id: string

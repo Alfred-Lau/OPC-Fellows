@@ -53,7 +53,13 @@ if (!gotLock) {
     const booted = await bootKernel(quitApp)
     kernel = booted
     openInitialView(booted)
-    startLocalApi(booted.dshRuntime)
+    startLocalApi({
+      prompt: (input) => booted.dshRuntime.prompt(input),
+      catalog: () => booted.opcTools.catalog(),
+      currentTurn: (sessionId) => booted.dshRuntime.currentTurn(sessionId),
+      invoke: (name, args, meta) => booted.opcTools.invoke(name, args, meta),
+      askApproval: (input) => booted.dshRuntime.askApproval(input),
+    })
   })
 
   app.on('activate', () => {

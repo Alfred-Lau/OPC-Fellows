@@ -1,8 +1,10 @@
 /**
  * OPC 职业工具的目录与调用协议。
- * 活在自建 Cordis 的 ctx.tools 上；模型在 dsh session 里用一段 JSON 点名，
- * 主进程执行后再把结果送回同一棵 SDK 树。不 import dsh-tools 包。
+ * 主路径是 dsh `defineTool` + Local API；JSON 点名只作一轮退路。
  */
+
+const NATIVE_WRITE_TOOLS = new Set(['edit', 'write', 'bash', 'shell', 'apply_patch', 'fs_write'])
+
 
 import type { ShortListing } from '../../shared/listing.ts'
 
@@ -40,8 +42,13 @@ export function toolResultListing(result: OpcToolExecuteResult): ShortListing | 
   return typeof result === 'string' ? undefined : result.listing
 }
 
-export function isWriteTool(tool: Pick<OpcToolInfo, 'effect'>): boolean {
-  return tool.effect !== 'read'
+export function isWriteTool(tool: Pick<OpcToolInfo, 'effect' | 'name'>): boolean {
+  return tool.effect !== 'read' || isNativeWriteTool(tool.name)
+}
+
+export function isNativeWriteTool(name: string): boolean {
+  const tool = name.trim().toLowerCase()
+  return NATIVE_WRITE_TOOLS.has(tool) || /^(edit|write|bash|shell)_/.test(tool)
 }
 
 export interface OpcToolCall {

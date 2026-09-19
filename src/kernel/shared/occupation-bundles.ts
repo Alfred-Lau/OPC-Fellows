@@ -4,21 +4,12 @@ import type { DshBundleManifest } from './dsh-manifest.ts'
 import { OPC_PROFILE_NAME } from './opc-profile.ts'
 
 /**
- * 已经在 Electron `ctx.tools` 上挂了工具的内置职业。
- * 桌面 Panel 仍走 `src/modules/*.ts`。记下在 dsh 树上挂 `notes_add`；
- * 刷新态势 / 收款 / 选品仍是空入口，不在这一刀重写业务。
- * 停用时回写 `{ id: opc-<id>, disabled: true }`。
+ * 开源版不再随包附带 occupation-* 职业包。dsh 树上只挂 opc-kernel。
  */
-export const OCCUPATION_TOOL_BUNDLES = [
-  { id: 'notes', packageName: 'ownworkbuddy-occupation-notes', dirName: 'occupation-notes' },
-  { id: 'monitor', packageName: 'ownworkbuddy-occupation-monitor', dirName: 'occupation-monitor' },
-  { id: 'payments', packageName: 'ownworkbuddy-occupation-payments', dirName: 'occupation-payments' },
-  { id: 'micro', packageName: 'ownworkbuddy-occupation-micro', dirName: 'occupation-micro' },
-] as const
+export const OCCUPATION_TOOL_BUNDLES: readonly { id: string; packageName: string; dirName: string }[] = []
 
-export type OccupationToolId = (typeof OCCUPATION_TOOL_BUNDLES)[number]['id']
+export type OccupationToolId = string
 
-/** 内置职业与 occupation 包共用的 `dsh.bundle` 声明。路径相对包根。 */
 export const OCCUPATION_DSH_BUNDLE: DshBundleManifest = { patch: './cordis.patch.yml' }
 
 export interface OccupationPackageRef {
@@ -48,7 +39,6 @@ export function occupationPackageDirs(repoRoot: string): OccupationPackageRef[] 
   return refs
 }
 
-/** asar 里没有 packages/，打包后再看 extraResources。 */
 export function occupationSearchRoots(appPath: string, resourcesPath?: string): string[] {
   const roots: string[] = []
   for (const root of [appPath, resourcesPath]) {
@@ -85,7 +75,6 @@ export function profileDependencyNames(profilePkg: unknown): string[] {
   return Object.keys(dependencies as Record<string, unknown>)
 }
 
-/** 已经写进 opc `dependencies` 的职业包不再 `dsh plugin add`。 */
 export function occupationDirsToAdd(
   profilePkg: unknown,
   refs: readonly OccupationPackageRef[],

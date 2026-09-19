@@ -16,6 +16,7 @@ export interface ToolInvokeMeta {
   agentId?: string
   depth?: number
   workspaceRoot?: string
+  identityDirectory?: string
   writeAllowed?: boolean
 }
 
@@ -25,15 +26,15 @@ export interface ToolInvokeResult extends SkillReply {
 }
 
 /**
- * 职业模块和内核工具包往这里挂工具。执行仍在 Electron 主进程，
- * 模型通过 dsh session 里的 JSON 协议选中它们（见 opc-tools.ts）。
+ * 职业模块和内核工具包往这里挂工具（ctx.opcTools，不占 dsh-base 的 ctx.tools）。
+ * 模型主路径经 opc-kernel defineTool + Local API；JSON 点名只作退路。
  */
 export class ToolsService extends Service {
   private readonly tools = new Map<string, OpcToolDefinition>()
   private current: ToolInvokeMeta | undefined
 
   constructor(ctx: Context) {
-    super(ctx, 'tools')
+    super(ctx, 'opcTools')
   }
 
   register(tool: OpcToolDefinition): void {
@@ -109,6 +110,6 @@ export class ToolsService extends Service {
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
-    tools: ToolsService
+    opcTools: ToolsService
   }
 }

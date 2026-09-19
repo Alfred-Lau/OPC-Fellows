@@ -1,22 +1,17 @@
-import type { MonitorSnapshot } from './monitor.ts'
-import type { ProductIdea } from './micro-sourcing.ts'
-import { matchProduct, type OpcProduct } from './products.ts'
+import { getProducts, type OpcProduct } from './products.ts'
 import type { SocialDraftInput, SocialPlatformId } from './social.ts'
 
 export interface ProductFeature {
   product: OpcProduct
   title: string
-  source: 'git' | 'vercel' | 'traffic' | 'catalog' | 'idea'
+  source: 'catalog'
   at: string | null
   url: string
-  ideaId?: string
 }
 
 export const DEFAULT_SOCIAL_SIGNATURE = ''
 
-const FEATURE_WINDOW_DAYS = 21
 const MAX_FEATURES = 2
-const TRAFFIC_GROW_MIN = 8
 
 let socialSignature = DEFAULT_SOCIAL_SIGNATURE
 
@@ -29,115 +24,14 @@ export function setSocialSignature(value: string): void {
   socialSignature = next || DEFAULT_SOCIAL_SIGNATURE
 }
 
-export function collectFeatures(snapshot: MonitorSnapshot, now = new Date()): ProductFeature[] {
-  const cutoff = now.getTime() - FEATURE_WINDOW_DAYS * 86400000
-  const seen = new Set<string>()
-  const ranked: ProductFeature[] = []
-  const scored: Array<ProductFeature & { score: number }> = []
-
-  for (const project of snapshot.projects) {
-    const product = matchProduct(project.name)
-    if (!product || !project.lastCommit) {
-      continue
-    }
-    if (project.lastCommitAt && Date.parse(project.lastCommitAt) < cutoff) {
-      continue
-    }
-    scored.push({
-      product,
-      title: project.lastCommit,
-      source: 'git',
-      at: project.lastCommitAt,
-      url: product.url,
-      score: 30 + recencyBonus(project.lastCommitAt, now),
-    })
-  }
-
-  for (const project of snapshot.vercel.projects) {
-    const product = matchProduct(project.name)
-    if (!product) {
-      continue
-    }
-    if (project.lastCommitMessage) {
-      scored.push({
-        product,
-        title: project.lastCommitMessage,
-        source: 'vercel',
-        at: project.updatedAt ? new Date(project.updatedAt).toISOString() : null,
-        url: project.url ? withScheme(project.url) : product.url,
-        score: 24 + recencyBonus(project.updatedAt ? new Date(project.updatedAt).toISOString() : null, now),
-      })
-    }
-    const analytics = project.analytics
-    if (analytics?.isGrowing && analytics.todayPageviews >= TRAFFIC_GROW_MIN && (analytics.deltaPct ?? 0) > 0) {
-      scored.push({
-        product,
-        title: `近 24 小时浏览 ↑${analytics.deltaPct}%（${analytics.todayPageviews}）`,
-        source: 'traffic',
-        at: snapshot.vercel.fetchedAt,
-        url: project.url ? withScheme(project.url) : product.url,
-        score: 18 + Math.min(analytics.deltaPct ?? 0, 40) / 4,
-      })
-    }
-  }
-
-  scored.sort((left, right) => right.score - left.score)
-  for (const item of scored) {
-    const key = `${item.product.id}:${slug(item.title)}`
-    if (seen.has(key)) {
-      continue
-    }
-    seen.add(key)
-    ranked.push({
-      product: item.product,
-      title: item.title,
-      source: item.source,
-      at: item.at,
-      url: item.url,
-    })
-    if (ranked.length >= MAX_FEATURES) {
-      return ranked
-    }
-  }
-
-  if (ranked.length === 0) {
-    const fallback = matchProduct(snapshot.projects[0]?.name ?? '') ?? matchProduct(snapshot.vercel.projects[0]?.name ?? '')
-    const product = fallback ?? null
-    if (product) {
-      ranked.push({
-        product,
-        title: product.pitch,
-        source: 'catalog',
-        at: null,
-        url: product.url,
-      })
-    }
-  }
-
-  return ranked
-}
-
-export function featureFromIdea(idea: ProductIdea): ProductFeature {
-  const pitch = idea.pain || idea.workaround || idea.title
-  return {
-    product: {
-      id: `idea:${idea.id}`,
-      line: 'bitou',
-      name: idea.title.slice(0, 24) || idea.title,
-      nameEn: idea.title.slice(0, 48) || idea.title,
-      url: '',
-      pitch,
-      pitchEn: pitch,
-      aliases: [],
-      tagsZh: [idea.domain],
-      tagsEn: [idea.domain],
-    },
-    title: idea.title,
-    source: 'idea',
-    at: idea.lastSeenAt,
-    url: '',
-    ideaId: idea.id,
-  }
+export function collectFeatures(products = getProducts()): ProductFeature[] {
+  return products.slice(0, MAX_FEATURES).map((product) => ({
+    product,
+    title: product.pitch,
+    source: 'catalog',
+    at: null,
+    url: product.url,
+  }))
 }
 
 export function generateSocialCopy(features: ProductFeature[]): SocialDraftInput[] {
@@ -353,7 +247,6 @@ function draft(
     outline,
     tags,
     mediaBrief,
-    ...(feature.ideaId ? { ideaId: feature.ideaId } : {}),
   }
 }
 
@@ -361,12 +254,6 @@ function englishHook(feature: ProductFeature): string {
   switch (feature.source) {
     case 'catalog':
       return feature.product.pitchEn
-    case 'traffic':
-      return `${feature.product.nameEn} traffic is up — ${feature.title}`
-    case 'idea':
-    case 'git':
-    case 'vercel':
-      return clip(feature.title.replace(/\s+/g, ' '), 90)
     default: {
       const exhaustive: never = feature.source
       return exhaustive
@@ -378,12 +265,6 @@ function chineseHook(feature: ProductFeature): string {
   switch (feature.source) {
     case 'catalog':
       return feature.product.pitch
-    case 'traffic':
-      return `${feature.product.name} 流量在涨：${feature.title}`
-    case 'idea':
-    case 'git':
-    case 'vercel':
-      return clip(feature.title.replace(/\s+/g, ' '), 42)
     default: {
       const exhaustive: never = feature.source
       return exhaustive
@@ -416,27 +297,3 @@ export function clip(value: string, max: number): string {
   return `${chars.slice(0, Math.max(0, max - 1)).join('')}…`
 }
 
-function recencyBonus(iso: string | null, now: Date): number {
-  if (!iso) {
-    return 0
-  }
-  const age = now.getTime() - Date.parse(iso)
-  if (!Number.isFinite(age) || age < 0) {
-    return 0
-  }
-  const days = age / 86400000
-  if (days < 1) {
-    return 12
-  }
-  if (days < 3) {
-    return 8
-  }
-  if (days < 7) {
-    return 4
-  }
-  return 0
-}
-
-function withScheme(url: string): string {
-  return /^https?:\/\//i.test(url) ? url : `https://${url}`
-}

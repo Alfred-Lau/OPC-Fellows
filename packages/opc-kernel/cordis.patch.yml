@@ -1,5 +1,24 @@
-# Electron 主进程走 applyOpcKernel。dsh --profile opc 只挂这个空入口，
-# 避免在 Agent 树上碰 BrowserWindow / ipcMain。
+# Electron 主进程走 applyOpcKernel。dsh --profile opc 挂这个入口：
+# 用 defineTool 把工作台工具代理进来，执行经 Local API 回主进程，不碰 BrowserWindow。
+# 覆盖 dsh-base 的 tool-subagent：官方 subagent 只读调研。
 - insert:
     - id: opc-kernel
       name: ownworkbuddy-kernel
+- id: tool-subagent
+  config:
+    provider: spawn
+    toolName: subagent
+    backgroundMode: one-shot
+    enableRunInBackground: false
+    maxDepth: 1
+    persona: 你是只读调研子循环。用中文给出结论和依据。不要改文件、不要跑会改状态的命令、不要再派子任务。
+    toolFilter:
+      allow:
+        - read
+        - glob
+        - grep
+        - read_image
+        - web_search
+        - web_fetch
+- id: tool-subagent-fork
+  disabled: true

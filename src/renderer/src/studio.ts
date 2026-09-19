@@ -36,6 +36,13 @@ import {
 } from '../../kernel/shared/project-context-ui'
 import { splitAssistantPayload } from '../../kernel/shared/dsh-rpc'
 import {
+  composerModeOf,
+  offersComposerModes,
+  parseComposerMode,
+  storedComposerModeOf,
+  type ComposerMode,
+} from '../../kernel/shared/plan-mode'
+import {
   NEW_PROJECT_ID,
   PROJECT_DESC_MAX,
   PROJECT_TITLE_MAX,
@@ -111,20 +118,7 @@ export type StudioFocus = {
 
 type Activate = (view: string) => void
 
-const VIEWS_IN_TOOL = new Set([
-  'todos',
-  'notes',
-  'monitor',
-  'social-ammo',
-  'micro',
-  'growth',
-  'accounts',
-  'wxdraft',
-  'wxhub',
-  'mail',
-  'payments',
-  'extensions',
-])
+const VIEWS_IN_TOOL = new Set(['todos', 'social-ammo', 'extensions'])
 
 let activateView: Activate = () => undefined
 let navEntries: NavEntry[] = []
@@ -132,13 +126,14 @@ let agents: AgentRecord[] = []
 let threads: ThreadRecord[] = []
 let messages: ThreadMessage[] = []
 let focus: StudioFocus = { threadId: INBOX_THREAD_ID, view: 'home' }
-let selectedTemplateId = 'blank'
+let selectedTemplateId = 'social-ammo'
 let cloneFrom: string | undefined
 let configureAgentId: string | undefined
 let mentionIndex = 0
 let mentionHits: AgentRecord[] = []
 let skillHits: ComposerSkill[] = []
 let chatting = false
+let composerMode: ComposerMode = 'agent'
 let railMarks: RailActivityMark[] = []
 const railErrorTimers = new Map<string, number>()
 let typingAgentId = ''
@@ -795,12 +790,11 @@ async function applyAction(action: DispatchAction, threadId: string): Promise<vo
                 await replySkillMiss(threadId, agentId, action.text)
                 return
               case 'chat':
-                await window.ownworkbuddy.agents.chat(threadId, agentId)
+                await window.ownworkbuddy.agents.chat(threadId, agentId, { mode: composerMode })
                 return
               case 'note':
-                await window.ownworkbuddy.notes.add(action.text)
                 await window.ownworkbuddy.agents.writeWorkspaceNote?.(threadId, action.text)
-                await window.ownworkbuddy.agents.reply(threadId, `已记到随手记：${action.text}`, agentId)
+                await window.ownworkbuddy.agents.reply(threadId, `已写入工作区：${action.text}`, agentId)
                 return
               case 'miss':
                 await replySkillMiss(threadId, agentId, action.text)
@@ -823,9 +817,8 @@ async function applyAction(action: DispatchAction, threadId: string): Promise<vo
       return
     case 'note':
       if (action.text) {
-        await window.ownworkbuddy.notes.add(action.text)
         await window.ownworkbuddy.agents.writeWorkspaceNote?.(threadId, action.text)
-        await window.ownworkbuddy.agents.reply(threadId, `已记到随手记：${action.text}`, action.agentId)
+        await window.ownworkbuddy.agents.reply(threadId, `已写入工作区：${action.text}`, action.agentId)
         if (action.agentId) {
           await attachAgent(action.agentId)
         }
@@ -844,7 +837,7 @@ async function applyAction(action: DispatchAction, threadId: string): Promise<vo
         paintTyping(agentId)
         await withAgentWork(agentId, threadId, 'thinking', async () => {
           try {
-            await window.ownworkbuddy.agents.chat(threadId, agentId)
+            await window.ownworkbuddy.agents.chat(threadId, agentId, { mode: composerMode })
           } catch (error) {
             markRailError(agentId, threadId)
             await window.ownworkbuddy.agents.reply(
@@ -1239,6 +1232,7 @@ function renderThread(): void {
   feed.hidden = !showFeed
   renderTaskPage()
   paintComposerContext()
+  paintComposerModes()
   feed.replaceChildren()
   if (!showFeed) {
     return
@@ -1406,7 +1400,7 @@ function messageEl(message: ThreadMessage): HTMLElement {
 
 export async function openCreateAgent(): Promise<void> {
   const dialog = required('#create-agent', HTMLDialogElement)
-  selectedTemplateId = 'blank'
+  selectedTemplateId = 'social-ammo'
   cloneFrom = undefined
   await renderPalette()
   await fillForm()
@@ -2895,6 +2889,51 @@ function paintComposerContext(): void {
   const taskThread = selectedProjectId ? threads.find((item) => item.id === selectedProjectId) : undefined
   paintAttachmentChips('inbox', canBindProjectFolder(inboxThread) ? inboxThread?.attachedFiles ?? [] : [])
   paintAttachmentChips('task', taskThread?.attachedFiles ?? pendingFiles)
+}
+
+function currentComposerAgent(): AgentRecord | undefined {
+  const thread = threads.find((item) => item.id === focus.threadId)
+  const agentId = focus.agentId ?? thread?.workspaceAgentId ?? thread?.agentIds[0]
+  return agents.find((item) => item.id === agentId)
+}
+
+function paintComposerModes(): void {
+  const host = document.querySelector('#composer-modes')
+  if (!(host instanceof HTMLElement)) {
+    return
+  }
+  const thread = threads.find((item) => item.id === focus.threadId)
+  const agent = currentComposerAgent()
+  const visible = Boolean(agent && offersComposerModes(agent) && thread?.kind !== 'inbox')
+  host.hidden = !visible
+  if (!visible || !agent || !thread) {
+    return
+  }
+  composerMode = composerModeOf(storedComposerModeOf(thread, agent.id) ?? parseComposerMode(thread.composerMode), agent)
+  const labels: Record<ComposerMode, string> = { ask: '问', plan: '计划', agent: '动手' }
+  host.replaceChildren()
+  for (const mode of ['ask', 'plan', 'agent'] as const) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.dataset.mode = mode
+    button.textContent = labels[mode]
+    button.className = `composer-mode${composerMode === mode ? ' is-current' : ''}`
+    button.addEventListener('click', () => {
+      void setComposerMode(mode)
+    })
+    host.append(button)
+  }
+}
+
+async function setComposerMode(mode: ComposerMode): Promise<void> {
+  const thread = threads.find((item) => item.id === focus.threadId)
+  const agent = currentComposerAgent()
+  composerMode = mode
+  if (thread && agent) {
+    const next = await window.ownworkbuddy.agents.setComposerMode(thread.id, agent.id, mode)
+    threads = threads.map((item) => (item.id === next.id ? next : item))
+  }
+  paintComposerModes()
 }
 
 function paintAttachmentChips(surface: ComposerSurface, files: readonly ProjectContextFile[]): void {

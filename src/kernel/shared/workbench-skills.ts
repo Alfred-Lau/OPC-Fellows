@@ -363,7 +363,7 @@ export function workbenchSkillSystemPrompt(
     `你是「${agent.title}」，正在执行赋能 Skill「${skill.title}」。`,
     agent.description,
     skill.prompt,
-    '用中文简洁回答。回复必须是 Markdown：集合用表格，步骤用列表。不要假装已经调用了收款、监控、选品等工具。',
+    '用中文简洁回答。回复必须是 Markdown：集合用表格，步骤用列表。不要假装已经调用了还没赋能的工具。',
   ]
     .filter((line) => line.trim())
     .join('\n')

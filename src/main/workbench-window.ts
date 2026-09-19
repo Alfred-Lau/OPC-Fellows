@@ -29,9 +29,6 @@ export function showWorkbench(view: WorkbenchView = 'home', highlightId?: string
         existing.webContents.send('todos:highlight', highlightId)
       }
     }
-    if (view === 'notes') {
-      existing.webContents.send('notes:focus-input')
-    }
     return existing
   }
 
@@ -71,9 +68,6 @@ export function showWorkbench(view: WorkbenchView = 'home', highlightId?: string
       if (highlightId) {
         window.webContents.send('todos:highlight', highlightId)
       }
-    }
-    if (view === 'notes') {
-      window.webContents.send('notes:focus-input')
     }
   })
 

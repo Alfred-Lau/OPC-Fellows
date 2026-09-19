@@ -18,56 +18,8 @@ import type {
   ProjectContextFile,
 } from '../kernel/shared/agent'
 import type { ToolEvent } from '../kernel/shared/tool-events'
-import type { MonitorCache, MonitorRefreshResult } from '../shared/monitor'
-import type { MicroSourcingSettings, MicroSourcingState, IdeaStatus } from '../shared/micro-sourcing'
-import type {
-  AccountMaterialInput,
-  AccountPostInput,
-  AccountsState,
-  DayMetrics,
-  SocialAccountInput,
-} from '../shared/accounts'
-import type {
-  GrowthChannelInput,
-  GrowthExperimentInput,
-  GrowthLoopInput,
-  GrowthState,
-} from '../shared/growth'
 import type { SocialMetricsInput, SocialState } from '../shared/social'
-import type {
-  CreateCheckoutInput,
-  CreateDiscountInput,
-  CreateProductInput,
-  ExpenseRecordInput,
-  ManualReceiptInput,
-  PaymentActionResult,
-  PaymentSettingsInput,
-  PaymentsState,
-  PayoutRecordInput,
-  SubscriptionAction,
-} from '../shared/payments'
-import type { XPushSendResult, XPushStatus } from '../shared/x-push'
-import type {
-  IngestedDrop,
-  PickedAssets,
-  PickedMarkdown,
-  WxDraftInput,
-  WxDraftProgress,
-  WxDraftRecord,
-  WxDraftRunResult,
-  WxDraftSettingsInput,
-  WxDraftViewState,
-} from '../shared/wx-draft'
-import type {
-  WechatHubSettings,
-  WechatHubState,
-  WechatLookupKind,
-  WechatTriageDecision,
-} from '../shared/wechat-hub'
-import type { MailAccountInput, MailState, MailTriage } from '../shared/mail'
-import type { PetAlert } from '../shared/pet'
 import type { HostStatus } from '../shared/status'
-import type { NoteItem } from '../shared/note'
 import type { LlmKeyResult, LlmSettings } from '../shared/deepseek'
 import type { ThemePreference } from '../shared/theme'
 import type { DecomposeInput, DecomposeResult, DraftTodo, TodoItem } from '../shared/todo'
@@ -75,12 +27,6 @@ import type { DecomposeInput, DecomposeResult, DraftTodo, TodoItem } from '../sh
 type ThemeState = { preference: ThemePreference; dark: boolean }
 
 contextBridge.exposeInMainWorld('ownworkbuddy', {
-  openHarness: () => ipcRenderer.invoke('harness:open') as Promise<void>,
-  harness: {
-    origin: () =>
-      ipcRenderer.invoke('harness:origin') as Promise<{ origin?: string; error?: string }>,
-    open: () => ipcRenderer.invoke('harness:open') as Promise<void>,
-  },
   /**
    * 内核通道，永远可用。模块自己的通道会随模块停用而消失，
    * 这一组不会 —— 否则关掉模块之后就没法再打开它了。
@@ -181,8 +127,12 @@ contextBridge.exposeInMainWorld('ownworkbuddy', {
         invoke?: string
         text: string
       }>,
-    chat: (threadId: string, agentId: string) =>
-      ipcRenderer.invoke('agents:chat', threadId, agentId) as Promise<ThreadMessage>,
+    chat: (threadId: string, agentId: string, options?: { mode?: 'ask' | 'plan' | 'agent' }) =>
+      ipcRenderer.invoke('agents:chat', threadId, agentId, options) as Promise<ThreadMessage>,
+    setComposerMode: (threadId: string, agentId: string, mode: 'ask' | 'plan' | 'agent') =>
+      ipcRenderer.invoke('agents:set-composer-mode', threadId, agentId, mode) as Promise<
+        AgentSnapshot['threads'][number]
+      >,
     reply: (threadId: string, text: string, agentId?: string, listing?: ShortListing, thinking?: string) =>
       ipcRenderer.invoke('agents:reply', threadId, text, agentId, listing, thinking) as Promise<ThreadMessage>,
     messages: (threadId: string) => ipcRenderer.invoke('agents:messages', threadId) as Promise<ThreadMessage[]>,
@@ -268,176 +218,12 @@ contextBridge.exposeInMainWorld('ownworkbuddy', {
       }
     },
   },
-  monitor: {
-    refresh: () => ipcRenderer.invoke('monitor:refresh') as Promise<MonitorRefreshResult>,
-    cached: () => ipcRenderer.invoke('monitor:cached') as Promise<MonitorCache | null>,
-  },
-  micro: {
-    state: () => ipcRenderer.invoke('micro:state') as Promise<MicroSourcingState>,
-    scan: () => ipcRenderer.invoke('micro:scan') as Promise<MicroSourcingState>,
-    saveSettings: (input: Partial<MicroSourcingSettings>) =>
-      ipcRenderer.invoke('micro:save-settings', input) as Promise<MicroSourcingState>,
-    patchIdea: (id: string, patch: { status?: IdeaStatus; note?: string }) =>
-      ipcRenderer.invoke('micro:patch-idea', id, patch) as Promise<MicroSourcingState>,
-    onChanged: (callback: (state: MicroSourcingState) => void) => {
-      const listener = (_event: unknown, next: MicroSourcingState): void => {
-        callback(next)
-      }
-      ipcRenderer.on('micro:changed', listener)
-      return () => {
-        ipcRenderer.removeListener('micro:changed', listener)
-      }
-    },
-  },
   social: {
     state: () => ipcRenderer.invoke('social:state') as Promise<SocialState>,
-    generate: (input?: { ideaId?: string }) => ipcRenderer.invoke('social:generate', input) as Promise<SocialState>,
+    generate: () => ipcRenderer.invoke('social:generate') as Promise<SocialState>,
     publish: (id: string, url: string) => ipcRenderer.invoke('social:publish', id, url) as Promise<SocialState>,
     discard: (id: string) => ipcRenderer.invoke('social:discard', id) as Promise<SocialState>,
     record: (input: SocialMetricsInput) => ipcRenderer.invoke('social:record', input) as Promise<SocialState>,
-  },
-  xPush: {
-    status: () => ipcRenderer.invoke('xpush:status') as Promise<XPushStatus>,
-    send: (draftId: string) => ipcRenderer.invoke('xpush:send', draftId) as Promise<XPushSendResult>,
-  },
-  xBridge: {
-    dmDraft: (draftId: string) => ipcRenderer.invoke('xbridge:dm-draft', draftId) as Promise<{ ok: boolean; error?: string; queueLength?: number }>,
-    status: () => ipcRenderer.invoke('xbridge:status') as Promise<{ running: boolean; queueLength: number; lastResult: { taskId: string; ok: boolean; error?: string; at: string } | null }>,
-  },
-  accounts: {
-    state: () => ipcRenderer.invoke('accounts:state') as Promise<AccountsState>,
-    saveAccount: (input: SocialAccountInput) =>
-      ipcRenderer.invoke('accounts:save-account', input) as Promise<AccountsState>,
-    removeAccount: (id: string) => ipcRenderer.invoke('accounts:remove-account', id) as Promise<AccountsState>,
-    saveMaterial: (input: AccountMaterialInput) =>
-      ipcRenderer.invoke('accounts:save-material', input) as Promise<AccountsState>,
-    removeMaterial: (id: string) => ipcRenderer.invoke('accounts:remove-material', id) as Promise<AccountsState>,
-    addPost: (accountId: string, date: string, input: AccountPostInput) =>
-      ipcRenderer.invoke('accounts:add-post', accountId, date, input) as Promise<AccountsState>,
-    removePost: (accountId: string, date: string, postId: string) =>
-      ipcRenderer.invoke('accounts:remove-post', accountId, date, postId) as Promise<AccountsState>,
-    saveMetrics: (accountId: string, date: string, metrics: Partial<DayMetrics>) =>
-      ipcRenderer.invoke('accounts:save-metrics', accountId, date, metrics) as Promise<AccountsState>,
-    setMaterials: (accountId: string, date: string, materialIds: string[]) =>
-      ipcRenderer.invoke('accounts:set-materials', accountId, date, materialIds) as Promise<AccountsState>,
-  },
-  growth: {
-    state: () => ipcRenderer.invoke('growth:state') as Promise<GrowthState>,
-    saveExperiment: (input: GrowthExperimentInput) =>
-      ipcRenderer.invoke('growth:save-experiment', input) as Promise<GrowthState>,
-    removeExperiment: (id: string) => ipcRenderer.invoke('growth:remove-experiment', id) as Promise<GrowthState>,
-    saveLoop: (input: GrowthLoopInput) => ipcRenderer.invoke('growth:save-loop', input) as Promise<GrowthState>,
-    removeLoop: (id: string) => ipcRenderer.invoke('growth:remove-loop', id) as Promise<GrowthState>,
-    saveChannel: (input: GrowthChannelInput) =>
-      ipcRenderer.invoke('growth:save-channel', input) as Promise<GrowthState>,
-    removeChannel: (id: string) => ipcRenderer.invoke('growth:remove-channel', id) as Promise<GrowthState>,
-  },
-  payments: {
-    state: () => ipcRenderer.invoke('payments:state') as Promise<PaymentsState>,
-    sync: () => ipcRenderer.invoke('payments:sync') as Promise<PaymentsState>,
-    setApiKey: (key: string | null) => ipcRenderer.invoke('payments:set-api-key', key) as Promise<PaymentActionResult>,
-    saveSettings: (input: PaymentSettingsInput) =>
-      ipcRenderer.invoke('payments:save-settings', input) as Promise<PaymentsState>,
-    saveReceipt: (input: ManualReceiptInput) => ipcRenderer.invoke('payments:save-receipt', input) as Promise<PaymentsState>,
-    removeReceipt: (id: string) => ipcRenderer.invoke('payments:remove-receipt', id) as Promise<PaymentsState>,
-    savePayout: (input: PayoutRecordInput) => ipcRenderer.invoke('payments:save-payout', input) as Promise<PaymentsState>,
-    removePayout: (id: string) => ipcRenderer.invoke('payments:remove-payout', id) as Promise<PaymentsState>,
-    saveExpense: (input: ExpenseRecordInput) => ipcRenderer.invoke('payments:save-expense', input) as Promise<PaymentsState>,
-    removeExpense: (id: string) => ipcRenderer.invoke('payments:remove-expense', id) as Promise<PaymentsState>,
-    clearEvents: () => ipcRenderer.invoke('payments:clear-events') as Promise<PaymentsState>,
-    createProduct: (input: CreateProductInput) =>
-      ipcRenderer.invoke('payments:create-product', input) as Promise<PaymentActionResult>,
-    createCheckout: (input: CreateCheckoutInput) =>
-      ipcRenderer.invoke('payments:create-checkout', input) as Promise<PaymentActionResult>,
-    billingPortal: (customerId: string) =>
-      ipcRenderer.invoke('payments:billing-portal', customerId) as Promise<PaymentActionResult>,
-    subscriptionAction: (id: string, action: SubscriptionAction) =>
-      ipcRenderer.invoke('payments:subscription-action', id, action) as Promise<PaymentActionResult>,
-    refund: (transactionId: string) => ipcRenderer.invoke('payments:refund', transactionId) as Promise<PaymentActionResult>,
-    createDiscount: (input: CreateDiscountInput) =>
-      ipcRenderer.invoke('payments:create-discount', input) as Promise<PaymentActionResult>,
-    deleteDiscount: (id: string) => ipcRenderer.invoke('payments:delete-discount', id) as Promise<PaymentActionResult>,
-    copy: (text: string) => ipcRenderer.invoke('payments:copy', text) as Promise<boolean>,
-    openDashboard: (path?: string) => ipcRenderer.invoke('payments:open-dashboard', path) as Promise<void>,
-    exportCsv: (name: string, csv: string) => ipcRenderer.invoke('payments:export-csv', name, csv) as Promise<boolean>,
-    onChanged: (callback: (state: PaymentsState) => void) => {
-      const listener = (_event: unknown, state: PaymentsState): void => {
-        callback(state)
-      }
-      ipcRenderer.on('payments:changed', listener)
-      return () => {
-        ipcRenderer.removeListener('payments:changed', listener)
-      }
-    },
-  },
-  wxdraft: {
-    state: () => ipcRenderer.invoke('wxdraft:state') as Promise<WxDraftViewState>,
-    saveSettings: (input: WxDraftSettingsInput) =>
-      ipcRenderer.invoke('wxdraft:save-settings', input) as Promise<WxDraftViewState>,
-    run: (input: WxDraftInput) => ipcRenderer.invoke('wxdraft:run', input) as Promise<WxDraftRunResult>,
-    stop: () => ipcRenderer.invoke('wxdraft:stop') as Promise<boolean>,
-    removeRecord: (id: string) =>
-      ipcRenderer.invoke('wxdraft:remove-record', id) as Promise<WxDraftRecord[]>,
-    copy: (text: string) => ipcRenderer.invoke('wxdraft:copy', text) as Promise<boolean>,
-    openExternal: (url: string) => ipcRenderer.invoke('wxdraft:open-external', url) as Promise<boolean>,
-    pickMarkdown: () => ipcRenderer.invoke('wxdraft:pick-markdown') as Promise<PickedMarkdown | null>,
-    pickAssets: () => ipcRenderer.invoke('wxdraft:pick-assets') as Promise<PickedAssets | null>,
-    ingestDrop: (paths: string[]) =>
-      ipcRenderer.invoke('wxdraft:ingest-drop', paths) as Promise<IngestedDrop>,
-    onProgress: (callback: (progress: WxDraftProgress) => void) => {
-      const listener = (_event: unknown, progress: WxDraftProgress): void => {
-        callback(progress)
-      }
-      ipcRenderer.on('wxdraft:progress', listener)
-      return () => {
-        ipcRenderer.removeListener('wxdraft:progress', listener)
-      }
-    },
-  },
-  wxhub: {
-    state: () => ipcRenderer.invoke('wxhub:state') as Promise<WechatHubState>,
-    probe: () => ipcRenderer.invoke('wxhub:probe') as Promise<WechatHubState>,
-    refresh: () => ipcRenderer.invoke('wxhub:refresh') as Promise<WechatHubState>,
-    lookup: (kind: WechatLookupKind, query: string) =>
-      ipcRenderer.invoke('wxhub:lookup', kind, query) as Promise<WechatHubState>,
-    triage: (id: number, decision: WechatTriageDecision, followUp?: string, note?: string) =>
-      ipcRenderer.invoke('wxhub:triage', id, decision, followUp, note) as Promise<WechatHubState>,
-    saveSettings: (input: Partial<WechatHubSettings>) =>
-      ipcRenderer.invoke('wxhub:save-settings', input) as Promise<WechatHubState>,
-    pickHome: () => ipcRenderer.invoke('wxhub:pick-home') as Promise<WechatHubState>,
-    copy: (text: string) => ipcRenderer.invoke('wxhub:copy', text) as Promise<boolean>,
-    openInstall: () => ipcRenderer.invoke('wxhub:open-install') as Promise<boolean>,
-    onChanged: (callback: (state: WechatHubState) => void) => {
-      const listener = (_event: unknown, next: WechatHubState): void => {
-        callback(next)
-      }
-      ipcRenderer.on('wxhub:changed', listener)
-      return () => {
-        ipcRenderer.removeListener('wxhub:changed', listener)
-      }
-    },
-  },
-  mail: {
-    state: () => ipcRenderer.invoke('mail:state') as Promise<MailState>,
-    probe: () => ipcRenderer.invoke('mail:probe') as Promise<MailState>,
-    sync: () => ipcRenderer.invoke('mail:sync') as Promise<MailState>,
-    saveAccount: (input: MailAccountInput) => ipcRenderer.invoke('mail:save-account', input) as Promise<MailState>,
-    removeAccount: (id: string) => ipcRenderer.invoke('mail:remove-account', id) as Promise<MailState>,
-    triage: (id: string, decision: MailTriage) => ipcRenderer.invoke('mail:triage', id, decision) as Promise<MailState>,
-    watchSender: (from: string, watched?: boolean) =>
-      ipcRenderer.invoke('mail:watch-sender', from, watched) as Promise<MailState>,
-    saveDraft: (messageId: string, text: string) =>
-      ipcRenderer.invoke('mail:save-draft', messageId, text) as Promise<MailState>,
-    copy: (text: string) => ipcRenderer.invoke('mail:copy', text) as Promise<boolean>,
-    onChanged: (callback: (state: MailState) => void) => {
-      const listener = (_event: unknown, next: MailState): void => {
-        callback(next)
-      }
-      ipcRenderer.on('mail:changed', listener)
-      return () => {
-        ipcRenderer.removeListener('mail:changed', listener)
-      }
-    },
   },
   onNavigate: (callback: (view: WorkbenchView) => void) => {
     const listener = (_event: unknown, view: WorkbenchView): void => {
@@ -503,43 +289,6 @@ contextBridge.exposeInMainWorld('ownworkbuddy', {
       ipcRenderer.on('todos:focus-input', listener)
       return () => {
         ipcRenderer.removeListener('todos:focus-input', listener)
-      }
-    },
-  },
-  notes: {
-    list: () => ipcRenderer.invoke('notes:list') as Promise<NoteItem[]>,
-    add: (text: string) => ipcRenderer.invoke('notes:add', text) as Promise<NoteItem | null>,
-    remove: (id: string) => ipcRenderer.invoke('notes:remove', id) as Promise<boolean>,
-    onFocusInput: (callback: () => void) => {
-      const listener = (): void => {
-        callback()
-      }
-      ipcRenderer.on('notes:focus-input', listener)
-      return () => {
-        ipcRenderer.removeListener('notes:focus-input', listener)
-      }
-    },
-  },
-  pet: {
-    dismiss: () => ipcRenderer.invoke('pet:dismiss') as Promise<void>,
-    openTodo: (id: string) => ipcRenderer.invoke('pet:open-todo', id) as Promise<void>,
-    openHome: () => ipcRenderer.invoke('pet:open-home') as Promise<void>,
-    onAlert: (callback: (alert: PetAlert) => void) => {
-      const listener = (_event: unknown, alert: PetAlert): void => {
-        callback(alert)
-      }
-      ipcRenderer.on('pet:alert', listener)
-      return () => {
-        ipcRenderer.removeListener('pet:alert', listener)
-      }
-    },
-    onIdle: (callback: () => void) => {
-      const listener = (): void => {
-        callback()
-      }
-      ipcRenderer.on('pet:idle', listener)
-      return () => {
-        ipcRenderer.removeListener('pet:idle', listener)
       }
     },
   },

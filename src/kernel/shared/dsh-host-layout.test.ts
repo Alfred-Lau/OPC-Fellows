@@ -60,8 +60,14 @@ test('主进程外置 dsh runtime，不把 dsh-llm 打进 asar', () => {
 
 test('安装包带上 opc-kernel extraResources；签名身份不进仓库', () => {
   const yml = readFileSync(join(repoRoot, 'electron-builder.yml'), 'utf8')
+  const brand = readFileSync(join(repoRoot, 'src/shared/brand.ts'), 'utf8')
+  const main = readFileSync(join(repoRoot, 'src/main/index.ts'), 'utf8')
   assert.match(yml, /from:\s*packages\/opc-kernel/)
   assert.match(yml, /to:\s*opc-kernel/)
   assert.match(yml, /notarize:\s*false/)
+  assert.match(yml, /appId:\s*tech\.bitou\.ownworkbuddy/)
+  assert.match(yml, /稳定安装身份/)
+  assert.match(brand, /INSTALL_APP_ID = 'tech\.bitou\.ownworkbuddy'/)
+  assert.match(main, /setAppUserModelId\(INSTALL_APP_ID\)/)
   assert.doesNotMatch(yml, /CSC_NAME|CSC_LINK/)
 })

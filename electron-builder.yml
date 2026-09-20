@@ -1,3 +1,4 @@
+# 稳定安装身份，不是产品线默认值。改掉会拆开已装用户和通知。
 appId: tech.bitou.ownworkbuddy
 productName: OPC-Fellows
 directories:

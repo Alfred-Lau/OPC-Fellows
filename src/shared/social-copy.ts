@@ -273,10 +273,16 @@ function chineseHook(feature: ProductFeature): string {
 }
 
 function verbFor(product: OpcProduct): string {
-  if (product.line === 'solokit') {
-    return 'run the OPC toolkit'
+  switch (product.line) {
+    case 'toolkit':
+      return 'run the OPC toolkit'
+    case 'research':
+      return 'keep research and shipping in one place'
+    default: {
+      const exhaustive: never = product.line
+      return exhaustive
+    }
   }
-  return 'keep research and shipping in one place'
 }
 
 export function slug(value: string): string {

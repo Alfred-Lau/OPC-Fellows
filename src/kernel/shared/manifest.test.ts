@@ -10,7 +10,7 @@ test('没有 ownworkbuddy.id 的包不是模块', () => {
 
 test('只有 dsh.bundle 的包按后台模块收下', () => {
   const manifest = parseModulePackage({
-    name: '@solokit/ownworkbuddy-radar',
+    name: '@example/ownworkbuddy-radar',
     version: '0.4.0',
     main: 'dsh-plugin.js',
     dsh: { bundle: { patch: './cordis.patch.yml' } },

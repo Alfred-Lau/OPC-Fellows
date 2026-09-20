@@ -2,7 +2,7 @@ import type { WorkbenchCatalog } from '../../kernel/shared/catalog'
 import type { WorkbenchProfileView } from '../../kernel/shared/profile'
 import { PRODUCT_NAME } from '../../shared/brand'
 import { describeLlmKeyStatus, type LlmSettings } from '../../shared/deepseek'
-import type { OpcProduct, StatsStatus } from '../../shared/products'
+import { DEFAULT_PRODUCT_LINE, type OpcProduct, type StatsStatus } from '../../shared/products'
 import { setUserAvatarSrc } from './avatar'
 import { setHostLabel } from './studio'
 
@@ -298,7 +298,7 @@ function readCatalog(): WorkbenchCatalog {
     const previous = lastCatalog?.products.find((item) => item.id === id)
     products.push({
       id,
-      line: previous?.line ?? 'bitou',
+      line: previous?.line ?? DEFAULT_PRODUCT_LINE
       name,
       nameEn: previous?.nameEn || name,
       url,

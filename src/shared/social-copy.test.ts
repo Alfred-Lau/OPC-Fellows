@@ -44,3 +44,12 @@ test('clip 截断到上限', () => {
   assert.equal(clip('abcd', 3), 'ab…')
   assert.equal(clip('ab', 3), 'ab')
 })
+
+test('toolkit 线仍用工具包口吻，research 线仍用研究口吻', () => {
+  const research = generateSocialCopy(collectFeatures()).find((item) => item.platform === 'youtube')
+  assert.match(research?.body ?? '', /keep research and shipping in one place/)
+  setProducts([{ ...cloneProduct(EXAMPLE_PRODUCT), line: 'toolkit' }])
+  const toolkit = generateSocialCopy(collectFeatures()).find((item) => item.platform === 'youtube')
+  assert.match(toolkit?.body ?? '', /run the OPC toolkit/)
+  setProducts([demo])
+})

@@ -97,7 +97,9 @@ Then open the app. **Upgrading from v0.7.3:** this release builds under the name
 with a fresh workspace — the previous build kept its data in `~/Library/Application Support/OPC Agent Team - Solokit`
 and the new name does not read it. The same first-hour path applies: model key → hire → bind a folder → Work situation.
 
-## Write a module when the job is missing
+## Extend the roster: add your own member
+
+This tree ships two members, but that is the default set rather than a limit: a member is an occupation backed by a module, and nothing in the kernel is per-occupation. When a job is missing, add a member instead of patching the kernel.
 
 If a built-in occupation does not cover your business, add an npm package. Do not grow kernel union types. The workbench reads `ownworkbuddy` (`apply(ctx)` + optional `mount`); the runtime reads `dsh.bundle`. Write both during the transition. Smallest sample: [`examples/hello-module`](examples/hello-module).
 

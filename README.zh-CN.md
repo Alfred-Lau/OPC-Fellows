@@ -101,7 +101,9 @@ xattr -cr "/Applications/OPC-Fellows.app"
 
 屏幕上的名字仍是 **OPC Agent Team - Solokit**（改名会迁移 `userData`，留到后续版本）。接到业务的步骤和从源码启动相同：模型 key → 雇成员 → 绑目录 → 工作情况。
 
-## 缺能力就写模块
+## 扩展花名册：加你自己的成员
+
+本主干只带两个成员，但那是**默认配置而不是上限**：一个成员 = 一个职业 + 它背后的模块，内核里没有任何一处是为某个职业特写的。遇到没有的职业，请加一个成员，而不是去改内核。
 
 内置职业盖不住你的业务时，加一个 npm 包，不要改内核联合类型。工作台读 `ownworkbuddy`（`apply(ctx)` + 可选 `mount`）；运行时读 `dsh.bundle`。过渡期两份都写。最小示例：[`examples/hello-module`](examples/hello-module)。
 

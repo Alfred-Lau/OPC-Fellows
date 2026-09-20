@@ -298,7 +298,7 @@ function readCatalog(): WorkbenchCatalog {
     const previous = lastCatalog?.products.find((item) => item.id === id)
     products.push({
       id,
-      line: previous?.line ?? DEFAULT_PRODUCT_LINE
+      line: previous?.line ?? DEFAULT_PRODUCT_LINE,
       name,
       nameEn: previous?.nameEn || name,
       url,

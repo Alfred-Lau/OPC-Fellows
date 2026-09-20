@@ -26,8 +26,8 @@ export interface ToolInvokeResult extends SkillReply {
 }
 
 /**
- * 职业模块和内核工具包往这里挂工具（ctx.opcTools，不占 dsh-base 的 ctx.tools）。
- * 模型主路径经 opc-kernel defineTool + Local API；JSON 点名只作退路。
+ * 职业模块和内核工具包往这里挂工具。执行仍在 Electron 主进程。
+ * dsh 树上的 defineTool 经 Local API 调回这里；JSON 协议仍是 spawn 退路。
  */
 export class ToolsService extends Service {
   private readonly tools = new Map<string, OpcToolDefinition>()

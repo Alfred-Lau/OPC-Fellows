@@ -482,10 +482,32 @@ export function planDeleteProject(
 
 /** 发起新项目时不带上一段会话；今日空收件箱也不出空列表。 */
 export function shouldShowThreadFeed(view: string, messageCount: number): boolean {
-  if (view === 'task' || view === 'schedule' || view === 'extensions' || view === 'prefs') {
+  if (
+    view === 'task' ||
+    view === 'schedule' ||
+    view === 'tasks' ||
+    view === 'extensions' ||
+    view === 'prefs'
+  ) {
     return false
   }
   return !(view === 'home' && messageCount === 0)
+}
+
+/** 今日简报只在收件箱且没有会话时出现；新项目/日程把它藏掉。 */
+export function shouldHideHomeBoard(
+  view: string,
+  threadId: string,
+  inboxId: string,
+  messageCount: number,
+): boolean {
+  return (
+    view === 'task' ||
+    view === 'schedule' ||
+    view === 'tasks' ||
+    threadId !== inboxId ||
+    messageCount > 0
+  )
 }
 
 export function homeThreadForeignTitles(

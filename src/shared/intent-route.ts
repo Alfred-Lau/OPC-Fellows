@@ -131,6 +131,21 @@ export function classifyOccupationIntent(skills: readonly RouteSkill[], text: st
   return { kind: 'miss' }
 }
 
+/** 本地口令匹配；对不上就交给 dsh session，不再另开 Completions 分类器。 */
+export function localClassifyDecision(skills: readonly RouteSkill[], text: string): ClassifyDecision {
+  const decision = classifyOccupationIntent(skills, text)
+  switch (decision.kind) {
+    case 'invoke':
+      return { kind: 'invoke', invoke: decision.skillId, text }
+    case 'miss':
+      return { kind: 'chat', text }
+    default: {
+      const exhaustive: never = decision
+      return exhaustive
+    }
+  }
+}
+
 export function parseReadIntent(raw: string, skills: readonly RouteSkill[]): string | undefined {
   const decision = parseAllocateIntent(raw, skills)
   if (decision.kind !== 'invoke') {

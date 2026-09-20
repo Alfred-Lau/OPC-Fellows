@@ -119,6 +119,23 @@ test('侧栏本身不是窗口拖拽区，避免拖成员时被系统吃掉指�
   assert.doesNotMatch(studioRail, /-webkit-app-region:\s*drag/)
 })
 
+test('启动落在今日，不自动打开新项目页把简报藏掉', () => {
+  const appTs = readFileSync(join(rendererSrc, 'app.ts'), 'utf8')
+  assert.match(appTs, /focusInbox\('home'\)/)
+  assert.doesNotMatch(appTs, /openNewTask\(\)/)
+})
+
+test('中栏正文不是拖拽区，只有标题条可拖窗口', () => {
+  const appCss = readFileSync(join(rendererSrc, 'app.css'), 'utf8')
+  const studioCss = readFileSync(join(rendererSrc, 'studio.css'), 'utf8')
+  const htmlBody = appCss.match(/html,\s*body\s*\{[^}]+\}/)?.[0] ?? ''
+  const pane = studioCss.match(/\.thread-pane\s*\{[^}]+\}/)?.[0] ?? ''
+  const head = studioCss.match(/\.thread-head\s*\{[^}]+\}/)?.[0] ?? ''
+  assert.doesNotMatch(htmlBody, /-webkit-app-region:\s*drag/)
+  assert.match(pane, /-webkit-app-region:\s*no-drag/)
+  assert.match(head, /-webkit-app-region:\s*drag/)
+})
+
 test('工作窗标题贴顶更紧，不显示成员数字', () => {
   const studioCss = readFileSync(join(rendererSrc, 'studio.css'), 'utf8')
   const html = readFileSync(join(rendererSrc, '../index.html'), 'utf8')

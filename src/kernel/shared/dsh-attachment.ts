@@ -6,6 +6,7 @@
 import { extname } from 'node:path'
 import type { ProjectContextFile } from './agent.ts'
 import { isPathInside, normalizeAbsPath, relativeToFolder } from './project-context.ts'
+import { shareableLogPath } from './session-log.ts'
 
 export type SdkImageMime = 'image/png' | 'image/jpeg' | 'image/webp' | 'image/gif'
 
@@ -46,7 +47,7 @@ export function citeAttachments(
     }
     const name = file.name.trim() || path
     const rel = folder ? relativeToFolder(folder, path) : null
-    const shown = rel && rel !== '.' ? rel : path
+    const shown = shareableLogPath(rel && rel !== '.' ? rel : '', name)
     if (folder && !isPathInside(folder, path)) {
       cites.push({ path, name, shown, omitted: '不在项目文件夹里' })
       continue

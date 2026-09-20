@@ -1,9 +1,23 @@
+:root {
+  --chat-pane-min: 280px;
+  --tool-pane-min: 320px;
+}
+
 .studio {
   flex: 1;
-  min-width: 0;
+  min-width: var(--chat-pane-min, 280px);
   display: flex;
   overflow: hidden;
   background: var(--bg);
+}
+
+body:not([data-tool-collapsed='true']):not([data-tool-expanded='true']) .studio {
+  min-width: calc(var(--chat-pane-min, 280px) + var(--tool-pane-min, 320px));
+}
+
+body[data-tool-expanded='true'] .studio,
+body[data-view='extensions'] .studio {
+  min-width: var(--tool-pane-min, 320px);
 }
 
 .thread-pane {
@@ -12,7 +26,7 @@
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  -webkit-app-region: drag;
+  -webkit-app-region: no-drag;
 }
 
 .thread-head {
@@ -22,6 +36,7 @@
   gap: 12px;
   padding: 20px 28px 10px;
   border-bottom: 1px solid var(--border);
+  -webkit-app-region: drag;
 }
 
 .thread-head-copy {
@@ -89,7 +104,242 @@ body[data-tool-collapsed='true'] .tool-reveal {
 }
 
 .thread-msg.is-typing .bubble {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--muted);
+  overflow: visible;
+}
+
+.thread-task {
+  margin: 0 0 4px;
+  min-width: min(100%, 420px);
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--fg) 3%, var(--nested));
+  overflow: hidden;
+}
+
+.thread-task.is-running {
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+.thread-task.is-error {
+  border-color: color-mix(in srgb, #c45c26 45%, var(--border));
+}
+
+.thread-task-summary {
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.thread-task-status {
+  flex: none;
+  width: 1.1em;
+  color: var(--muted);
+  font: 12px/1.4 var(--font-mono, ui-monospace, monospace);
+}
+
+.thread-task.is-running .thread-task-status {
+  color: var(--accent);
+}
+
+.thread-task.is-ok .thread-task-status {
+  color: color-mix(in srgb, #2f7a4b 80%, var(--fg));
+}
+
+.thread-task.is-error .thread-task-status {
+  color: #c45c26;
+}
+
+.thread-task-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.thread-task-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.thread-task-live {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.thread-msg.is-typing .bubble.is-shimmer,
+.thread-task-title.is-shimmer {
+  --typing-base: color-mix(in srgb, var(--fg) 38%, transparent);
+  --typing-shine: var(--fg);
+  background-color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    var(--typing-base) 0%,
+    var(--typing-base) 38%,
+    var(--typing-shine) 50%,
+    var(--typing-base) 62%,
+    var(--typing-base) 100%
+  );
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: thread-shimmer 1.35s linear infinite;
+}
+
+@keyframes thread-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thread-msg.is-typing .bubble.is-shimmer,
+  .thread-task-title.is-shimmer {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: var(--muted);
+    color: var(--muted);
+  }
+}
+
+.thread-task.is-approval,
+.thread-approval {
+  margin: 0 0 4px;
+  min-width: min(100%, 420px);
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--fg) 3%, var(--nested));
+}
+
+.thread-approval.is-ok {
+  border-color: color-mix(in srgb, #2f7a4b 40%, var(--border));
+}
+
+.thread-approval.is-error {
+  border-color: color-mix(in srgb, #c45c26 45%, var(--border));
+}
+
+.thread-approval-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.thread-approval-body {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.thread-approval-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.thread-approval-allow,
+.thread-approval-reject {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.thread-approval-allow {
+  border-color: transparent;
+  background: var(--solid, var(--fg));
+  color: var(--surface);
+}
+
+.thread-approval-allow:hover {
+  filter: brightness(1.05);
+}
+
+.thread-approval-reject {
+  color: var(--muted);
+  background: transparent;
+}
+
+.thread-approval-reject:hover {
+  color: var(--fg);
+}
+
+.thread-plan {
+  flex-shrink: 0;
+  margin: 0 20px 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line, color-mix(in srgb, var(--muted) 28%, transparent));
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.thread-plan[hidden] {
+  display: none !important;
+}
+
+.thread-plan-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.thread-plan-head h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.thread-plan-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thread-plan-head button {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+#thread-plan-cancel {
+  color: var(--muted);
+  background: transparent;
+}
+
+.thread-plan textarea {
+  display: block;
+  width: 100%;
+  min-height: 88px;
+  max-height: 220px;
+  border: 0;
+  resize: vertical;
+  background: transparent;
+  color: var(--fg);
+  font: 13px/1.5 var(--font-sans);
+}
+
+.thread-scroll {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .thread-body {
@@ -113,7 +363,7 @@ body[data-view='home'] .thread-home {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 20px 28px 12px;
+  padding: 28px 28px 12px;
 }
 
 #thread-feed[hidden] {
@@ -121,11 +371,17 @@ body[data-view='home'] .thread-home {
 }
 
 .thread-msg {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
   max-width: min(92%, 760px);
+}
+
+.thread-msg:hover,
+.thread-msg:focus-within {
+  z-index: 2;
 }
 
 .thread-msg.is-user {
@@ -294,11 +550,303 @@ body[data-view='home'] .thread-home {
   overflow-x: auto;
 }
 
-.thread-msg .bubble.is-md pre code {
+.thread-msg .bubble.is-md .chat-code {
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.thread-msg .bubble.is-md .chat-code-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.thread-msg .bubble.is-md .chat-code-lang {
+  flex: none;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.thread-msg .bubble.is-md .chat-code-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg);
+}
+
+.thread-msg .bubble.is-md .chat-code-stat {
+  margin-left: auto;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.thread-msg .bubble.is-md .chat-code-stat.is-add {
+  color: #3f9d6b;
+}
+
+.thread-msg .bubble.is-md .chat-code-stat.is-del {
+  color: #c45c26;
+}
+
+.thread-msg .bubble.is-md .chat-code-peek {
+  margin: 0;
+  padding: 0 0 8px;
+  overflow: hidden;
+}
+
+.thread-msg .bubble.is-md .chat-code-line {
+  display: grid;
+  grid-template-columns: 2.6em 1em minmax(0, 1fr);
+  column-gap: 6px;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 12px 0 8px;
+  font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.thread-msg .bubble.is-md .chat-code-line.is-add {
+  background: color-mix(in srgb, #3f9d6b 14%, transparent);
+}
+
+.thread-msg .bubble.is-md .chat-code-line.is-del {
+  background: color-mix(in srgb, #c45c26 12%, transparent);
+}
+
+.thread-msg .bubble.is-md .chat-code-no {
+  color: var(--muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.thread-msg .bubble.is-md .chat-code-mark {
+  text-align: center;
+  color: var(--muted);
+}
+
+.thread-msg .bubble.is-md .chat-code-line.is-add .chat-code-mark {
+  color: #3f9d6b;
+}
+
+.thread-msg .bubble.is-md .chat-code-line.is-del .chat-code-mark {
+  color: #c45c26;
+}
+
+.thread-msg .bubble.is-md .chat-code-line code {
+  min-width: 0;
   padding: 0;
   background: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
+
+.thread-msg .bubble.is-md .chat-code:has(.chat-code-rest[open]) .chat-code-peek {
+  display: none;
+}
+
+.thread-msg .bubble.is-md .chat-code-rest {
+  border-top: 1px solid var(--border);
+}
+
+.thread-msg .bubble.is-md .chat-code-rest > summary {
+  padding: 7px 12px;
+  color: var(--muted);
   font-size: 12px;
-  line-height: 1.5;
+  cursor: pointer;
+  list-style: none;
+}
+
+.thread-msg .bubble.is-md .chat-code-rest > summary::-webkit-details-marker {
+  display: none;
+}
+
+.thread-msg .bubble.is-md .chat-code-rest:not([open]) .chat-code-less,
+.thread-msg .bubble.is-md .chat-code-rest[open] .chat-code-more {
+  display: none;
+}
+
+.thread-msg .bubble.is-md .chat-code-rest[open] > summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.thread-msg .bubble.is-md .chat-code-full {
+  padding: 0 0 8px;
+}
+
+.thread-msg .bubble.is-md .chat-code-full .chat-code-line {
+  align-items: start;
+}
+
+.thread-msg .bubble.is-md .chat-code-full .chat-code-line code {
+  overflow: visible;
+  text-overflow: unset;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.thread-msg .bubble.is-md table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.thread-msg .bubble.is-md th,
+.thread-msg .bubble.is-md td {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.thread-msg .bubble.is-md th {
+  font-weight: 650;
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+  white-space: nowrap;
+}
+
+.thread-msg .bubble.is-md tr.is-pick {
+  cursor: pointer;
+}
+
+.thread-msg .bubble.is-md tr.is-pick:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.thread-msg .bubble.is-md img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 8px 0;
+  border-radius: 8px;
+}
+
+.thread-msg .bubble.is-md a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.thread-msg-bubble {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.thread-msg-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--fg) 10%, transparent);
+  transform: translateY(-78%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.thread-msg.is-user .thread-msg-actions {
+  right: auto;
+  left: 0;
+}
+
+.thread-msg:hover .thread-msg-actions,
+.thread-msg:focus-within .thread-msg-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.thread-msg.is-typing .thread-msg-actions {
+  display: none;
+}
+
+.thread-msg .thread-msg-actions button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.thread-msg .thread-msg-actions button:hover,
+.thread-msg .thread-msg-actions button:focus-visible {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.thread-msg-actions svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.thread-msg-actions svg.is-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+#thread-jump-latest {
+  position: absolute;
+  right: 20px;
+  bottom: 16px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--fg) 12%, transparent);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+#thread-jump-latest[hidden] {
+  display: none !important;
+}
+
+#thread-jump-latest:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+#thread-jump-latest svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .thread-msg .bubble.is-md table {
@@ -665,6 +1213,7 @@ body[data-view='home'] .thread-home {
 }
 
 .tool-rail button {
+  position: relative;
   width: 32px;
   height: 32px;
   padding: 0;
@@ -676,6 +1225,30 @@ body[data-view='home'] .thread-home {
 .tool-rail button.is-current {
   background: var(--nested);
   color: var(--fg);
+}
+
+.tool-rail button[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  z-index: 8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--fg);
+  color: var(--surface);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  box-shadow: 0 6px 16px color-mix(in srgb, #000 16%, transparent);
+}
+
+.tool-rail button:hover[data-tooltip]::after,
+.tool-rail button:focus-visible[data-tooltip]::after {
+  opacity: 1;
 }
 
 .tool-rail-icon {

@@ -24,6 +24,7 @@ import type {
 } from '../kernel/shared/agent'
 import type { DispatchAction } from '../kernel/shared/agents'
 import type { ToolEvent } from '../kernel/shared/tool-events'
+import type { ApprovalDecision, ApprovalPrompt } from '../kernel/shared/approval'
 
 type ThemeState = { preference: ThemePreference; dark: boolean }
 
@@ -105,6 +106,7 @@ declare global {
           agentId: string,
           mode: 'ask' | 'plan' | 'agent',
         ) => Promise<AgentSnapshot['threads'][number]>
+        clearPlan: (threadId: string) => Promise<ThreadRecord>
         reply: (threadId: string, text: string, agentId?: string, listing?: ShortListing, thinking?: string) => Promise<ThreadMessage>
         messages: (threadId: string) => Promise<ThreadMessage[]>
         workspace: (agentId?: string, threadId?: string) => Promise<WorkspaceEntry[]>
@@ -128,6 +130,8 @@ declare global {
         reorderProjects: (ids: string[]) => Promise<AgentSnapshot['threads']>
         onChanged: (callback: () => void) => () => void
         onTool: (callback: (event: ToolEvent) => void) => () => void
+        onApproval: (callback: (prompt: ApprovalPrompt) => void) => () => void
+        decideApproval: (id: string, decision: ApprovalDecision) => Promise<boolean>
       }
       tools: {
         invoke: (name: string, args: Record<string, string>) => Promise<{ text: string; listing?: ShortListing }>

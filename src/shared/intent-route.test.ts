@@ -3,6 +3,7 @@ import test from 'node:test'
 import {
   allocateIntentSystemPrompt,
   classifyOccupationIntent,
+  localClassifyDecision,
   formatSkillContract,
   isIdentityAsk,
   isInboxQuestion,
@@ -71,6 +72,20 @@ test('模型只能点名读 Skill，写 Skill 当 miss', () => {
   assert.match(readIntentSystemPrompt('项目监控官', monitor), /分配/)
 })
 
+test('本地分类命中口令，对不上就 chat', () => {
+  assert.deepEqual(localClassifyDecision(monitor, '刷新态势'), {
+    kind: 'invoke',
+    invoke: 'refresh',
+    text: '刷新态势',
+  })
+  assert.deepEqual(localClassifyDecision(monitor, '这几个项目如何'), {
+    kind: 'invoke',
+    invoke: 'traffic',
+    text: '这几个项目如何',
+  })
+  assert.deepEqual(localClassifyDecision(monitor, '随便聊聊'), { kind: 'chat', text: '随便聊聊' })
+})
+
 test('分配模型可以点读、点写、开口或 miss', () => {
   assert.deepEqual(parseAllocateIntent('{"action":"invoke","skillId":"traffic"}', monitor), {
     kind: 'invoke',
@@ -100,7 +115,7 @@ test('分配模型可以点读、点写、开口或 miss', () => {
 test('旧菜单和新引导都能认成 miss 文案', () => {
   assert.equal(isSkillMissText('先点一条，或再说具体一点。'), true)
   assert.equal(isSkillMissText('对不上「项目监控官」的 Skill。可以说：'), true)
-  assert.equal(isSkillMissText('我是「选品策略师」，刚才这句还对不上要执行哪一条。'), true)
+  assert.equal(isSkillMissText('我是「示例成员」，刚才这句还对不上要执行哪一条。'), true)
   assert.equal(isSkillMissText('仓库健康：未提交都没有。'), false)
 })
 

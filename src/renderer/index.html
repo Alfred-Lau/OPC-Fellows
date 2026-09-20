@@ -211,6 +211,7 @@
             </button>
           </div>
         </header>
+        <div class="thread-scroll">
         <div class="thread-body">
           <section id="view-home" class="view thread-home">
             <div class="home-board">
@@ -277,6 +278,24 @@
           </section>
           <div id="thread-feed" class="thread-feed" hidden></div>
         </div>
+        <section id="thread-plan" class="thread-plan" hidden>
+          <header class="thread-plan-head">
+            <h2>计划</h2>
+            <div class="thread-plan-actions">
+              <button type="button" id="thread-plan-cancel">取消</button>
+              <button type="button" id="thread-plan-build">按计划执行</button>
+            </div>
+          </header>
+          <label class="sr-only" for="thread-plan-text">计划正文</label>
+          <textarea id="thread-plan-text" rows="6" spellcheck="false" readonly></textarea>
+        </section>
+          <button type="button" id="thread-jump-latest" class="thread-jump-latest" hidden title="滚到最新" aria-label="滚到最新">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" />
+              <path d="M6 18h12" />
+            </svg>
+          </button>
+        </div>
         <form id="inbox" class="composer">
           <div id="mention-menu" class="mention-menu" hidden></div>
           <label class="sr-only" for="command">会话输入</label>
@@ -305,18 +324,18 @@
         <div class="tool-gutter" role="separator" aria-orientation="vertical" aria-label="调整聊天与工具分界"></div>
         <nav class="tool-rail" aria-label="工具面板">
           <div class="tool-rail-tabs" role="tablist">
-            <button type="button" data-tool-tab="tool" title="工具" aria-label="工具">
+            <button type="button" data-tool-tab="tool" data-tooltip="工具" title="工具" aria-label="工具">
               <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M14.7 6.3a4 4 0 0 0-5.7 5.4L3 18l3 3 6.3-6a4 4 0 0 0 5.4-5.7l-3.2 3.2-2-2z" />
               </svg>
             </button>
-            <button type="button" data-tool-tab="todos" class="is-current" title="待办" aria-label="待办">
+            <button type="button" data-tool-tab="todos" class="is-current" data-tooltip="待办" title="待办" aria-label="待办">
               <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M9 6h12M9 12h12M9 18h12" />
                 <path d="M4 6h.01M4 12h.01M4 18h.01" />
               </svg>
             </button>
-            <button type="button" data-tool-tab="calendar" title="日程" aria-label="日程">
+            <button type="button" data-tool-tab="calendar" data-tooltip="日程" title="日程" aria-label="日程">
               <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="3" y="5" width="18" height="16" rx="2" />
                 <path d="M8 3v4M16 3v4M3 10h18" />
@@ -324,12 +343,12 @@
             </button>
           </div>
           <span class="tool-rail-gap" aria-hidden="true"></span>
-          <button type="button" id="tool-expand" class="tool-rail-action" title="在主区打开" aria-label="在主区打开">
+          <button type="button" id="tool-expand" class="tool-rail-action" data-tooltip="在主区打开" title="在主区打开" aria-label="在主区打开">
             <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M3 15v4a2 2 0 0 0 2 2h4" />
             </svg>
           </button>
-          <button type="button" id="tool-close" class="tool-rail-action" title="收起右栏" aria-label="收起右栏">
+          <button type="button" id="tool-close" class="tool-rail-action" data-tooltip="收起右栏" title="收起右栏" aria-label="收起右栏">
             <svg class="tool-rail-icon" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="3" y="4" width="18" height="16" rx="2" />
               <path d="M15 4v16M10 9l-3 3 3 3" />
@@ -414,7 +433,9 @@
             <p class="mark">社媒弹药</p>
             <h1>六平台文案 <span id="social-updated" class="tick-count"></span></h1>
           </div>
-          <button id="social-refresh" type="button">装填弹药</button>
+          <div class="tick-head-actions">
+            <button id="social-refresh" type="button">装填弹药</button>
+          </div>
         </header>
         <p id="social-status" class="hint">按最新产品能力写出六平台文案，记下发布和互动。不跟着项目监控一起刷新。</p>
         <div class="social-layout">
@@ -443,80 +464,6 @@
             </form>
             <ul id="social-metrics-list" class="monitor-rows"></ul>
           </section>
-        </div>
-      </section>
-
-            <section class="panel wx-panel">
-              <p class="caption">文章信息</p>
-              <div class="wx-form-grid">
-                <label class="is-wide">标题 <input id="wxd-title" type="text" spellcheck="false" placeholder="留空则由 AI 根据正文生成" /></label>
-                <label>作者 <input id="wxd-author" type="text" spellcheck="false" placeholder="可到设置里存默认作者" /></label>
-                <label class="is-wide">封面图 <input id="wxd-cover" type="text" spellcheck="false" placeholder="默认读取文档目录 images/封面.jpg，不自动生成" /></label>
-                <p id="wxd-cover-hint" class="hint wx-cover-hint" hidden></p>
-                <label class="is-wide">摘要 <input id="wxd-digest" type="text" spellcheck="false" placeholder="留空则由 AI 根据正文生成，不超过 120 字" /></label>
-                <label class="is-wide">原文链接 <input id="wxd-source-url" type="url" spellcheck="false" placeholder="https://…（可选）" /></label>
-                <label class="is-check"><input id="wxd-open-comment" type="checkbox" /> 开启评论</label>
-                <label class="is-check"><input id="wxd-fans-only" type="checkbox" /> 仅粉丝可评论</label>
-                <label class="is-check"><input id="wxd-original" type="checkbox" checked /> 文末加原创声明</label>
-                <p id="wxd-original-hint" class="hint wx-original-hint">
-                  微信 <code>draft/add</code> 没有官方「声明原创」字段，原创标只能到公众号后台草稿箱手动点。
-                  勾选后会在正文末尾写入「本账号」原创说明（有默认作者则用作者名）；阅读原文用上方链接。
-                </p>
-              </div>
-            </section>
-
-            <details class="panel wx-panel wx-settings">
-              <summary class="caption">接口与密钥设置（AppID / Secret / 生成通道）</summary>
-              <div class="wx-form-grid">
-                <label class="is-wide">生成通道
-                  <select id="wxd-channel">
-                    <option value="direct">直连微信 API（推荐，无需扣子）</option>
-                    <option value="coze">扣子工作流</option>
-                  </select>
-                </label>
-                <label class="is-wide coze-only">扣子工作流 ID <input id="wxd-workflow" type="text" spellcheck="false" /></label>
-                <label>默认作者 <input id="wxd-default-author" type="text" spellcheck="false" placeholder="例如：公众号署名" /></label>
-                <label>公众号 AppID <input id="wxd-appid" type="text" spellcheck="false" placeholder="wx…" /></label>
-                <label class="coze-only">扣子 PAT <input id="wxd-token" type="password" autocomplete="off" spellcheck="false" /></label>
-                <label class="coze-only">令牌状态 <span id="wxd-token-state" class="wx-secret-state"></span></label>
-                <label>微信 AppSecret <input id="wxd-secret" type="password" autocomplete="off" spellcheck="false" /></label>
-                <label>密钥状态 <span id="wxd-secret-state" class="wx-secret-state"></span></label>
-                <label class="is-check"><input id="wxd-set-open" type="checkbox" /> 默认开启评论</label>
-                <label class="is-check"><input id="wxd-set-fans" type="checkbox" /> 默认仅粉丝评论</label>
-              </div>
-              <p class="hint">
-                直连模式需要公众号 AppID/AppSecret，且本机出口 IP 需在公众号后台「IP 白名单」内（否则报 40164）；扣子模式额外需要工作流 ID 和 PAT。
-                敏感信息通过系统安全存储加密保存在本机；也可用环境变量 COZE_TOKEN / WX_APPID / WX_APP_SECRET
-                覆盖（环境变量优先）。扣子 PAT 在 coze.cn/open/oauth/pats 创建，需具备该工作流运行权限。
-              </p>
-              <div class="form-actions">
-                <button id="wxd-save-settings" type="button">保存设置</button>
-                <button id="wxd-clear-token" type="button" class="ghost coze-only">清除 PAT</button>
-                <button id="wxd-clear-secret" type="button" class="ghost">清除 Secret</button>
-              </div>
-            </details>
-          </div>
-
-          <aside class="wx-side">
-            <section class="panel wx-panel">
-              <div class="panel-head">
-                <p class="caption">执行进度</p>
-                <span id="wxd-progress-state" class="tick-count"></span>
-              </div>
-              <ul id="wxd-log" class="wx-log"></ul>
-            </section>
-            <section id="wxd-result-block" class="panel wx-panel" hidden>
-              <p class="caption">结果</p>
-              <div id="wxd-result" class="wx-result"></div>
-            </section>
-            <section class="panel wx-panel">
-              <div class="panel-head">
-                <p class="caption">历史</p>
-                <span id="wxd-history-meta" class="tick-count"></span>
-              </div>
-              <ul id="wxd-history" class="wx-history"></ul>
-            </section>
-          </aside>
         </div>
       </section>
 

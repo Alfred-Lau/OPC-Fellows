@@ -16,3 +16,18 @@ test('工具栏 CSS 不用 anywhere 把中文拆成单字', () => {
   }
 })
 
+test('中文族名写在 -apple-system 前面，避免 Electron 落到日文 Hiragino', () => {
+  const cjk = /PingFang SC|Hiragino Sans GB|Microsoft YaHei/
+  const system = /-apple-system|BlinkMacSystemFont/
+  for (const name of occupationCssFiles()) {
+    const text = fs.readFileSync(path.join(cssDir, name), 'utf8')
+    const stacks = text.match(/(?:font-family|--font-sans|font):[^;{]+/g) ?? []
+    for (const stack of stacks) {
+      if (!cjk.test(stack) || !system.test(stack)) {
+        continue
+      }
+      assert.ok(stack.search(cjk) < stack.search(system), `${name}: ${stack.trim()}`)
+    }
+  }
+})
+

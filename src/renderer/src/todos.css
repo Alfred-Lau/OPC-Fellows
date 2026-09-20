@@ -1,6 +1,7 @@
 :root {
-  --font-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Inter 只覆盖拉丁。中文必须写在 -apple-system 前面，否则 Electron 会落到日文 Hiragino。 */
+  --font-sans: Inter, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: Menlo, Monaco, Consolas, "Courier New", monospace;
   --text-2xs: 11px;
   --text-xs: 12px;
@@ -28,6 +29,7 @@ body {
   font-size: 14px;
   line-height: var(--leading-normal);
   letter-spacing: 0.01em;
+  font-variant-east-asian: simplified;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -114,6 +116,9 @@ input[type='datetime-local'] {
 .tick-head > button,
 .tick-head-actions {
   flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tick-count {

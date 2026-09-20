@@ -31,7 +31,6 @@ import {
   focusAgent,
   focusInbox,
   handleComposer,
-  openNewTask,
   openStudioTool,
   refreshStudio,
   setNavEntries,
@@ -389,31 +388,37 @@ function recentChip(title: string, meta: string, onClick: () => void): HTMLLIEle
 }
 
 async function renderDashboard(): Promise<void> {
-  const now = new Date()
-  const items = await window.ownworkbuddy.todos.list()
-  const open = items.filter((item) => !item.done)
-  const due = open
-    .filter((item) => isSameDay(item.notifyAt, now))
-    .sort((left, right) => Date.parse(left.notifyAt ?? '') - Date.parse(right.notifyAt ?? ''))
+  try {
+    const now = new Date()
+    const items = await window.ownworkbuddy.todos.list()
+    const open = items.filter((item) => !item.done)
+    const due = open
+      .filter((item) => isSameDay(item.notifyAt, now))
+      .sort((left, right) => Date.parse(left.notifyAt ?? '') - Date.parse(right.notifyAt ?? ''))
 
-  fillList(dueToday, due, '今天没有提醒', (item) => whenMeta(item.notifyAt, now))
+    fillList(dueToday, due, '今天没有提醒', (item) => whenMeta(item.notifyAt, now))
 
-  const tags = collectTags(open)
-  if (homeTag !== ALL_TAG && !tags.includes(homeTag)) {
-    homeTag = ALL_TAG
+    const tags = collectTags(open)
+    if (homeTag !== ALL_TAG && !tags.includes(homeTag)) {
+      homeTag = ALL_TAG
+    }
+    renderTagFilter(todoTags, tags, homeTag, (tag) => {
+      homeTag = tag
+      localStorage.setItem(TAG_KEY, tag)
+      void renderDashboard()
+    })
+    const personal = homeTag === ALL_TAG ? open : open.filter((item) => item.tags.includes(homeTag))
+    fillList(
+      openTodos,
+      personal.slice(0, 8),
+      homeTag === ALL_TAG ? '没有未完成的事' : `没有「${homeTag}」待办`,
+      (item) => whenMeta(item.notifyAt, now),
+    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '待办还没读出来'
+    fillList(dueToday, [], message, () => '')
+    fillList(openTodos, [], message, () => '')
   }
-  renderTagFilter(todoTags, tags, homeTag, (tag) => {
-    homeTag = tag
-    localStorage.setItem(TAG_KEY, tag)
-    void renderDashboard()
-  })
-  const personal = homeTag === ALL_TAG ? open : open.filter((item) => item.tags.includes(homeTag))
-  fillList(
-    openTodos,
-    personal.slice(0, 8),
-    homeTag === ALL_TAG ? '没有未完成的事' : `没有「${homeTag}」待办`,
-    (item) => whenMeta(item.notifyAt, now),
-  )
 
   recentEl.replaceChildren()
   // 停用掉的模块不再出现在最近使用里。
@@ -477,11 +482,7 @@ bindRailResize()
 activateTheme()
 void hydrateProfile()
 bindStudio(showView)
-try {
-  openNewTask()
-} catch (error) {
-  console.error(error)
-}
+focusInbox('home')
 void window.ownworkbuddy.workbench.catalog().then((catalog) => {
   applyCatalog(catalog)
 })

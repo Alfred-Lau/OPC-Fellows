@@ -4,6 +4,7 @@ directories:
   output: dist
   buildResources: build
 beforeBuild: ./scripts/before-build.cjs
+beforePack: ./scripts/stage-dsh-host.mjs
 afterPack: ./scripts/after-pack.cjs
 npmRebuild: false
 files:
@@ -11,9 +12,14 @@ files:
   - package.json
   - "!node_modules/**"
 # dsh 的 node_modules 不能走 extraResources（builder 会丢掉），afterPack 再拷。
+# P1：host / 内核包在 asar 外；spawn 仍用 afterPack 拷的 resources/dsh。
 extraResources:
   - from: packages/opc-kernel
     to: opc-kernel
+  - from: build/dsh-host
+    to: dsh-host
+  - from: build/dsh-host/node_modules
+    to: dsh-host/node_modules
 asar: true
 artifactName: ${productName}-${version}-${os}-${arch}.${ext}
 mac:

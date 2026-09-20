@@ -23,14 +23,14 @@ export interface LlmCompleteInput {
 
 let active: LlmService | null = null
 
-/** 主进程里选品 / 拆解 / 弹药 / 公众号走同一条 complete，不再各自 fetch。 */
+/** 主进程里拆解 / 弹药 / 润色走同一条 complete，不再各自 fetch。 */
 export function kernelLlm(): LlmService | null {
   return active
 }
 
 /**
- * 分类器、待办拆解和职业 LLM 润色的唯一 Completions 出口。
- * 中栏闲聊仍走 dsh SDK session。
+ * 待办拆解和职业 LLM 润色的 Completions 出口。
+ * 中栏对话与只读子调研走 dsh SDK session，不再另开 Agent 循环。
  */
 export class LlmService extends Service {
   static inject = ['bridge']

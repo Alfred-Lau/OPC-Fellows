@@ -29,9 +29,9 @@ test('每轮把人设和用户话拼成一条 prompt', () => {
 })
 
 test('工具回灌仍带着用户原话，思考块不进正文', () => {
-  const follow = composeToolFollowUp('你是项目监控官。', '你有什么能力', 'monitor_refresh', '今日浏览 0')
+  const follow = composeToolFollowUp('你是演示助手。', '你有什么能力', 'demo_refresh', '今日浏览 0')
   assert.match(follow, /你有什么能力/)
-  assert.match(follow, /monitor_refresh/)
+  assert.match(follow, /demo_refresh/)
   assert.match(follow, /今日浏览 0/)
   assert.equal(
     assistantPlainText({

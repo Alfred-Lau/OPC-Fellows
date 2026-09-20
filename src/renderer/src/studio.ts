@@ -40,6 +40,7 @@ import {
   offersComposerModes,
   parseComposerMode,
   storedComposerModeOf,
+  threadPlanOf,
   type ComposerMode,
 } from '../../kernel/shared/plan-mode'
 import {
@@ -51,6 +52,7 @@ import {
   describeNewTaskPage,
   isProjectPinned,
   listProjects,
+  shouldHideHomeBoard,
   shouldShowThreadFeed,
   withHostAgent,
   type NewTaskAgentChip,
@@ -102,9 +104,11 @@ import { agentAvatarEl, paintAgentAvatar, userAvatarEl } from './avatar'
 import { formatCalendarTitle } from '../../shared/calendar'
 import { DEEPSEEK_MODEL, DEEPSEEK_MODEL_LABEL } from '../../shared/deepseek'
 import { renderChatMarkdown } from '../../shared/chat-markdown'
+import { quoteComposerDraft } from '../../shared/chat-quote'
 import { activateCalendar } from './calendar'
 import { isWorkbenchAdviceInvoke } from '../../kernel/shared/workbench-skills'
-import { formatToolEventLine, type ToolEvent } from '../../kernel/shared/tool-events'
+import type { ApprovalDecision, ApprovalPrompt } from '../../kernel/shared/approval'
+import { formatToolEventLine, toolCardTitle, type ToolEvent } from '../../kernel/shared/tool-events'
 import { TOOL_PACKS, defaultToolPacks, isToolPackId, toolPackTitle, type ToolPackId } from '../../kernel/shared/tool-packs'
 import { runSkillInvoke } from './skill-invoke'
 import { seedTodos } from './todos'
@@ -137,6 +141,8 @@ let composerMode: ComposerMode = 'agent'
 let railMarks: RailActivityMark[] = []
 const railErrorTimers = new Map<string, number>()
 let typingAgentId = ''
+const pendingApprovals: ApprovalPrompt[] = []
+const liveToolEvents: ToolEvent[] = []
 const TOOL_WIDTH_KEY = 'ownworkbuddy.toolWidth'
 let hostLabel = ''
 let selectedTaskIds: string[] = []
@@ -292,6 +298,12 @@ export function bindStudio(activate: Activate): void {
   required('#composer-context-menu', HTMLElement).addEventListener('click', (event) => {
     event.stopPropagation()
   })
+  required('#thread-plan-cancel', HTMLButtonElement).addEventListener('click', () => {
+    void clearThreadPlan()
+  })
+  required('#thread-plan-build', HTMLButtonElement).addEventListener('click', () => {
+    void handleComposer('按计划执行')
+  })
   required('#task-plus', HTMLButtonElement).addEventListener('click', (event) => {
     event.stopPropagation()
     toggleContextMenu('task')
@@ -367,6 +379,13 @@ export function bindStudio(activate: Activate): void {
   window.ownworkbuddy.agents.onTool((event) => {
     paintToolEvent(event)
   })
+  window.ownworkbuddy.agents.onApproval((prompt) => {
+    paintApprovalPrompt(prompt)
+  })
+  required('#thread-jump-latest', HTMLButtonElement).addEventListener('click', () => {
+    scrollThreadToLatest()
+  })
+  required('.thread-body', HTMLElement).addEventListener('scroll', paintThreadJumpLatest, { passive: true })
   bindRailPointer()
   bindToolResize()
   void loadHostLabel()
@@ -1118,6 +1137,12 @@ function renderRail(): void {
   }
   agentNav.replaceChildren()
   const roster = sortAgentsForRail(agents)
+  if (roster.length === 0) {
+    const empty = document.createElement('p')
+    empty.className = 'rail-empty'
+    empty.textContent = '点 + 雇成员'
+    agentNav.append(empty)
+  }
   for (const [index, agent] of roster.entries()) {
     agentNav.append(agentRailButton(agent, index, roster.length))
   }
@@ -1221,18 +1246,25 @@ function renderThread(): void {
   paintThreadFace(thread?.agentIds ?? [])
   const threadMessages = messages.filter((item) => item.threadId === focus.threadId)
   const home = document.querySelector('#view-home')
+  const hideHome = shouldHideHomeBoard(focus.view, focus.threadId, INBOX_THREAD_ID, threadMessages.length)
   if (home instanceof HTMLElement) {
-    home.hidden =
-      focus.view === 'task' ||
-      focus.view === 'schedule' ||
-      focus.threadId !== INBOX_THREAD_ID ||
-      threadMessages.length > 0
+    home.hidden = hideHome
   }
   const showFeed = shouldShowThreadFeed(focus.view, threadMessages.length)
   feed.hidden = !showFeed
-  renderTaskPage()
+  try {
+    renderTaskPage()
+  } catch (error) {
+    console.error(error)
+    if (home instanceof HTMLElement && focus.view === 'task') {
+      focus = { ...focus, view: 'home' }
+      document.body.dataset.view = 'home'
+      home.hidden = false
+    }
+  }
   paintComposerContext()
   paintComposerModes()
+  paintThreadPlan()
   feed.replaceChildren()
   if (!showFeed) {
     return
@@ -1240,6 +1272,41 @@ function renderThread(): void {
   for (const message of threadMessages) {
     feed.append(messageEl(message))
   }
+  scrollThreadToLatest()
+}
+
+function threadBodyEl(): HTMLElement | undefined {
+  const body = document.querySelector('.thread-body')
+  return body instanceof HTMLElement ? body : undefined
+}
+
+function isThreadNearBottom(el: HTMLElement, slack = 72): boolean {
+  return el.scrollHeight - el.scrollTop - el.clientHeight <= slack
+}
+
+function paintThreadJumpLatest(): void {
+  const button = document.querySelector('#thread-jump-latest')
+  const feed = document.querySelector('#thread-feed')
+  const body = threadBodyEl()
+  if (!(button instanceof HTMLButtonElement) || !(feed instanceof HTMLElement) || !body) {
+    return
+  }
+  button.hidden = feed.hidden || isThreadNearBottom(body)
+}
+
+function scrollThreadToLatest(): void {
+  const feed = document.querySelector('#thread-feed')
+  const body = threadBodyEl()
+  if (!(feed instanceof HTMLElement) || feed.hidden || !body) {
+    paintThreadJumpLatest()
+    return
+  }
+  const pin = (): void => {
+    body.scrollTop = body.scrollHeight
+    paintThreadJumpLatest()
+  }
+  pin()
+  requestAnimationFrame(pin)
 }
 
 function agentsByIds(agentIds: readonly string[]): AgentRecord[] {
@@ -1333,15 +1400,17 @@ function threadThinkEl(thinking: string): HTMLElement {
 function messageEl(message: ThreadMessage): HTMLElement {
   const wrap = document.createElement('article')
   wrap.className = `thread-msg is-${message.role}`
+  wrap.dataset.messageId = message.id
   const row = document.createElement('div')
   row.className = 'thread-msg-row'
   const agent = message.agentId ? agents.find((item) => item.id === message.agentId) : undefined
   const copy = displayedAgentCopy(message)
   const bubble = document.createElement('div')
   bubble.className = 'bubble'
+  const skipActions = message.id === 'typing'
   if (message.role === 'user') {
     paintMentionedText(bubble, message.text)
-    row.append(bubble, userAvatarEl())
+    row.append(withMessageActions(bubble, { text: message.text, skip: skipActions }), userAvatarEl())
     wrap.append(row)
     return wrap
   }
@@ -1376,6 +1445,11 @@ function messageEl(message: ThreadMessage): HTMLElement {
       bubble.append(chips)
     }
   }
+  const spoken = withMessageActions(bubble, {
+    text: copy.text,
+    speaker: agent?.title,
+    skip: skipActions,
+  })
   if (agent) {
     const body = document.createElement('div')
     body.className = 'thread-msg-body'
@@ -1386,7 +1460,7 @@ function messageEl(message: ThreadMessage): HTMLElement {
     if (copy.thinking) {
       body.append(threadThinkEl(copy.thinking))
     }
-    body.append(bubble)
+    body.append(spoken)
     row.append(agentAvatarEl({ templateId: agent.templateId, hue: agent.hue }), body)
     wrap.append(row)
     return wrap
@@ -1394,8 +1468,105 @@ function messageEl(message: ThreadMessage): HTMLElement {
   if (copy.thinking) {
     wrap.append(threadThinkEl(copy.thinking))
   }
-  wrap.append(bubble)
+  wrap.append(spoken)
   return wrap
+}
+
+function withMessageActions(
+  bubble: HTMLElement,
+  input: { text: string; speaker?: string; skip?: boolean },
+): HTMLElement {
+  const actions = input.skip ? null : messageActionsEl(input)
+  if (!actions) {
+    return bubble
+  }
+  const host = document.createElement('div')
+  host.className = 'thread-msg-bubble'
+  host.append(actions, bubble)
+  return host
+}
+
+function messageActionsEl(input: { text: string; speaker?: string }): HTMLElement | null {
+  const text = input.text.trim()
+  if (!text) {
+    return null
+  }
+  const bar = document.createElement('div')
+  bar.className = 'thread-msg-actions'
+  bar.append(
+    messageActionButton('引用', messageQuoteGlyph(), () => {
+      const command = commandEl()
+      command.value = quoteComposerDraft({
+        text,
+        speaker: input.speaker,
+        existing: command.value,
+      })
+      command.focus()
+    }),
+    messageActionButton('复制', messageCopyGlyph(), (button) => {
+      void copyMessageText(text, button)
+    }),
+  )
+  return bar
+}
+
+function messageActionButton(
+  label: string,
+  glyph: SVGSVGElement,
+  onClick: (button: HTMLButtonElement) => void,
+): HTMLButtonElement {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.title = label
+  button.setAttribute('aria-label', label)
+  button.append(glyph)
+  button.addEventListener('click', (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    onClick(button)
+  })
+  return button
+}
+
+function messageQuoteGlyph(): SVGSVGElement {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  svg.setAttribute('viewBox', '0 0 16 16')
+  svg.setAttribute('aria-hidden', 'true')
+  svg.classList.add('is-fill')
+  const left = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  left.setAttribute('d', 'M3.5 12.2c1.7 0 3.2-.7 3.2-3.2V4.5H3.5V8h1.4c0 1.3-.8 2-1.9 2v2.2z')
+  const right = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  right.setAttribute('d', 'M9.3 12.2c1.7 0 3.2-.7 3.2-3.2V4.5H9.3V8h1.4c0 1.3-.8 2-1.9 2v2.2z')
+  svg.append(left, right)
+  return svg
+}
+
+function messageCopyGlyph(): SVGSVGElement {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  svg.setAttribute('viewBox', '0 0 16 16')
+  svg.setAttribute('aria-hidden', 'true')
+  const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  box.setAttribute('x', '5.5')
+  box.setAttribute('y', '5.5')
+  box.setAttribute('width', '7')
+  box.setAttribute('height', '8')
+  box.setAttribute('rx', '1.4')
+  const back = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  back.setAttribute('d', 'M10.5 5.2V4.2A1.2 1.2 0 0 0 9.3 3H4.2A1.2 1.2 0 0 0 3 4.2v6.1A1.2 1.2 0 0 0 4.2 11.5h1')
+  svg.append(back, box)
+  return svg
+}
+
+async function copyMessageText(text: string, button: HTMLButtonElement): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text)
+    button.title = '已复制'
+    window.setTimeout(() => {
+      button.title = '复制'
+    }, 1200)
+  } catch {
+    button.title = '复制失败'
+  }
 }
 
 export async function openCreateAgent(): Promise<void> {
@@ -2595,11 +2766,14 @@ function leaveHarness(): void {
   }
 }
 
-function paintTyping(agentId: string): void {
+function paintTyping(agentId: string, reset = true): void {
   if (focus.view === 'task') {
     return
   }
   typingAgentId = agentId
+  if (reset) {
+    liveToolEvents.length = 0
+  }
   const feed = required('#thread-feed', HTMLElement)
   const home = document.querySelector('#view-home')
   if (home instanceof HTMLElement) {
@@ -2619,10 +2793,140 @@ function paintTyping(agentId: string): void {
   const last = feed.lastElementChild
   if (last instanceof HTMLElement) {
     last.classList.add('is-typing')
+    const bubble = last.querySelector('.bubble')
+    if (bubble instanceof HTMLElement) {
+      bubble.classList.remove('is-md')
+      bubble.classList.add('is-shimmer')
+      bubble.textContent = '正在想…'
+    }
   }
 }
 
+function describeApproval(input: { toolName: string; reason: string }): { title: string; body: string } {
+  const reason = input.reason.trim()
+  const tool = input.toolName.trim() || '工具'
+  if (/escalate sandbox/i.test(reason)) {
+    return { title: '需要提权', body: reason }
+  }
+  return { title: '需要审批', body: reason || `允许「${tool}」继续？` }
+}
+
+function paintApprovalPrompt(prompt: ApprovalPrompt): void {
+  const index = pendingApprovals.findIndex((item) => item.id === prompt.id)
+  if (index >= 0) {
+    pendingApprovals[index] = prompt
+  } else {
+    pendingApprovals.push(prompt)
+  }
+  if (prompt.threadId && prompt.threadId !== focus.threadId) {
+    return
+  }
+  if (!document.querySelector('#thread-feed .is-typing')) {
+    paintTyping(prompt.agentId ?? typingAgentId)
+  }
+  const typing = document.querySelector('#thread-feed .is-typing')
+  if (!(typing instanceof HTMLElement)) {
+    return
+  }
+  paintApprovalInto(typing, prompt)
+}
+
+function paintApprovalInto(host: HTMLElement, prompt: ApprovalPrompt): void {
+  const next = approvalCardEl(prompt)
+  const existing = host.querySelector('.thread-approval')
+  if (existing) {
+    existing.replaceWith(next)
+    return
+  }
+  const bubble = host.querySelector('.bubble')
+  if (bubble) {
+    bubble.replaceWith(next)
+    return
+  }
+  const body = host.querySelector('.thread-msg-body')
+  if (body) {
+    body.append(next)
+    return
+  }
+  host.append(next)
+}
+
+function approvalCardEl(prompt: ApprovalPrompt, decided?: ApprovalDecision): HTMLElement {
+  const copy = describeApproval(prompt)
+  const root = document.createElement('div')
+  root.className = `thread-approval${decided === 'allow' ? ' is-ok' : decided === 'reject' ? ' is-error' : ''}`
+  root.dataset.approvalId = prompt.id
+  const title = document.createElement('div')
+  title.className = 'thread-approval-title'
+  title.textContent = decided === 'allow' ? '已允许一次' : decided === 'reject' ? '已拒绝' : copy.title
+  root.append(title)
+  if (copy.body && copy.body !== copy.title) {
+    const body = document.createElement('div')
+    body.className = 'thread-approval-body'
+    body.textContent = copy.body
+    root.append(body)
+  }
+  if (!decided) {
+    const actions = document.createElement('div')
+    actions.className = 'thread-approval-actions'
+    const allow = document.createElement('button')
+    allow.type = 'button'
+    allow.className = 'thread-approval-allow'
+    allow.textContent = '允许一次'
+    allow.addEventListener('click', (event) => {
+      event.preventDefault()
+      void settleApproval(prompt.id, 'allow')
+    })
+    const reject = document.createElement('button')
+    reject.type = 'button'
+    reject.className = 'thread-approval-reject'
+    reject.textContent = '拒绝'
+    reject.addEventListener('click', (event) => {
+      event.preventDefault()
+      void settleApproval(prompt.id, 'reject')
+    })
+    actions.append(allow, reject)
+    root.append(actions)
+  }
+  return root
+}
+
+async function settleApproval(id: string, decision: ApprovalDecision): Promise<void> {
+  const prompt = pendingApprovals.find((item) => item.id === id)
+  const index = pendingApprovals.findIndex((item) => item.id === id)
+  if (index >= 0) {
+    pendingApprovals.splice(index, 1)
+  }
+  const card = document.querySelector(`[data-approval-id="${CSS.escape(id)}"]`)
+  if (card instanceof HTMLElement && prompt) {
+    card.replaceWith(approvalCardEl(prompt, decision))
+  }
+  try {
+    await window.ownworkbuddy.agents.decideApproval(id, decision)
+  } catch {
+    if (prompt) {
+      pendingApprovals.push(prompt)
+    }
+  }
+}
+
+function upsertLiveToolEvent(event: ToolEvent): void {
+  const index = liveToolEvents.findIndex((item) => item.name === event.name && item.agentId === event.agentId)
+  if (index >= 0) {
+    liveToolEvents[index] = event
+    return
+  }
+  liveToolEvents.push(event)
+}
+
+function liveRunningTools(agentId: string): ToolEvent[] {
+  return liveToolEvents.filter(
+    (item) => item.status === 'running' && (!item.agentId || item.agentId === agentId),
+  )
+}
+
 function paintToolEvent(event: ToolEvent): void {
+  upsertLiveToolEvent(event)
   if (!chatting) {
     return
   }
@@ -2632,12 +2936,85 @@ function paintToolEvent(event: ToolEvent): void {
   if (event.agentId && event.agentId !== typingAgentId) {
     return
   }
-  const bubble = document.querySelector('#thread-feed .is-typing .bubble')
-  if (!(bubble instanceof HTMLElement)) {
+  if (!document.querySelector('#thread-feed .is-typing') && typingAgentId) {
+    paintTyping(typingAgentId, false)
+  }
+  const typing = document.querySelector('#thread-feed .is-typing')
+  if (!(typing instanceof HTMLElement)) {
     return
   }
-  bubble.classList.remove('is-md')
-  bubble.textContent = formatToolEventLine(event)
+  const running = typingAgentId ? liveRunningTools(typingAgentId) : []
+  if (running.length > 0) {
+    paintRunningToolsInto(typing, running)
+  } else {
+    paintToolCardInto(typing, event)
+  }
+  const approval = pendingApprovals.find(
+    (prompt) =>
+      (!prompt.threadId || prompt.threadId === focus.threadId) &&
+      (!prompt.agentId || prompt.agentId === typingAgentId),
+  )
+  if (approval) {
+    paintApprovalInto(typing, approval)
+  }
+}
+
+function paintToolCardInto(host: HTMLElement, event: ToolEvent): void {
+  const next = toolCardEl(event)
+  const existing = host.querySelector('.thread-task')
+  if (existing) {
+    existing.replaceWith(next)
+    return
+  }
+  const bubble = host.querySelector('.bubble')
+  if (bubble) {
+    bubble.replaceWith(next)
+    return
+  }
+  const body = host.querySelector('.thread-msg-body')
+  if (body) {
+    body.append(next)
+    return
+  }
+  host.append(next)
+}
+
+function paintRunningToolsInto(host: HTMLElement, events: ToolEvent[]): void {
+  for (const node of [...host.querySelectorAll('.thread-task')]) {
+    node.remove()
+  }
+  host.querySelector('.bubble')?.remove()
+  const target = host.querySelector('.thread-msg-body') ?? host
+  for (const event of events) {
+    target.append(toolCardEl(event))
+  }
+}
+
+function toolCardEl(event: ToolEvent): HTMLElement {
+  const root = document.createElement('div')
+  root.className = `thread-task is-${event.status}`
+  const summary = document.createElement('div')
+  summary.className = 'thread-task-summary'
+  const status = document.createElement('span')
+  status.className = 'thread-task-status'
+  status.setAttribute('aria-hidden', 'true')
+  status.textContent = event.status === 'running' ? '…' : event.status === 'ok' ? '✓' : '!'
+  const copy = document.createElement('span')
+  copy.className = 'thread-task-copy'
+  const title = document.createElement('span')
+  title.className = event.status === 'running' ? 'thread-task-title is-shimmer' : 'thread-task-title'
+  title.textContent = toolCardTitle(event.name)
+  copy.append(title)
+  const live = formatToolEventLine(event)
+  if (live && live !== title.textContent) {
+    const hint = document.createElement('span')
+    hint.className = 'thread-task-live'
+    hint.textContent = live
+    copy.append(hint)
+  }
+  summary.append(status, copy)
+  root.append(summary)
+  return root
 }
 
 function composerMenuEl(): HTMLElement {
@@ -2934,6 +3311,37 @@ async function setComposerMode(mode: ComposerMode): Promise<void> {
     threads = threads.map((item) => (item.id === next.id ? next : item))
   }
   paintComposerModes()
+  paintThreadPlan()
+}
+
+async function clearThreadPlan(): Promise<void> {
+  const threadId = focus.threadId
+  if (!threadId) {
+    return
+  }
+  const thread = await window.ownworkbuddy.agents.clearPlan(threadId)
+  threads = threads.map((item) => (item.id === thread.id ? thread : item))
+  paintThreadPlan()
+}
+
+function paintThreadPlan(): void {
+  const card = document.querySelector('#thread-plan')
+  const area = document.querySelector('#thread-plan-text')
+  if (!(card instanceof HTMLElement) || !(area instanceof HTMLTextAreaElement)) {
+    return
+  }
+  const thread = threads.find((item) => item.id === focus.threadId)
+  const agent = currentComposerAgent()
+  const plan = agent ? threadPlanOf(thread, agent.id) : thread?.plan
+  const show = Boolean(
+    plan?.text.trim() && thread && thread.kind !== 'inbox' && agent && offersComposerModes(agent),
+  )
+  card.hidden = !show
+  if (!show || !plan) {
+    area.value = ''
+    return
+  }
+  area.value = plan.text
 }
 
 function paintAttachmentChips(surface: ComposerSurface, files: readonly ProjectContextFile[]): void {

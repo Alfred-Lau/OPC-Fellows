@@ -414,6 +414,20 @@ export class AgentsService extends Service {
     return this.commitThread(next)
   }
 
+  clearPlan(threadId: string): ThreadRecord {
+    if (!this.thread(threadId)) {
+      throw new Error('没有这条记录')
+    }
+    this.threads = applyThreadPlan(this.threads, threadId, undefined)
+    this.persist()
+    this.emit()
+    const thread = this.thread(threadId)
+    if (!thread) {
+      throw new Error('没有这条记录')
+    }
+    return thread
+  }
+
   removeAgent(agentId: string): boolean {
     const planned = planRemoveAgent(this.agents, this.threads, this.messages, agentId)
     if (!planned.ok) {

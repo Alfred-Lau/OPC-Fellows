@@ -13,12 +13,15 @@ import { isToolPackId } from '../shared/tool-packs'
 import { parseChatTurnOptions, parseComposerMode } from '../shared/plan-mode'
 import { bootKernelTree } from '../shared/dsh-desktop-profile'
 import { dshHome } from '../shared/opc-profile'
+import { resolveActiveLlm, withLlmEnv } from '../../main/credentials'
+import { llmOverlayYaml } from '../../shared/llm-overlay'
 
 /**
  * 内核启动。能 in-process 时走官方 `boot()` + desktop profile；
  * 缺 host 才自建 Context，对话再 spawn opc。
  */
 export async function bootKernel(quit: () => Promise<void>): Promise<Context> {
+  Object.assign(process.env, withLlmEnv())
   process.env.DSH_TELEMETRY_DISABLED = '1'
   process.env.DSH_PERMISSION_MODE = 'workspace-write'
   loadLayeredEnv('dsh', process.cwd(), (line) => {
@@ -31,6 +34,7 @@ export async function bootKernel(quit: () => Promise<void>): Promise<Context> {
     cwd: process.cwd(),
     dshHome: dshHome(),
     applyHost: applyOpcKernel,
+    overlayYaml: llmOverlayYaml(resolveActiveLlm()) ?? undefined,
   })
 
   registerKernelNav(ctx)
@@ -188,6 +192,7 @@ function registerKernelIpc(ctx: Context): void {
     }
     return ctx.roster.setComposerMode(String(threadId), String(agentId), parsed)
   })
+  ctx.bridge.handle('agents:clear-plan', (_event, threadId: string) => ctx.roster.clearPlan(String(threadId)))
   ctx.bridge.handle('agents:approval-decide', (_event, id: string, decision: unknown) =>
     ctx.dshRuntime.decideApproval(String(id), decision),
   )

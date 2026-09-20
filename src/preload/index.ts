@@ -18,6 +18,7 @@ import type {
   ProjectContextFile,
 } from '../kernel/shared/agent'
 import type { ToolEvent } from '../kernel/shared/tool-events'
+import type { ApprovalDecision, ApprovalPrompt } from '../kernel/shared/approval'
 import type { SocialMetricsInput, SocialState } from '../shared/social'
 import type { HostStatus } from '../shared/status'
 import type { LlmKeyResult, LlmSettings } from '../shared/deepseek'
@@ -133,6 +134,8 @@ contextBridge.exposeInMainWorld('ownworkbuddy', {
       ipcRenderer.invoke('agents:set-composer-mode', threadId, agentId, mode) as Promise<
         AgentSnapshot['threads'][number]
       >,
+    clearPlan: (threadId: string) =>
+      ipcRenderer.invoke('agents:clear-plan', threadId) as Promise<AgentSnapshot['threads'][number]>,
     reply: (threadId: string, text: string, agentId?: string, listing?: ShortListing, thinking?: string) =>
       ipcRenderer.invoke('agents:reply', threadId, text, agentId, listing, thinking) as Promise<ThreadMessage>,
     messages: (threadId: string) => ipcRenderer.invoke('agents:messages', threadId) as Promise<ThreadMessage[]>,
@@ -189,6 +192,17 @@ contextBridge.exposeInMainWorld('ownworkbuddy', {
         ipcRenderer.removeListener('agents:tool', listener)
       }
     },
+    onApproval: (callback: (prompt: ApprovalPrompt) => void) => {
+      const listener = (_event: unknown, payload: ApprovalPrompt): void => {
+        callback(payload)
+      }
+      ipcRenderer.on('agents:approval', listener)
+      return () => {
+        ipcRenderer.removeListener('agents:approval', listener)
+      }
+    },
+    decideApproval: (id: string, decision: ApprovalDecision) =>
+      ipcRenderer.invoke('agents:approval-decide', id, decision) as Promise<boolean>,
   },
   tools: {
     invoke: (name: string, args: Record<string, string>) =>

@@ -20,6 +20,7 @@ import {
   planRenameProject,
   planReorderProjects,
   shouldShowThreadFeed,
+  shouldHideHomeBoard,
   planProjectSubmit,
   titleFromTaskText,
   withHostAgent,
@@ -52,8 +53,8 @@ function project(overrides: Partial<ThreadRecord> = {}): ThreadRecord {
     id: 'thread:user:poem',
     title: '古诗图文素材',
     kind: 'user',
-    agentIds: ['micro', 'social-ammo'],
-    workspaceAgentId: 'micro',
+    agentIds: ['demo', 'social-ammo'],
+    workspaceAgentId: 'demo',
     description: '把目录和封面图一次收齐',
     createdAt: clock.now(),
     updatedAt: clock.now(),
@@ -89,7 +90,7 @@ test('选了已有项目时标题点名，并带上参与者和主 Agent', () =>
   const page = describeNewTaskPage({
     threads: [project()],
     agents: [
-      agent({ id: 'micro', title: '选品策略师', mark: '选', hue: 5 }),
+      agent({ id: 'demo', title: '示例成员', mark: '示', hue: 5 }),
       agent({ id: 'social-ammo', title: '社媒弹药手', mark: '弹', hue: 7 }),
     ],
     hostName: 'opc.local',
@@ -101,13 +102,13 @@ test('选了已有项目时标题点名，并带上参与者和主 Agent', () =>
   assert.equal(page.showComposer, true)
   assert.equal(page.emptyHint, '')
   assert.equal(page.brief, '把目录和封面图一次收齐')
-  assert.equal(page.leadId, 'micro')
+  assert.equal(page.leadId, 'demo')
   assert.equal(page.folderLabel, '')
   assert.equal(page.chipLabel, 'opc.local')
   assert.deepEqual(
     page.agents.map((item) => [item.id, item.selected, item.lead]),
     [
-      ['micro', true, true],
+      ['demo', true, true],
       ['social-ammo', true, false],
     ],
   )
@@ -202,10 +203,10 @@ test('项目列表只收用户开的事，主对话和今日不进', () => {
       updatedAt: clock.now(),
     },
     {
-      id: 'thread:micro',
-      title: '选品策略师',
+      id: 'thread:demo',
+      title: '示例成员',
       kind: 'agent',
-      agentIds: ['micro'],
+      agentIds: ['demo'],
       createdAt: clock.now(),
       updatedAt: clock.now(),
     },
@@ -360,9 +361,19 @@ test('主对话里 @ 别人要点名，项目里不拦', () => {
 test('发起新项目不带会话列表，今日空收件箱也不出空列表', () => {
   assert.equal(shouldShowThreadFeed('task', 4), false)
   assert.equal(shouldShowThreadFeed('schedule', 2), false)
+  assert.equal(shouldShowThreadFeed('tasks', 3), false)
   assert.equal(shouldShowThreadFeed('home', 0), false)
   assert.equal(shouldShowThreadFeed('home', 2), true)
   assert.equal(shouldShowThreadFeed('monitor', 0), true)
+})
+
+test('今日空收件箱要露出简报，新项目页才藏掉，避免两面都 hidden', () => {
+  assert.equal(shouldHideHomeBoard('home', 'inbox', 'inbox', 0), false)
+  assert.equal(shouldHideHomeBoard('task', 'inbox', 'inbox', 0), true)
+  assert.equal(shouldHideHomeBoard('schedule', 'inbox', 'inbox', 0), true)
+  assert.equal(shouldHideHomeBoard('tasks', 'inbox', 'inbox', 0), true)
+  assert.equal(shouldHideHomeBoard('home', 'thread:user:a', 'inbox', 0), true)
+  assert.equal(shouldHideHomeBoard('home', 'inbox', 'inbox', 3), true)
 })
 
 test('有主理人时新项目默认勾上且不能移出；旧项目补进主理人，今日不塞', () => {
@@ -398,8 +409,8 @@ test('有主理人时新项目默认勾上且不能移出；旧项目补进主�
     updatedAt: clock.now(),
   }
   const hydrated = ensureHostOnUserProjects([project(), inbox])
-  assert.deepEqual(hydrated[0]?.agentIds, [HOST_AGENT_ID, 'micro', 'social-ammo'])
-  assert.equal(hydrated[0]?.workspaceAgentId, 'micro')
+  assert.deepEqual(hydrated[0]?.agentIds, [HOST_AGENT_ID, 'demo', 'social-ammo'])
+  assert.equal(hydrated[0]?.workspaceAgentId, 'demo')
   assert.deepEqual(hydrated[1]?.agentIds, [])
   assert.deepEqual(withHostAgent(['mina', HOST_AGENT_ID, 'mina']), [HOST_AGENT_ID, 'mina'])
 })

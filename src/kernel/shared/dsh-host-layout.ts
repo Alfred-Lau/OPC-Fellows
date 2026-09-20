@@ -144,7 +144,7 @@ export function resolveOpcKernelDir(input: DshHostLookup & { hostRoot?: string }
     appPath && canBootDshInProcess(appPath) ? join(appPath, 'packages', OPC_KERNEL_RESOURCE) : undefined,
     cwd && canBootDshInProcess(cwd) && !asarLookup ? join(cwd, 'packages', OPC_KERNEL_RESOURCE) : undefined,
   ]
-  return dirs.find((dir): dir is string => Boolean(dir) && isOpcKernelDir(dir))
+  return dirs.find((dir): dir is string => typeof dir === 'string' && isOpcKernelDir(dir))
 }
 
 export function dshHostInstallAnchor(root: string): string {

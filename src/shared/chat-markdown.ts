@@ -1,5 +1,13 @@
 /** 会话气泡用的 Markdown → 安全 HTML。零依赖，只产出白名单标签。 */
 
+const CODE_PEEK_LINES = 4
+
+export type ChatCodeMeta = {
+  lang: string
+  fileName?: string
+  startLine?: number
+}
+
 export function markdownTable(headers: readonly string[], rows: readonly (readonly string[])[]): string {
   if (headers.length === 0) {
     return ''
@@ -13,6 +21,47 @@ export function markdownTable(headers: readonly string[], rows: readonly (readon
 export function markdownFence(body: string, lang = ''): string {
   const safe = body.replace(/```/g, '`\u200b``')
   return `\`\`\`${lang}\n${safe}\n\`\`\``
+}
+
+export function parseChatCodeMeta(header: string): ChatCodeMeta {
+  const raw = header.trim()
+  if (!raw) {
+    return { lang: '' }
+  }
+  const ranged = /^(\d+):(\d+):(.+)$/.exec(raw)
+  if (ranged) {
+    const path = (ranged[3] ?? '').trim()
+    return {
+      lang: fileExtension(path) ?? '',
+      fileName: fileCardName(path),
+      startLine: Number(ranged[1]),
+    }
+  }
+  const withFile = /^([A-Za-z0-9+#._-]+)(?:\s+|:)(.+)$/.exec(raw)
+  const file = (withFile?.[2] ?? '').trim()
+  if (withFile && looksLikeCodeFile(file)) {
+    return {
+      lang: withFile[1] ?? '',
+      fileName: fileCardName(file),
+    }
+  }
+  if (looksLikeCodeFile(raw)) {
+    return { lang: fileExtension(raw) ?? '', fileName: fileCardName(raw) }
+  }
+  return { lang: raw }
+}
+
+export function chatCodeStat(lines: readonly string[]): string {
+  const added = lines.filter((line) => line.startsWith('+') && !line.startsWith('+++')).length
+  const removed = lines.filter((line) => line.startsWith('-') && !line.startsWith('---')).length
+  if (added > 0 || removed > 0) {
+    return [added > 0 ? `+${added}` : '', removed > 0 ? `-${removed}` : ''].filter(Boolean).join(' ')
+  }
+  return lines.length > 0 ? `${lines.length} 行` : ''
+}
+
+export function shouldCollapseChatCode(meta: ChatCodeMeta, lines: readonly string[]): boolean {
+  return Boolean(meta.fileName) || lines.length > CODE_PEEK_LINES || isDiffBody(lines)
 }
 
 export function renderChatMarkdown(markdown: string): string {
@@ -183,7 +232,7 @@ function renderInline(text: string): string {
 }
 
 function parseFence(lines: string[], start: number): { html: string; next: number } {
-  const lang = (lines[start] ?? '').slice(3).trim()
+  const meta = parseChatCodeMeta((lines[start] ?? '').slice(3))
   const inner: string[] = []
   let index = start + 1
   while (index < lines.length && !(lines[index] ?? '').startsWith('```')) {
@@ -193,11 +242,88 @@ function parseFence(lines: string[], start: number): { html: string; next: numbe
   if (index < lines.length) {
     index += 1
   }
-  const cls = lang ? ` class="lang-${escapeHtml(lang)}"` : ''
+  if (shouldCollapseChatCode(meta, inner)) {
+    return { html: chatCodeHtml(meta, inner), next: index }
+  }
+  const cls = meta.lang ? ` class="lang-${escapeHtml(meta.lang)}"` : ''
   return {
     html: `<pre><code${cls}>${escapeHtml(inner.join('\n'))}</code></pre>`,
     next: index,
   }
+}
+
+function fileCardName(path: string): string {
+  const parts = path.replace(/\\/g, '/').split('/').filter(Boolean)
+  return parts[parts.length - 1] || path
+}
+
+function fileExtension(name: string): string | undefined {
+  const match = /\.([A-Za-z0-9]+)$/.exec(name)
+  return match?.[1]
+}
+
+function looksLikeCodeFile(value: string): boolean {
+  return /[./\\]/.test(value) && /\.[A-Za-z0-9]+$/.test(fileCardName(value))
+}
+
+function isDiffBody(lines: readonly string[]): boolean {
+  return lines.some(
+    (line) =>
+      (line.startsWith('+') && !line.startsWith('+++')) || (line.startsWith('-') && !line.startsWith('---')),
+  )
+}
+
+function chatCodeLangBadge(meta: ChatCodeMeta): string {
+  const raw = (meta.lang || fileExtension(meta.fileName ?? '') || 'code').toLowerCase()
+  switch (raw) {
+    case 'typescript':
+    case 'tsx':
+    case 'ts':
+      return 'TS'
+    case 'javascript':
+    case 'jsx':
+    case 'js':
+    case 'mjs':
+    case 'cjs':
+      return 'JS'
+    case 'markdown':
+    case 'md':
+      return 'MD'
+    case 'python':
+    case 'py':
+      return 'PY'
+    case 'diff':
+      return 'DIFF'
+    default:
+      return raw.slice(0, 4).toUpperCase() || 'CODE'
+  }
+}
+
+function chatCodeHtml(meta: ChatCodeMeta, lines: string[]): string {
+  const peek = lines.slice(0, CODE_PEEK_LINES)
+  const start = meta.startLine && Number.isFinite(meta.startLine) ? meta.startLine : 1
+  const lang = escapeHtml(chatCodeLangBadge(meta))
+  const name = escapeHtml(meta.fileName || '代码')
+  const stat = escapeHtml(chatCodeStat(lines))
+  const peekHtml = peek.map((line, index) => chatCodeLineHtml(line, start + index)).join('')
+  const rest =
+    lines.length > CODE_PEEK_LINES
+      ? `<details class="chat-code-rest"><summary><span class="chat-code-more">展开全部 ${String(lines.length)} 行</span><span class="chat-code-less">收起</span></summary><div class="chat-code-full">${lines
+          .map((line, index) => chatCodeLineHtml(line, start + index))
+          .join('')}</div></details>`
+      : ''
+  const deltaClass = stat.startsWith('+') ? ' is-add' : stat.startsWith('-') ? ' is-del' : ''
+  return `<div class="chat-code"><div class="chat-code-head"><span class="chat-code-lang">${lang}</span><span class="chat-code-name">${name}</span>${stat ? `<span class="chat-code-stat${deltaClass}">${stat}</span>` : ''}</div><div class="chat-code-peek">${peekHtml}</div>${rest}</div>`
+}
+
+function chatCodeLineHtml(line: string, no: number): string {
+  const added = line.startsWith('+') && !line.startsWith('+++')
+  const removed = line.startsWith('-') && !line.startsWith('---')
+  const kind = added ? 'add' : removed ? 'del' : ''
+  const mark = added ? '+' : removed ? '-' : ''
+  const body = added || removed ? line.slice(1) : line
+  const kindClass = kind ? ` is-${kind}` : ''
+  return `<div class="chat-code-line${kindClass}"><span class="chat-code-no">${String(no)}</span><span class="chat-code-mark">${mark}</span><code>${escapeHtml(body)}</code></div>`
 }
 
 function parseQuote(lines: string[], start: number): { html: string; next: number } {

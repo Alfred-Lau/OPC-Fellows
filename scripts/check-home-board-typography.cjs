@@ -27,6 +27,7 @@ app.whenReady().then(async () => {
       cream: root.getPropertyValue('--cream').trim(),
       brass: root.getPropertyValue('--brass').trim(),
       surface: root.getPropertyValue('--surface').trim(),
+      fontSans: root.getPropertyValue('--font-sans').trim(),
     }
 
     function hexToRgb(input) {
@@ -149,7 +150,11 @@ app.whenReady().then(async () => {
   const loudTitle = titleIsFullFg || heavyTitle
   const threeAcross = metrics.board.columnCount > 2
   const notStacked = metrics.board.display !== 'flex'
-  const failed = cramped || oversized || loudTitle || threeAcross || notStacked
+  const fontSans = metrics.tokens.fontSans
+  const ping = fontSans.indexOf('PingFang SC')
+  const apple = fontSans.search(/-apple-system|BlinkMacSystemFont/)
+  const jpFallback = ping === -1 || (apple !== -1 && apple < ping)
+  const failed = cramped || oversized || loudTitle || threeAcross || notStacked || jpFallback
 
   process.stdout.write(
     `${JSON.stringify(
@@ -161,6 +166,7 @@ app.whenReady().then(async () => {
           loudTitle,
           threeAcross,
           notStacked,
+          jpFallback,
           minLineHeightRatio: MIN_LINE_HEIGHT_RATIO,
           maxTitleFontPx: MAX_TITLE_FONT_PX,
         },

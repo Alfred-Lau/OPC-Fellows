@@ -1,6 +1,7 @@
 /**
  * 中栏气泡从 dsh Session 表层投影。
  * 操作者 / 成员对白进 Session；座位提示（没 key、超时、转发）不进模型日志。
+ * 可分享日志不写本机绝对路径。
  */
 
 import type { DialogueSource, ThreadMessage } from './agent.ts'
@@ -37,6 +38,25 @@ export function isSeatMessage(message: Pick<ThreadMessage, 'role' | 'source'>): 
       return exhaustive
     }
   }
+}
+
+export function isShareableAbsPath(value: string): boolean {
+  const trimmed = value.trim()
+  return trimmed.startsWith('/') || trimmed.startsWith('~') || /^[A-Za-z]:[\\/]/.test(trimmed)
+}
+
+export function shareableLogPath(path: string, fallbackName = ''): string {
+  const trimmed = path.trim()
+  const name = fallbackName.trim() || fileNameOf(trimmed) || 'file'
+  if (!trimmed || isShareableAbsPath(trimmed)) {
+    return name
+  }
+  return trimmed
+}
+
+function fileNameOf(path: string): string {
+  const cut = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'))
+  return cut >= 0 ? path.slice(cut + 1) : path
 }
 
 export function projectSessionSurface(events: readonly unknown[]): SessionSurfaceTurn {

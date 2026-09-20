@@ -36,13 +36,8 @@ function revealOccupation(reveal: OccupationReveal | undefined): void {
   if (!reveal) {
     return
   }
-  switch (reveal.kind) {
-    case 'social':
-      activateSocial()
-      return
-    default: {
-      const exhaustive: never = reveal
-      return exhaustive
-    }
+  // 公开仓只保留 social；其余职业 reveal 已删，不再做 exhaustive never。
+  if (reveal.kind === 'social') {
+    activateSocial()
   }
 }

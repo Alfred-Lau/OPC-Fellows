@@ -66,7 +66,7 @@ function sampleAgent(overrides: Partial<AgentRecord> = {}): AgentRecord {
 test('slugify 吃中文也能给出稳定 id', () => {
   assert.equal(slugify('Rumi'), 'rumi')
   assert.equal(slugify('Hello World'), 'hello-world')
-  assert.equal(slugify('选品策略师'), '选品策略师')
+  assert.equal(slugify('示例成员'), '示例成员')
 })
 
 test('默认实例 id 对齐历史上的 ingest agentId', () => {
@@ -130,17 +130,17 @@ test('雇佣未知模板失败，弹药手单例可再开已有实例', () => {
 test('Thread 短结果钉死上次 listing，无新表不覆盖', () => {
   const threads = [
     {
-      id: 'thread:micro',
-      title: '选品策略师',
+      id: 'thread:demo',
+      title: '示例成员',
       kind: 'agent' as const,
-      agentIds: ['micro-sourcing'],
+      agentIds: ['demo-member'],
       createdAt: clock.now(),
       updatedAt: clock.now(),
     },
   ]
-  const pinned = applyThreadListing(threads, 'thread:micro', { kind: 'idea', ids: ['low', 'high'] }, clock)
+  const pinned = applyThreadListing(threads, 'thread:demo', { kind: 'idea', ids: ['low', 'high'] }, clock)
   assert.deepEqual(pinned[0]?.lastListing?.ids, ['low', 'high'])
-  const kept = applyThreadListing(pinned, 'thread:micro', undefined, clock)
+  const kept = applyThreadListing(pinned, 'thread:demo', undefined, clock)
   assert.deepEqual(kept[0]?.lastListing?.ids, ['low', 'high'])
 })
 

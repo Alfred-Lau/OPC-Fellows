@@ -1,7 +1,6 @@
 html,
 body {
   height: 100%;
-  -webkit-app-region: drag;
 }
 
 body {
@@ -190,13 +189,13 @@ body[data-rail='collapsed'] .nav-mark {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  -webkit-app-region: drag;
+  -webkit-app-region: no-drag;
 }
 
 .view {
   display: none;
   min-height: 0;
-  -webkit-app-region: drag;
+  -webkit-app-region: no-drag;
 }
 
 body[data-view='home'] #view-home {
@@ -239,7 +238,7 @@ body[data-view='extensions'] #view-settings {
 .home-board {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 20px;
   padding: 8px 18px 28px;
   -webkit-app-region: no-drag;
 }
@@ -249,9 +248,15 @@ body[data-view='extensions'] #view-settings {
 }
 
 .home-section + .home-section {
-  margin-top: 8px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.home-count {
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
 }
 
 .home-section-head {

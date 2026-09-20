@@ -9,6 +9,7 @@ import {
   type LlmKeyResult,
   type LlmSettings,
 } from '../shared/deepseek'
+import { resolveLlmRuntime, type ResolvedLlm } from '../shared/llm-overlay'
 
 interface StoredApiKey {
   encrypted?: string
@@ -86,11 +87,24 @@ export function setDeepSeekApiKey(raw: string | null): LlmKeyResult {
 /** 给 SDK 进程 / dsh CLI 带上工作台这份 key，不再要求去 Harness 里另填。 */
 export function withDeepSeekApiKey(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
   const next = { ...env }
-  const key = readDeepSeekApiKey()
-  if (key) {
-    next.DEEPSEEK_API_KEY = key
+  const runtime = resolveActiveLlm()
+  if (runtime.apiKey) {
+    next.DEEPSEEK_API_KEY = runtime.apiKey
   }
   return next
+}
+
+export function withLlmEnv(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  return withDeepSeekApiKey(env)
+}
+
+export function resolveActiveLlm(): ResolvedLlm {
+  const resolved = resolveDeepSeekApiKey()
+  return resolveLlmRuntime({
+    apiKey: resolved.key,
+    keySource: resolved.source,
+    env: process.env,
+  })
 }
 
 function resolveDeepSeekApiKey(): ReturnType<typeof resolveLlmApiKey> {

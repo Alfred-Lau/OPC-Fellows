@@ -1,4 +1,17 @@
-export type ProductLine = 'bitou' | 'solokit'
+/**
+ * 目录分组 id，不是公司名。
+ * `bitou` / `solokit` 只当读旧 catalog 的别名，不进默认值。
+ */
+export const PRODUCT_LINES = ['research', 'toolkit'] as const
+
+export type ProductLine = (typeof PRODUCT_LINES)[number]
+
+export const DEFAULT_PRODUCT_LINE: ProductLine = 'research'
+
+const LEGACY_PRODUCT_LINES = {
+  bitou: 'research',
+  solokit: 'toolkit',
+} as const satisfies Record<string, ProductLine>
 
 /**
  * 站点 /api/stats 的接入状态。只有 'live' 会被真正请求，
@@ -33,7 +46,7 @@ export const OPC_PRODUCTS: OpcProduct[] = []
 /** 测试和文档用的虚构站点，不进启动默认值。 */
 export const EXAMPLE_PRODUCT: OpcProduct = {
   id: 'demo',
-  line: 'bitou',
+  line: DEFAULT_PRODUCT_LINE,
   name: '示例产品',
   nameEn: 'Demo Product',
   url: 'https://example.com/',
@@ -44,6 +57,21 @@ export const EXAMPLE_PRODUCT: OpcProduct = {
   aliases: ['demo', 'example'],
   tagsZh: ['示例', '一人公司'],
   tagsEn: ['Demo', 'OPC', 'IndieHacker'],
+}
+
+export function isProductLine(value: unknown): value is ProductLine {
+  return value === 'research' || value === 'toolkit'
+}
+
+/** 读目录时收下中性 id 和旧别名；缺省或未知值落到 research，不写公司名。 */
+export function normalizeProductLine(value: unknown): ProductLine {
+  if (isProductLine(value)) {
+    return value
+  }
+  if (typeof value === 'string' && value.trim() in LEGACY_PRODUCT_LINES) {
+    return LEGACY_PRODUCT_LINES[value.trim() as keyof typeof LEGACY_PRODUCT_LINES]
+  }
+  return DEFAULT_PRODUCT_LINE
 }
 
 export function cloneProduct(product: OpcProduct): OpcProduct {

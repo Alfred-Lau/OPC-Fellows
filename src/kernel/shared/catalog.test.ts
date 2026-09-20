@@ -37,7 +37,20 @@ test('缺字段的产品丢掉，合法的留下', () => {
   assert.equal(catalog.socialSignature, 'me.example')
   assert.equal(catalog.products.length, 1)
   assert.equal(catalog.products[0]?.id, 'one')
-  assert.equal(catalog.products[0]?.line, 'bitou')
+  assert.equal(catalog.products[0]?.line, 'research')
+})
+
+test('旧 catalog 的公司名产品线收成中性 id，行为不变', () => {
+  const catalog = normalizeCatalog({
+    products: [
+      { id: 'old-research', name: '旧研究', url: 'https://a.example', line: 'bitou' },
+      { id: 'old-toolkit', name: '旧工具', url: 'https://b.example', line: 'solokit' },
+      { id: 'kept', name: '已中性', url: 'https://c.example', line: 'toolkit' },
+    ],
+  })
+  assert.equal(catalog.products[0]?.line, 'research')
+  assert.equal(catalog.products[1]?.line, 'toolkit')
+  assert.equal(catalog.products[2]?.line, 'toolkit')
 })
 
 test('applyCatalog 改运行时标签和产品目录', () => {

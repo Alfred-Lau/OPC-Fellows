@@ -40,7 +40,7 @@ test('模块形状：ownworkbuddy、dsh.bundle、双写', () => {
 
 test('从包名收模块 id', () => {
   assert.equal(moduleIdFromPackageName(undefined), null)
-  assert.equal(moduleIdFromPackageName('@solokit/ownworkbuddy-hello'), 'hello')
+  assert.equal(moduleIdFromPackageName('@example/ownworkbuddy-hello'), 'hello')
   assert.equal(moduleIdFromPackageName('opc-notes'), 'notes')
   assert.equal(moduleIdFromPackageName('weather'), 'weather')
 })

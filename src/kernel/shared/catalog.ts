@@ -1,4 +1,11 @@
-import { cloneProduct, OPC_PRODUCTS, setProducts, type OpcProduct, type ProductLine, type StatsStatus } from '../../shared/products.ts'
+import {
+  cloneProduct,
+  normalizeProductLine,
+  OPC_PRODUCTS,
+  setProducts,
+  type OpcProduct,
+  type StatsStatus,
+} from '../../shared/products.ts'
 import { DEFAULT_SOCIAL_SIGNATURE, setSocialSignature } from '../../shared/social-copy.ts'
 import { OPC_PROJECT_TAG, setProjectTag } from '../../shared/tags.ts'
 
@@ -53,7 +60,7 @@ function normalizeProduct(value: unknown): OpcProduct | null {
   if (typeof raw.url !== 'string' || !raw.url.trim()) {
     return null
   }
-  const line: ProductLine = raw.line === 'solokit' ? 'solokit' : 'bitou'
+  const line = normalizeProductLine(raw.line)
   const statsStatus: StatsStatus | undefined =
     raw.statsStatus === 'live' || raw.statsStatus === 'pending' || raw.statsStatus === 'unavailable'
       ? raw.statsStatus

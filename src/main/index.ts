@@ -1,6 +1,6 @@
 import { app } from 'electron'
 import type { Context } from '@deepseek-ai/cordis'
-import { PRODUCT_NAME } from '../shared/brand'
+import { INSTALL_APP_ID, PRODUCT_NAME } from '../shared/brand'
 import { applyDockIcon } from './app-icon'
 import { ensureDesktopPath } from './cli-path'
 import { initTheme, registerThemeIpc } from './theme'
@@ -44,7 +44,7 @@ if (!gotLock) {
     ensureDesktopPath()
     applyDockIcon()
     if (process.platform === 'win32') {
-      app.setAppUserModelId('tech.bitou.ownworkbuddy')
+      app.setAppUserModelId(INSTALL_APP_ID)
     }
     initTheme()
     registerThemeIpc()

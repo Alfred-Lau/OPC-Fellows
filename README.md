@@ -1,8 +1,4 @@
 <p align="center">
-  <img src="docs/cover.png" alt="OPC-Fellows — Local-first workbench for a one-person company" width="100%">
-</p>
-
-<p align="center">
   <strong>OPC-Fellows</strong> · hire occupations as members, then point them at <em>your</em> work<br>
   A small kernel (shell, todos, contracts) plus occupation plugins you can enable or write.
 </p>

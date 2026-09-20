@@ -85,16 +85,19 @@ pnpm dsh                      # 本机 DeepSeek Harness CLI
 
 ## 下载安装包
 
-不想跑源码时，用 [v0.7.3](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.7.3)（目前只有 macOS Apple Silicon）。
+不想跑源码时，用 [v0.8.0](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.8.0)（目前只有 macOS Apple Silicon）。
 
-- [dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.dmg) — 拖进「应用程序」
-- [zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.7.3/OPC.Agent.Team.-.Solokit-0.7.3-mac-arm64.zip)
+- [dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.0/OPC-Fellows-0.8.0-mac-arm64.dmg) — 拖进「应用程序」
+- [zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.0/OPC-Fellows-0.8.0-mac-arm64.zip)
 
-构建未签名、未公证。装完先执行，再右键打开：
+构建已做 Apple 签名与公证，拖进「应用程序」后直接打开即可；若因离线等原因首次启动被拦，执行一次：
 
 ```sh
-xattr -cr "/Applications/OPC Agent Team - Solokit.app"
+xattr -cr "/Applications/OPC-Fellows.app"
 ```
+
+
+**从 v0.7.3 升级注意：** 本版的应用名是 **OPC-Fellows**，因此会以全新的工作区启动 —— 旧版把数据放在 `~/Library/Application Support/OPC Agent Team - Solokit`，新名字不会去读它。
 
 屏幕上的名字仍是 **OPC Agent Team - Solokit**（改名会迁移 `userData`，留到后续版本）。接到业务的步骤和从源码启动相同：模型 key → 雇成员 → 绑目录 → 工作情况。
 

@@ -4,7 +4,6 @@ directories:
   output: dist
   buildResources: build
 beforeBuild: ./scripts/before-build.cjs
-beforePack: ./scripts/stage-dsh-host.mjs
 afterPack: ./scripts/after-pack.cjs
 npmRebuild: false
 files:

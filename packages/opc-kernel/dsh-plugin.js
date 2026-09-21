@@ -13,7 +13,12 @@ export async function apply(ctx) {
   ctx.systemPrompt.section({
     name: 'opc:member-preset',
     order: 0,
-    text: (context) => readPreset(sessionIdOfAgent(context?.agent)),
+    text: (context) => readPreset(sessionIdOfPrompt(context)),
+  })
+  ctx.systemPrompt.context({
+    name: 'opc:turn-context',
+    order: 200,
+    text: (context) => readTurnContext(sessionIdOfPrompt(context)),
   })
   ctx.on('tools/pre-execute', (call, next) => answerToolPolicy(call, next))
   ctx.on('approval/request', (request) => answerApproval(request))
@@ -256,6 +261,26 @@ function sessionIdOfApproval(request) {
   return sessionIdOfAgent(agent)
 }
 
+function sessionIdOfPrompt(context) {
+  const fromAgent = sessionIdOfAgent(context?.agent)
+  if (fromAgent) {
+    return fromAgent
+  }
+  const scope = context?.scope
+  if (typeof scope === 'string' && scope.trim()) {
+    return scope.trim()
+  }
+  if (scope && typeof scope === 'object') {
+    if (typeof scope.id === 'string' && scope.id.trim()) {
+      return scope.id.trim()
+    }
+    if (typeof scope.key === 'string' && scope.key.trim()) {
+      return scope.key.trim()
+    }
+  }
+  return ''
+}
+
 function sessionIdOfAgent(agent) {
   if (!agent || typeof agent !== 'object') {
     return ''
@@ -276,12 +301,20 @@ function presetFileName(sessionId) {
 }
 
 function readPreset(sessionId) {
+  return readPromptFile('presets', sessionId)
+}
+
+function readTurnContext(sessionId) {
+  return readPromptFile('contexts', sessionId)
+}
+
+function readPromptFile(kind, sessionId) {
   const root = process.env.OPC_USER_DATA?.trim()
   if (!root || !sessionId) {
     return ''
   }
   try {
-    return readFileSync(join(root, 'kernel', 'presets', presetFileName(sessionId)), 'utf8').trim()
+    return readFileSync(join(root, 'kernel', kind, presetFileName(sessionId)), 'utf8').trim()
   } catch {
     return ''
   }

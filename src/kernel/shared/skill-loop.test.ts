@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { AgentRecord } from './agent.ts'
 import {
+  agentRuntimeContext,
   agentSystemPrompt,
   occupationSkills,
   planDispatch,
@@ -108,6 +109,11 @@ test('职业 Skill 合同写进人设；miss 会列出能力而不是空菜单',
   ], { toolProtocol: 'native' })
   assert.match(native, /social_load/)
   assert.doesNotMatch(native, /"tool"/)
+  assert.doesNotMatch(native, /当前项目工作目录/)
+  const runtime = agentRuntimeContext({ cwd: '/tmp/site', composer: '先出计划，未批准前不要写。' })
+  assert.match(runtime, /\/tmp\/site/)
+  assert.match(runtime, /先出计划/)
+  assert.doesNotMatch(agentSystemPrompt(roster.ammo), /\/tmp\/site/)
   const miss = skillMissReply(roster.ammo, '线上有没有动静')
   assert.match(miss, /装填弹药/)
   assert.match(miss, /复盘热帖/)

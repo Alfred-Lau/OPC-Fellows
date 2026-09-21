@@ -1176,10 +1176,20 @@ export function inboxMissReply(
 
 export { isSkillMissText }
 
+export function agentRuntimeContext(input: {
+  cwd?: string
+  repoBrief?: string
+  composer?: string
+}): string {
+  return [composeWorkspaceSystemHint(input.cwd ?? ''), input.repoBrief?.trim() ?? '', input.composer?.trim() ?? '']
+    .filter((line) => line.trim())
+    .join('\n')
+}
+
 export function agentSystemPrompt(
   agent: AgentRecord,
   tools: readonly OpcToolInfo[] = [],
-  workspace?: { cwd?: string; repoBrief?: string; toolProtocol?: 'native' | 'json' },
+  workspace?: { toolProtocol?: 'native' | 'json' },
 ): string {
   const assigned = assignedWorkbenchSkills(agent)
   const occupation = occupationSkills(agent)
@@ -1205,7 +1215,6 @@ export function agentSystemPrompt(
     ? '只读调研可调用 agent_delegate。子循环不能再派、不能改文件。'
     : ''
   const codingHint = codingSystemHint(hasWorkspaceWriteTools(tools))
-  const repoBrief = workspace?.repoBrief?.trim() ?? ''
   const toolRule = toolsSection
     ? protocol === 'native'
       ? '需要查数或动手时调用已注册的工具，不要假装已经调用，也不要编 JSON 点名。对不上本职 Skill 时列出我会的能力请用户点名。越权请让用户 @ 对应成员。'
@@ -1219,8 +1228,6 @@ export function agentSystemPrompt(
     planHint,
     delegateHint,
     codingHint,
-    composeWorkspaceSystemHint(workspace?.cwd ?? ''),
-    repoBrief,
     toolsSection,
     `底层模型是 ${DEEPSEEK_MODEL_LABEL}。被问到你是谁或什么模型时，如实说身份和模型，不要装作调用了工具。`,
     `用中文简洁回答。回复必须是 Markdown：集合用表格，步骤用列表，代码用围栏，链接和图片用标准语法。${toolRule}`,

@@ -14,6 +14,8 @@
 - `opc-kernel` 的 `@deepseek-ai/dsh-tools` 改为 peer，避免 profile 里双份拷贝。
 - afterPack 缺 `dsh-host` 或弹药手职业包直接失败，安装包必须能官方 boot。
 - 零歧义写口令优先 `ctx.tools.execute`；没有官方树或工具未挂上再 `opcTools.invoke`。无对话回合时 Local API 只放行本职工具，不开放 fs/bash。
+- 人设走 `systemPrompt.section`；cwd / 开口模式走 `systemPrompt.context`，不写进人设文件。
+- 分类 / 拆解 / 润色优先 `ctx.llm.stream`，没有适配器再 Completions fetch。不把 `ModulesService` 和 dsh plugin 合成一套（Panel 启停仍读 workbench.yml）。
 
 ## 考虑过但没选
 

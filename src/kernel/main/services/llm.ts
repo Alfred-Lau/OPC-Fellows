@@ -3,9 +3,12 @@ import {
   loadLlmCredentials,
   llmSettings,
   readDeepSeekApiKey,
+  resolveActiveLlm,
   setDeepSeekApiKey,
 } from '../../../main/credentials'
 import { DEEPSEEK_MODEL, MISSING_LLM_KEY_HINT } from '../../../shared/deepseek'
+import { dshSdkCall } from '../../../shared/llm-overlay'
+import { completeViaOfficialLlm, type OfficialLlmRuntime } from '../../shared/official-llm'
 
 export interface LlmTurn {
   role: 'user' | 'assistant'
@@ -67,6 +70,17 @@ export class LlmService extends Service {
 
     const timeout = AbortSignal.timeout(input.timeoutMs ?? 45_000)
     const signal = input.signal ? AbortSignal.any([input.signal, timeout]) : timeout
+    const official = await completeViaOfficialLlm(this.ctx.get('llm') as OfficialLlmRuntime | undefined, {
+      ...dshSdkCall(resolveActiveLlm()),
+      system: input.system,
+      messages,
+      temperature: input.temperature,
+      json: input.json,
+      signal,
+    })
+    if (official) {
+      return official
+    }
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {

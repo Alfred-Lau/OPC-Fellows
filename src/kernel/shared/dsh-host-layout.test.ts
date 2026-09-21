@@ -37,6 +37,8 @@ test('opc-kernel 审批桥缺 session / 缺凭据时 fail-closed', () => {
   assert.match(plugin, /if \(!auth\) \{\s*return 'unavailable'/)
   assert.match(plugin, /return 'unavailable'/)
   assert.match(plugin, /tools\/pre-execute/)
+  assert.match(plugin, /systemPrompt\.context/)
+  assert.match(plugin, /opc:turn-context/)
   assert.match(plugin, /ctx.on\('approval\/request', \(request\) => answerApproval\(request\)\)/)
   const approval = plugin.match(/async function answerApproval\(request\) \{[\s\S]*?\n\}/)?.[0] ?? ''
   assert.match(approval, /return 'unavailable'/)

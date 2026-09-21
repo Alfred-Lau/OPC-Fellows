@@ -82,7 +82,7 @@ export interface DshPromptInput {
 /**
  * 能 in-process 时在同一棵树上 `ctx.agents.create` / `followup` / `whenIdle`。
  * 缺 host 才 spawn `dsh --profile opc`。人设写进 kernel/presets/<session>.md，
- * 由 opc-kernel 的 systemPrompt 段加载，不塞进用户话。
+ * 回合上下文写进 kernel/contexts/<session>.md，由 opc-kernel 的 section / context 加载。
  * 引用文件只传路径指针。中栏对白从 session.event 投影。
  * 已在跑的会话不因换夹重启。
  */

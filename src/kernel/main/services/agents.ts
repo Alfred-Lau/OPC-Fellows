@@ -19,6 +19,7 @@ import {
   type WorkspaceEntry,
 } from '../../shared/agent'
 import {
+  agentRuntimeContext,
   agentSystemPrompt,
   appendMessage,
   applyThreadListing,
@@ -85,7 +86,7 @@ import {
   type ComposerMode,
 } from '../../shared/plan-mode'
 import { composeRepoBrief } from '../../shared/coding-context'
-import { writeMemberPreset } from '../../shared/member-preset'
+import { writeMemberContext, writeMemberPreset } from '../../shared/member-preset'
 import { citeAttachments, composeAttachmentCiteText } from '../../shared/dsh-attachment'
 import { resolveAgentWorkspacePath } from '../../shared/identity-directory'
 import { readJson, writeJson } from './storage'
@@ -668,17 +669,23 @@ export class AgentsService extends Service {
         })
       }
       const repoBrief = packs.includes(WORKSPACE_TOOL_PACK) ? composeRepoBrief(cwd) : ''
-      const persona = [
+      const userData = app.getPath('userData')
+      writeMemberPreset(
+        userData,
+        sessionId,
         agentSystemPrompt(agent, tools, {
-          cwd,
-          repoBrief,
           toolProtocol: dshTreeHasAgentFactory(this.ctx) ? 'native' : 'json',
         }),
-        composerModePrompt(composer, threadPlanOf(this.thread(threadId), agentId)?.text ?? ''),
-      ]
-        .filter(Boolean)
-        .join('\n')
-      writeMemberPreset(app.getPath('userData'), sessionId, persona)
+      )
+      writeMemberContext(
+        userData,
+        sessionId,
+        agentRuntimeContext({
+          cwd,
+          repoBrief,
+          composer: composerModePrompt(composer, threadPlanOf(this.thread(threadId), agentId)?.text ?? ''),
+        }),
+      )
       this.ctx.dshRuntime.beginTurn({
         sessionId,
         threadId,

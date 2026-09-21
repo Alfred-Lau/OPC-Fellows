@@ -170,6 +170,7 @@ test('花名册和职业工具不再占用官方 ctx.agents / ctx.tools / ctx.ll
   assert.match(agents, /super\(ctx, 'roster'\)/)
   assert.match(tools, /super\(ctx, 'opcTools'\)/)
   assert.match(llm, /super\(ctx, 'completions'\)/)
+  assert.match(llm, /completeViaOfficialLlm/)
   assert.doesNotMatch(agents, /super\(ctx, 'agents'\)/)
   assert.doesNotMatch(tools, /super\(ctx, 'tools'\)/)
   assert.doesNotMatch(llm, /super\(ctx, 'llm'\)/)

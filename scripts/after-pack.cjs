@@ -38,7 +38,11 @@ module.exports = async function afterPack(context) {
 
   const stagedHost = join(context.packager.projectDir, 'build', 'dsh-host')
   if (!existsSync(join(stagedHost, 'package.json'))) {
-    return
+    throw new Error('afterPack: 先跑 node --experimental-strip-types scripts/stage-dsh-host.mjs，安装包必须带 extraResources/dsh-host 才能官方 boot()')
+  }
+  const occupation = join(context.packager.projectDir, 'packages', 'occupation-social-ammo', 'dsh-plugin.js')
+  if (!existsSync(occupation)) {
+    throw new Error(`afterPack: 缺少弹药手职业包 ${occupation}`)
   }
   const hostDest =
     context.electronPlatformName === 'darwin'

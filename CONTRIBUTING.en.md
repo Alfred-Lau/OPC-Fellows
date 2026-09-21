@@ -42,7 +42,7 @@ Do not commit `.env`, on-device `userData`, certificates, notarization identitie
 
 New features are modules. Do not grow the kernel view union. Cross-module traffic goes through kernel services (`todos.ingestAgent` and the like). Do not reach into another module's store.
 
-Third-party shape: [`examples/hello-module`](examples/hello-module) — `ownworkbuddy` (workbench Panel) + `dsh.bundle` (`dsh plugin --profile opc add`) + `apply(ctx)` + optional `mount(root, api)`. Declare only the capabilities you use. `subprocess` / `secrets` / `net:listen:*` are dangerous; skip them if you can.
+Third-party shape: [`examples/hello-module`](examples/hello-module) — `ownworkbuddy` (workbench Panel) + `dsh.bundle` (`dsh plugin --profile opc add`) + `apply(ctx)` with `defineTool` + optional `mount(root, api)`. Declare only the capabilities you use. Keep `@deepseek-ai/dsh-tools` as a peer. `subprocess` / `secrets` / `net:listen:*` are dangerous; skip them if you can.
 
 ## Good first issues
 

@@ -69,6 +69,7 @@ import {
   workbenchSkillById,
 } from '../../shared/workbench-skills'
 import { composeToolFollowUp, dshSessionId } from '../../shared/dsh-rpc'
+import { dshTreeHasAgentFactory } from '../../shared/dsh-in-process'
 import { parseOpcToolCall, TOOL_ROUND_LIMIT } from '../../shared/opc-tools'
 import { defaultToolPacks, normalizeToolPacks, WORKSPACE_TOOL_PACK, type ToolPackId } from '../../shared/tool-packs'
 import {
@@ -668,7 +669,11 @@ export class AgentsService extends Service {
       }
       const repoBrief = packs.includes(WORKSPACE_TOOL_PACK) ? composeRepoBrief(cwd) : ''
       const persona = [
-        agentSystemPrompt(agent, tools, { cwd, repoBrief }),
+        agentSystemPrompt(agent, tools, {
+          cwd,
+          repoBrief,
+          toolProtocol: dshTreeHasAgentFactory(this.ctx) ? 'native' : 'json',
+        }),
         composerModePrompt(composer, threadPlanOf(this.thread(threadId), agentId)?.text ?? ''),
       ]
         .filter(Boolean)

@@ -52,6 +52,7 @@ import {
   occupationSearchRoots,
 } from '../../shared/occupation-bundles'
 import {
+  denyBridgeToolNames,
   pickToolBridgeTurn,
   scrubSecretEnv,
   toolBridgeEnv,
@@ -389,6 +390,10 @@ export class DshRuntimeService extends Service {
         timeoutMs: TURN_TIMEOUT_MS,
         handles: this.agentHandles,
         agentOptions: dshSdkCall(resolveActiveLlm()),
+        restrictDeny: denyBridgeToolNames(
+          this.ctx.opcTools.catalog().map((tool) => tool.name),
+          _toolTurn?.allowedTools,
+        ),
       })
     }
     const watching = (frame: DshJsonRpcFrame): void => {

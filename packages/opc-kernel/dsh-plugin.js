@@ -15,6 +15,7 @@ export async function apply(ctx) {
     order: 0,
     text: (context) => readPreset(sessionIdOfAgent(context?.agent)),
   })
+  ctx.on('tools/pre-execute', (call, next) => answerToolPolicy(call, next))
   ctx.on('approval/request', (request) => answerApproval(request))
   const auth = readToolBridgeAuth()
   if (!auth) {
@@ -23,9 +24,10 @@ export async function apply(ctx) {
   const base = auth.base
   const token = auth.token
   const tools = await loadCatalog(base, token)
+  const occupationOwned = new Set(['social_load', 'social_publish', 'social_metrics', 'social_recap'])
   for (const tool of tools) {
     const toolName = typeof tool.name === 'string' ? tool.name.trim() : ''
-    if (!toolName) {
+    if (!toolName || occupationOwned.has(toolName)) {
       continue
     }
     ctx.tools.register(
@@ -104,6 +106,37 @@ function readToolBridgeAuth() {
     return { base, token }
   }
   return null
+}
+
+async function answerToolPolicy(call, next) {
+  const auth = readToolBridgeAuth()
+  if (!auth) {
+    return next()
+  }
+  const toolName = typeof call?.name === 'string' ? call.name.trim() : typeof call?.toolName === 'string' ? call.toolName.trim() : ''
+  const sessionId = sessionIdOf(call)
+  if (!toolName) {
+    return next()
+  }
+  try {
+    const response = await fetch(`${auth.base}/agent/tools/policy`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${auth.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: toolName, sessionId }),
+      signal: call?.signal,
+    })
+    const payload = await response.json().catch(() => ({}))
+    const decision = payload?.decision
+    if (decision === 'deny' || decision === 'allow' || decision === 'ask') {
+      return decision
+    }
+  } catch {
+    // 政策服务不可用时交给后面的官方管道，不要误杀 fs / bash。
+  }
+  return next()
 }
 
 async function askApproval(base, token, request) {

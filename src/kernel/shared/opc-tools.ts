@@ -56,16 +56,27 @@ export interface OpcToolCall {
   args: Record<string, string>
 }
 
-export function formatOpcToolsPrompt(tools: readonly OpcToolInfo[]): string {
+export type OpcToolProtocol = 'native' | 'json'
+
+export function formatOpcToolsPrompt(
+  tools: readonly OpcToolInfo[],
+  protocol: OpcToolProtocol = 'json',
+): string {
   if (tools.length === 0) {
     return ''
   }
-  const lines = [
-    '你可以调用工作台工具。需要动手或查数时，只输出一个 JSON 对象，不要 Markdown：',
-    '{"tool":"工具名","args":{"参数":"值"}}',
-    '一次只调一个工具；根据结果再决定下一步。不需要工具时直接用中文回答用户。',
-    '工具列表：',
-  ]
+  const lines =
+    protocol === 'native'
+      ? [
+          '工作台工具已挂在 dsh ctx.tools，schema 由 defineTool 提供。需要查数或动手时直接调用，不要编造 JSON 点名。',
+          '工具列表：',
+        ]
+      : [
+          '你可以调用工作台工具。需要动手或查数时，只输出一个 JSON 对象，不要 Markdown：',
+          '{"tool":"工具名","args":{"参数":"值"}}',
+          '一次只调一个工具；根据结果再决定下一步。不需要工具时直接用中文回答用户。',
+          '工具列表：',
+        ]
   for (const tool of tools) {
     const params = Object.entries(tool.parameters)
       .map(([key, spec]) => `${key}${spec.required === false ? '?' : ''}: ${spec.description ?? spec.type}`)

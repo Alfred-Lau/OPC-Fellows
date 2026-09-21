@@ -10,7 +10,12 @@ import {
   parsePublish,
   pickIndexed,
 } from '../shared/skill-route'
-import { parsePinnedArg } from '../kernel/shared/occupation-tools'
+import { OCCUPATION_DSH_BUNDLE } from '../kernel/shared/occupation-bundles'
+import {
+  composeSocialMetricsText,
+  composeSocialPublishText,
+  parsePinnedArg,
+} from '../kernel/shared/occupation-tools'
 
 export const socialAmmoModule: ModuleDefinition = {
   source: 'builtin',
@@ -27,6 +32,7 @@ export const socialAmmoModule: ModuleDefinition = {
     capabilities: ['storage', 'todos:write'],
     namespaces: ['social'],
     removable: false,
+    dshBundle: OCCUPATION_DSH_BUNDLE,
   },
   plugin(ctx: Context) {
     setSocialAmmoEnabled(true)
@@ -38,7 +44,7 @@ export const socialAmmoModule: ModuleDefinition = {
       name: 'social_load',
       description: '按产品目录装填六平台弹药。目录为空就请用户先登记站点。',
       moduleId: 'social-ammo',
-      parameters: { text: { type: 'string', description: '用户原话', required: false } },
+      parameters: { text: { type: 'string', description: '用户原话，可选', required: false } },
       execute: async () => {
         const state = await generateSocialAmmo()
         return formatAmmoLoad(state)
@@ -58,12 +64,18 @@ export const socialAmmoModule: ModuleDefinition = {
       moduleId: 'social-ammo',
       effect: 'write',
       parameters: {
-        text: { type: 'string', description: '用户原话，含链接和第几条' },
+        url: { type: 'string', description: '已发链接', required: false },
+        which: { type: 'string', description: '第几条弹药', required: false },
         pinned: { type: 'string', description: '弹药 id', required: false },
+        text: { type: 'string', description: '用户原话，可含链接和第几条', required: false },
       },
       execute: async (args) => {
         const state = socialState()
-        const parsed = parsePublish(args.text || '', state.drafts, parsePinnedArg(args.pinned))
+        const parsed = parsePublish(
+          composeSocialPublishText(args),
+          state.drafts,
+          parsePinnedArg(args.pinned),
+        )
         if (!parsed.id || !parsed.url) {
           return parsed.reply
         }
@@ -77,17 +89,24 @@ export const socialAmmoModule: ModuleDefinition = {
       moduleId: 'social-ammo',
       effect: 'write',
       parameters: {
-        text: { type: 'string', description: '用户原话，含数字' },
+        views: { type: 'string', description: '浏览 / 曝光', required: false },
+        likes: { type: 'string', description: '赞', required: false },
+        comments: { type: 'string', description: '评论', required: false },
+        shares: { type: 'string', description: '转发', required: false },
+        saves: { type: 'string', description: '收藏', required: false },
+        which: { type: 'string', description: '第几条已发弹药', required: false },
         pinned: { type: 'string', description: '弹药 id', required: false },
+        text: { type: 'string', description: '用户原话，可含数字和第几条', required: false },
       },
       execute: async (args) => {
         const state = socialState()
+        const spoken = composeSocialMetricsText(args)
         const published = state.drafts.filter((draft) => draft.publishedAt)
-        const picked = pickIndexed(published, args.text || '', {
+        const picked = pickIndexed(published, spoken, {
           pinnedIds: parsePinnedArg(args.pinned),
           idOf: (item) => item.id,
         })
-        const metrics = parseAmmoMetrics(args.text || '')
+        const metrics = parseAmmoMetrics(spoken)
         if (metrics.reply) {
           return metrics.reply
         }

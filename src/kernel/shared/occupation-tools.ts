@@ -48,3 +48,32 @@ export function flagArg(value: boolean): string {
 export function parseFlagArg(value: string | undefined): boolean {
   return value === 'true' || value === '1' || value === 'yes'
 }
+
+const METRIC_LABELS = {
+  views: '浏览',
+  likes: '赞',
+  comments: '评',
+  shares: '转发',
+  saves: '收藏',
+} as const
+
+/** 把结构化参数折回口令解析能吃的一句话。 */
+export function composeSocialPublishText(args: Record<string, string>): string {
+  return [args.text, args.which, args.url].filter((part) => part?.trim()).join(' ').trim()
+}
+
+export function composeSocialMetricsText(args: Record<string, string>): string {
+  const bits: string[] = []
+  if (args.text?.trim()) {
+    bits.push(args.text.trim())
+  }
+  if (args.which?.trim()) {
+    bits.push(args.which.trim())
+  }
+  for (const key of Object.keys(METRIC_LABELS) as Array<keyof typeof METRIC_LABELS>) {
+    if (args[key]?.trim()) {
+      bits.push(`${METRIC_LABELS[key]} ${args[key].trim()}`)
+    }
+  }
+  return bits.join(' ').trim()
+}

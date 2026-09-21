@@ -4,10 +4,13 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
+  bridgeToolPolicy,
   catalogToolsForTurn,
+  denyBridgeToolNames,
   isAllowedBridgeTool,
   pickToolBridgeTurn,
   readToolBridgeAuth,
+  restrictToolsIfPossible,
   scrubSecretEnv,
   toolBridgeEnv,
   writeToolBridgeAuth,
@@ -61,6 +64,45 @@ test('子进程环境要刮掉 token 和 API key', () => {
   assert.equal(next.PATH, '/usr/bin')
   assert.equal(next.DEEPSEEK_API_KEY, undefined)
   assert.equal(next.OPC_TOOL_BRIDGE_TOKEN, undefined)
+})
+
+test('政策：目录外交给官方管道，越权和计划模式拒写', () => {
+  assert.equal(
+    bridgeToolPolicy({ toolName: 'read', turn, inCatalog: false, writeTool: false }),
+    'unknown',
+  )
+  assert.equal(
+    bridgeToolPolicy({ toolName: 'unknown_tool', turn, inCatalog: true, writeTool: false }),
+    'deny',
+  )
+  assert.equal(
+    bridgeToolPolicy({ toolName: 'social_load', turn, inCatalog: true, writeTool: true }),
+    'deny',
+  )
+  assert.equal(
+    bridgeToolPolicy({
+      toolName: 'social_load',
+      turn: { ...turn, writeAllowed: true },
+      inCatalog: true,
+      writeTool: true,
+    }),
+    'allow',
+  )
+  assert.deepEqual(denyBridgeToolNames(['social_load', 'todos_list', 'notes_add'], turn.allowedTools), [
+    'notes_add',
+  ])
+  const restricted: string[][] = []
+  const lift = restrictToolsIfPossible(
+    {
+      restrict: (filter: unknown) => {
+        restricted.push((filter as { deny: string[] }).deny)
+        return () => undefined
+      },
+    },
+    ['notes_add'],
+  )
+  assert.deepEqual(restricted, [['notes_add']])
+  assert.equal(typeof lift, 'function')
 })
 
 test('工具桥凭据写 0600 文件，不依赖环境变量', () => {

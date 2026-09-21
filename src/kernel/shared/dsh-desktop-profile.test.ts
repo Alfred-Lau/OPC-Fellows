@@ -63,6 +63,24 @@ test('Electron 独占 desktop profile：官方 loadProfileDirectory 收下 dsh-b
   assert.deepEqual(manifest.dsh?.profile?.bundles, ['@deepseek-ai/dsh-base'])
 })
 
+test('desktop 用户层先 insert 弹药手职业包再挂 opc-kernel', () => {
+  const home = mkdtempSync(join(tmpdir(), 'opc-desktop-occupation-'))
+  const kernelDir = join(repoRoot, 'packages/opc-kernel')
+  const occupationDir = join(repoRoot, 'packages/occupation-social-ammo')
+  const composed = composeDesktopProfile({
+    home,
+    installAnchor: dshAppInstallAnchor(repoRoot),
+    kernelDir,
+    occupationDirs: [{ id: 'social-ammo', dir: occupationDir }],
+  })
+  const patch = readFileSync(join(composed.profile.dir, 'cordis.patch.yml'), 'utf8')
+  assert.match(patch, /id: opc-social-ammo/)
+  assert.match(patch, new RegExp(occupationDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+  const kernelAt = patch.indexOf('id: opc-kernel')
+  const ammoAt = patch.indexOf('id: opc-social-ammo')
+  assert.equal(ammoAt >= 0 && kernelAt > ammoAt, true)
+})
+
 test('desktop 用户层收下 opc-kernel 补丁', () => {
   const home = mkdtempSync(join(tmpdir(), 'opc-desktop-kernel-'))
   const kernelDir = join(repoRoot, 'packages/opc-kernel')

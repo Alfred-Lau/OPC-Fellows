@@ -127,6 +127,9 @@ Electron 薄壳（窗 / 托盘 / 台伴 / 通知 / safeStorage）
 **0017 · extraResources host 门闩 + 让出官方槽位（已落地）**  
 花名册是 `ctx.roster`，职业工具是 `ctx.opcTools`，分类 Completions 是 `ctx.completions`，模块 JSON 库是 `ctx.moduleStore`。官方 `boot()` 不再被花名册 / 模块库撞名。见 [0017](0017-dsh-boot-in-electron.md)。
 
+**0023 · 弹药手当官方职业 bundle（已落地）**  
+`packages/occupation-social-ammo` 用 `defineTool` 注册本职工具；in-process 不再教 JSON 点名；`tools/pre-execute` + `ctx.tools.restrict` 裁可见集。见 [0023](0023-dsh-native-occupation-tools.md)。
+
 约束：
 
 - H1 之前不要删职业 Panel，用户仍要能从左栏点到收款和监控。

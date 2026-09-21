@@ -98,6 +98,16 @@ test('职业 Skill 合同写进人设；miss 会列出能力而不是空菜单',
   assert.match(prompt, /本职 Skill/)
   assert.match(prompt, /social_load/)
   assert.match(prompt, /不要编数据/)
+  const native = agentSystemPrompt(roster.ammo, [
+    {
+      name: 'social_load',
+      description: '装填六平台弹药',
+      moduleId: 'social-ammo',
+      parameters: {},
+    },
+  ], { toolProtocol: 'native' })
+  assert.match(native, /social_load/)
+  assert.doesNotMatch(native, /"tool"/)
   const miss = skillMissReply(roster.ammo, '线上有没有动静')
   assert.match(miss, /装填弹药/)
   assert.match(miss, /复盘热帖/)

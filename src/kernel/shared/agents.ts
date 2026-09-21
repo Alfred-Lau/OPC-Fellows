@@ -1179,7 +1179,7 @@ export { isSkillMissText }
 export function agentSystemPrompt(
   agent: AgentRecord,
   tools: readonly OpcToolInfo[] = [],
-  workspace?: { cwd?: string; repoBrief?: string },
+  workspace?: { cwd?: string; repoBrief?: string; toolProtocol?: 'native' | 'json' },
 ): string {
   const assigned = assignedWorkbenchSkills(agent)
   const occupation = occupationSkills(agent)
@@ -1196,7 +1196,8 @@ export function agentSystemPrompt(
           ...assigned.map((skill) => `- ${skill.title}（口令：${skill.phrase}）：${skill.prompt}`),
         ].join('\n')
       : ''
-  const toolsSection = formatOpcToolsPrompt(tools)
+  const protocol = workspace?.toolProtocol === 'native' ? 'native' : 'json'
+  const toolsSection = formatOpcToolsPrompt(tools, protocol)
   const planHint = agent.planMode
     ? '这位成员默认先出计划。未批准前不要调用写工具；用户回复「按计划执行」后再动手。'
     : ''
@@ -1206,7 +1207,9 @@ export function agentSystemPrompt(
   const codingHint = codingSystemHint(hasWorkspaceWriteTools(tools))
   const repoBrief = workspace?.repoBrief?.trim() ?? ''
   const toolRule = toolsSection
-    ? '需要查数或动手时按协议调用工具，不要假装已经调用。对不上本职 Skill 时列出我会的能力请用户点名。越权请让用户 @ 对应成员。'
+    ? protocol === 'native'
+      ? '需要查数或动手时调用已注册的工具，不要假装已经调用，也不要编 JSON 点名。对不上本职 Skill 时列出我会的能力请用户点名。越权请让用户 @ 对应成员。'
+      : '需要查数或动手时按协议调用工具，不要假装已经调用。对不上本职 Skill 时列出我会的能力请用户点名。越权请让用户 @ 对应成员。'
     : '不要假装已经调用了还没赋能的工具；那些需要用户 @ 对应成员。'
   return [
     `你是 ${PRODUCT_NAME} 里的「${agent.title}」。`,

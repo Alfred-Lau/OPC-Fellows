@@ -13,6 +13,7 @@ export const OPC_TOOL_BRIDGE_TOKEN_ENV = 'OPC_TOOL_BRIDGE_TOKEN'
 
 export const OPC_TOOL_BRIDGE_CATALOG_PATH = '/agent/tools'
 export const OPC_TOOL_BRIDGE_INVOKE_PATH = '/agent/tools/invoke'
+export const OPC_TOOL_BRIDGE_POLICY_PATH = '/agent/tools/policy'
 export const OPC_TOOL_BRIDGE_APPROVAL_PATH = '/agent/approval/ask'
 export const OPC_TOOL_BRIDGE_FILE = 'kernel/tool-bridge.json'
 
@@ -143,6 +144,56 @@ export function stringifyToolArgs(value: unknown): Record<string, string> {
 
 export function isAllowedBridgeTool(turn: Pick<OpcToolBridgeTurn, 'allowedTools'>, name: string): boolean {
   return turn.allowedTools.includes(name)
+}
+
+export type BridgeToolPolicy = 'allow' | 'deny' | 'unknown'
+
+export function denyBridgeToolNames(
+  catalogNames: readonly string[],
+  allowedTools: readonly string[] | undefined,
+): string[] {
+  if (!allowedTools) {
+    return []
+  }
+  const allowed = new Set(allowedTools)
+  return catalogNames.filter((name) => name.trim() && !allowed.has(name))
+}
+
+/** 官方 ctx.tools.restrict 的 deny 名单：只藏本回合不该看见的 OPC 工具，不动 dsh-base。 */
+export function restrictToolsIfPossible(
+  tools: { restrict?: (filter: unknown) => unknown } | undefined,
+  deny: readonly string[],
+): (() => void) | undefined {
+  if (!tools || typeof tools.restrict !== 'function' || deny.length === 0) {
+    return undefined
+  }
+  try {
+    const lift = tools.restrict({ deny: [...deny] })
+    return typeof lift === 'function' ? () => lift() : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function bridgeToolPolicy(input: {
+  toolName: string
+  turn: Pick<OpcToolBridgeTurn, 'allowedTools' | 'writeAllowed'> | null
+  inCatalog: boolean
+  writeTool: boolean
+}): BridgeToolPolicy {
+  if (!input.inCatalog) {
+    return 'unknown'
+  }
+  if (!input.turn) {
+    return 'unknown'
+  }
+  if (!isAllowedBridgeTool(input.turn, input.toolName)) {
+    return 'deny'
+  }
+  if (input.writeTool && input.turn.writeAllowed === false) {
+    return 'deny'
+  }
+  return 'allow'
 }
 
 export function catalogToolsForTurn<T extends { name: string }>(

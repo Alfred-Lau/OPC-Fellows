@@ -1,0 +1,4 @@
+# 弹药手本职工具挂上 dsh ctx.tools。执行经 Local API 回 Electron，不碰 BrowserWindow。
+- insert:
+    - id: opc-social-ammo
+      name: ownworkbuddy-occupation-social-ammo

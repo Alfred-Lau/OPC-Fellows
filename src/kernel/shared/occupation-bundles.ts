@@ -4,9 +4,15 @@ import type { DshBundleManifest } from './dsh-manifest.ts'
 import { OPC_PROFILE_NAME } from './opc-profile.ts'
 
 /**
- * 开源版不再随包附带 occupation-* 职业包。dsh 树上只挂 opc-kernel。
+ * 开源职业包。dsh 树上用 defineTool 注册本职工具，执行仍回 Electron Local API。
  */
-export const OCCUPATION_TOOL_BUNDLES: readonly { id: string; packageName: string; dirName: string }[] = []
+export const OCCUPATION_TOOL_BUNDLES: readonly { id: string; packageName: string; dirName: string }[] = [
+  {
+    id: 'social-ammo',
+    packageName: 'ownworkbuddy-occupation-social-ammo',
+    dirName: 'occupation-social-ammo',
+  },
+]
 
 export type OccupationToolId = string
 
@@ -85,4 +91,30 @@ export function occupationDirsToAdd(
 
 export function occupationPluginAddArgv(dirs: readonly string[]): string[] {
   return ['plugin', '--profile', OPC_PROFILE_NAME, 'add', ...dirs]
+}
+
+export function occupationPluginId(id: string): string {
+  return `opc-${id}`
+}
+
+export function occupationNativeToolNames(): readonly string[] {
+  return ['social_load', 'social_publish', 'social_metrics', 'social_recap'] as const
+}
+
+export function occupationInsertPatchYaml(
+  refs: readonly { id: string; pluginPath: string }[],
+): string {
+  if (refs.length === 0) {
+    return ''
+  }
+  const lines = ['- insert:']
+  for (const ref of refs) {
+    lines.push(`    - id: ${occupationPluginId(ref.id)}`)
+    lines.push(`      name: ${JSON.stringify(ref.pluginPath)}`)
+  }
+  return `${lines.join('\n')}\n`
+}
+
+export function occupationPluginPath(dir: string): string {
+  return join(dir, 'dsh-plugin.js')
 }

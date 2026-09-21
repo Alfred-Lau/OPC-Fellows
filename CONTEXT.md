@@ -69,7 +69,7 @@ _Avoid_: Workspace、项目文件夹
 _Avoid_: Skill、命令
 
 **Skill Route**:
-谁听见已经定下之后，有 key 时零歧义写口令走固定 bridge；读 Skill、模糊写句和赋能建议交给该成员的 Agent Loop（工具目录在人设里）。无 key 时用 Trigger 家族匹配兜底。主对话里不必 @；项目里没 @ 只有主成员听见；今日无 @ 时唯一口令 Trigger 仍能唤人，问句不拆待办，其余才拆成待办。不是全局先派职业。
+谁听见已经定下之后，有 key 时零歧义写口令走固定 bridge；读 Skill、模糊写句和赋能建议交给该成员的 Agent Loop（in-process 时 schema 走 defineTool，人设只列工具名；spawn 退路才在人设里教 JSON）。无 key 时用 Trigger 家族匹配兜底。主对话里不必 @；项目里没 @ 只有主成员听见；今日无 @ 时唯一口令 Trigger 仍能唤人，问句不拆待办，其余才拆成待办。不是全局先派职业。
 _Avoid_: 全局分类器、关键词 invoke、Inbox 抢派
 
 **Capability**:

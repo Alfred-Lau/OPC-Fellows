@@ -9,6 +9,7 @@ import type { DshPromptContentBlock } from './dsh-attachment.ts'
 import {
   defineToolParameters,
   readToolBridgeAuth,
+  restrictToolsIfPossible,
   sessionIdFromToolExec,
   stringifyToolArgs,
 } from './opc-tool-bridge.ts'
@@ -92,6 +93,7 @@ export async function promptDshInProcess(input: {
   timeoutMs: number
   handles: Map<string, DshAgentHandle>
   agentOptions: DshAgentOptions
+  restrictDeny?: readonly string[]
 }): Promise<DshPromptResult> {
   const agents = input.ctx.get('agents') as DshAgentFactory | undefined
   if (typeof agents?.create !== 'function' || typeof agents.resume !== 'function') {
@@ -111,8 +113,16 @@ export async function promptDshInProcess(input: {
   })
   try {
     const handle = await obtainHandle(agents, input.sessionId, input.cwd, input.handles, input.agentOptions)
-    handle.agent.followup(contentBlocksToUserMessage(input.blocks))
-    await withTimeout(handle.agent.whenIdle(), input.timeoutMs, '回合结束')
+    const liftRestrict = restrictToolsIfPossible(
+      input.ctx.get('tools') as { restrict?: (filter: unknown) => unknown },
+      input.restrictDeny ?? [],
+    )
+    try {
+      handle.agent.followup(contentBlocksToUserMessage(input.blocks))
+      await withTimeout(handle.agent.whenIdle(), input.timeoutMs, '回合结束')
+    } finally {
+      liftRestrict?.()
+    }
     if (input.collector.failure) {
       throw new Error(input.collector.failure)
     }
@@ -158,7 +168,8 @@ export async function ensureInProcessOccupationTools(
             render: (_args: unknown, value: unknown) => [{ type: 'text', text: String(value ?? '') }],
           },
           async execute(args: unknown, exec: unknown) {
-            return invokeTool(base, token, toolName, args, sessionIdFromToolExec(exec))
+            const signal = exec && typeof exec === 'object' ? (exec as { signal?: AbortSignal }).signal : undefined
+            return invokeTool(base, token, toolName, args, sessionIdFromToolExec(exec), signal)
           },
         }),
       )
@@ -283,7 +294,14 @@ function parametersOf(raw: unknown): OpcToolParameters {
   return next
 }
 
-async function invokeTool(base: string, token: string, name: string, args: unknown, sessionId: string): Promise<string> {
+async function invokeTool(
+  base: string,
+  token: string,
+  name: string,
+  args: unknown,
+  sessionId: string,
+  signal?: AbortSignal,
+): Promise<string> {
   const response = await fetch(`${base}/agent/tools/invoke`, {
     method: 'POST',
     headers: {
@@ -295,6 +313,7 @@ async function invokeTool(base: string, token: string, name: string, args: unkno
       args: stringifyToolArgs(args),
       ...(sessionId ? { sessionId } : {}),
     }),
+    signal,
   })
   const payload = (await response.json().catch(() => ({}))) as { error?: unknown; text?: unknown }
   if (!response.ok) {

@@ -72,6 +72,19 @@ pnpm test
 
 Issue 同样写清范围。安全漏洞不要开公开 Issue：走 [SECURITY.md](SECURITY.md)。
 
+## 发布
+
+合入 `main` 后，[Release](.github/workflows/release.yml) 会自动：
+
+1. 跑 `pnpm test`
+2. 把根包和 `packages/opc-kernel` 的 **patch（小版本第三位，例如 0.8.0 → 0.8.1）** +1，并改 README 下载链接
+3. 提交 `chore(release): vX.Y.Z`、打 tag、建 GitHub Release
+4. 在 `macos-latest` 打 macOS Apple Silicon 的 dmg / zip
+
+某次合入不想发版：commit message 带 `[skip release]`。只重打当前版本：Actions → Release → Run workflow → Skip version bump。
+
+签名不进仓库。仓库 secrets 配了 `CSC_LINK` + `CSC_KEY_PASSWORD` 才走 Developer ID；再配 `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` 才公证。没配则 ad-hoc 签名，用户需在「隐私与安全性」里允许打开。本机打包仍用 `pnpm dist:mac`。
+
 ## 许可
 
 提交即按 [MIT License](LICENSE) 授权。版权归各位作者与 [bitou.tech](https://pen.bitou.tech/)。

@@ -72,6 +72,19 @@ A change that breaks the `ownworkbuddy` manifest or the `Capability` union must 
 
 Issues need the same scope. Security bugs are not public issues: follow [SECURITY.md](SECURITY.md).
 
+## Releases
+
+Merging to `main` runs [Release](.github/workflows/release.yml):
+
+1. `pnpm test`
+2. Bump the **patch** number on the root package and `packages/opc-kernel` (e.g. `0.8.0` → `0.8.1`) and refresh README download links
+3. Commit `chore(release): vX.Y.Z`, tag, and open a GitHub Release
+4. Build the macOS Apple Silicon dmg / zip on `macos-latest`
+
+Skip one merge with `[skip release]` in the commit message. Rebuild the current version from Actions → Release → Run workflow → Skip version bump.
+
+Do not commit signing defaults. Developer ID signing needs `CSC_LINK` + `CSC_KEY_PASSWORD`; notarization also needs `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID`. Without those secrets the CI build is ad-hoc signed. Local packaging is still `pnpm dist:mac`.
+
 ## License
 
 Contributions are licensed under the [MIT License](LICENSE). Copyright belongs to each author and [bitou.tech](https://pen.bitou.tech/).

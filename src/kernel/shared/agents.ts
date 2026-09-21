@@ -1243,8 +1243,8 @@ export function chatTurns(
 }
 
 /**
- * 有 key 时，读 Skill、模糊写句、赋能建议都交给 dsh session（工具目录在人设里）。
- * 只有零歧义写口令仍走固定 bridge。
+ * 有 key 时，读 Skill、模糊写句、赋能建议都交给 dsh session（in-process 时 schema 走 defineTool）。
+ * 只有零歧义写口令仍走快路径（官方 execute，没有再 opcTools）。
  */
 export function promoteToClassify(
   actions: readonly DispatchAction[],

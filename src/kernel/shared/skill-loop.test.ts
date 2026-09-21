@@ -53,7 +53,7 @@ function promoted(member: AgentRecord, text: string, hasKey: boolean) {
   }
 }
 
-test('金句：有 key 时读句进 Agent Loop，零歧义写口令仍走 bridge', () => {
+test('金句：有 key 时读句进 Agent Loop，零歧义写口令仍走快路径', () => {
   const cases: Array<[keyof typeof roster, string, 'invoke' | 'chat']> = [
     ['ammo', '装填弹药', 'invoke'],
     ['ammo', '帮我写几条文案', 'chat'],

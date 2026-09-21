@@ -5,7 +5,7 @@ import { asSkillReply, type ShortListing, type SkillReply } from '../../shared/l
 import { activateSocial } from './social'
 
 /**
- * 口令快路径：只负责亮 Panel，执行走主进程 ctx.tools。
+ * 口令快路径：只负责亮 Panel。主进程优先 ctx.tools.execute，没有官方树再 opcTools。
  */
 export async function runSkillInvoke(
   agentId: string,

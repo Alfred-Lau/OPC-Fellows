@@ -6,6 +6,7 @@ import { app } from 'electron'
 import type { TodoItem } from '../shared/todo'
 import { LOCAL_API_PORT } from './local-api-port'
 import {
+  allowsHostFastPathInvoke,
   bridgeToolPolicy,
   isAllowedBridgeTool,
   invokeBodySessionId,
@@ -280,15 +281,24 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
         return
       }
       const turn = current.currentTurn(invokeBodySessionId(body))
+      const args = stringifyToolArgs(body.args)
       if (!turn) {
-        sendJson(res, 409, { ok: false, error: '没有进行中的对话回合。', code: 'no_turn' })
+        if (!allowsHostFastPathInvoke(name)) {
+          sendJson(res, 409, { ok: false, error: '没有进行中的对话回合。', code: 'no_turn' })
+          return
+        }
+        const agentId = asNonEmptyString(args.agent_id)
+        const result = await current.invoke(name, args, {
+          writeAllowed: true,
+          ...(agentId ? { agentId } : {}),
+        })
+        sendJson(res, 200, { ok: true, text: result.text })
         return
       }
       if (!isAllowedBridgeTool(turn, name)) {
         sendJson(res, 403, { ok: false, error: `当前成员不能调用「${name}」。`, code: 'forbidden_tool' })
         return
       }
-      const args = stringifyToolArgs(body.args)
       const result = await current.invoke(name, args, {
         threadId: turn.threadId,
         agentId: turn.agentId,

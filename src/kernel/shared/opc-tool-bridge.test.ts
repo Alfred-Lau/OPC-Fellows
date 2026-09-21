@@ -4,10 +4,13 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
+  allowsHostFastPathInvoke,
   bridgeToolPolicy,
   catalogToolsForTurn,
   denyBridgeToolNames,
+  executeOfficialToolIfPossible,
   isAllowedBridgeTool,
+  officialToolText,
   pickToolBridgeTurn,
   readToolBridgeAuth,
   restrictToolsIfPossible,
@@ -103,6 +106,50 @@ test('政策：目录外交给官方管道，越权和计划模式拒写', () =>
   )
   assert.deepEqual(restricted, [['notes_add']])
   assert.equal(typeof lift, 'function')
+})
+
+test('口令快路径走官方 execute，失败再退回 opcTools', async () => {
+  assert.equal(allowsHostFastPathInvoke('social_load'), true)
+  assert.equal(allowsHostFastPathInvoke('bash'), false)
+  assert.equal(
+    officialToolText({
+      isError: false,
+      value: '已装填',
+    }),
+    '已装填',
+  )
+  assert.equal(officialToolText({ isError: true, value: 'x' }), undefined)
+  assert.equal(
+    officialToolText({
+      isError: false,
+      content: [{ type: 'text', text: '记下了' }],
+    }),
+    '记下了',
+  )
+  const executed: unknown[] = []
+  const text = await executeOfficialToolIfPossible(
+    {
+      execute: async (exec) => {
+        executed.push(exec.name)
+        return { isError: false, value: `ok:${exec.name}` }
+      },
+    },
+    'social_load',
+    { text: '装填弹药' },
+  )
+  assert.deepEqual(executed, ['social_load'])
+  assert.equal(text, 'ok:social_load')
+  assert.equal(await executeOfficialToolIfPossible(undefined, 'social_load', {}), undefined)
+  assert.equal(
+    await executeOfficialToolIfPossible(
+      {
+        execute: async () => ({ isError: true }),
+      },
+      'social_load',
+      {},
+    ),
+    undefined,
+  )
 })
 
 test('工具桥凭据写 0600 文件，不依赖环境变量', () => {

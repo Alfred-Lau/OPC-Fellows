@@ -13,6 +13,7 @@
 - 有 agent 工厂时人设只列工具名，schema 交给 `defineTool`。spawn opc 退路仍保留 JSON 点名。
 - `opc-kernel` 的 `@deepseek-ai/dsh-tools` 改为 peer，避免 profile 里双份拷贝。
 - afterPack 缺 `dsh-host` 或弹药手职业包直接失败，安装包必须能官方 boot。
+- 零歧义写口令优先 `ctx.tools.execute`；没有官方树或工具未挂上再 `opcTools.invoke`。无对话回合时 Local API 只放行本职工具，不开放 fs/bash。
 
 ## 考虑过但没选
 

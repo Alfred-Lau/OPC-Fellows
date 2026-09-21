@@ -1,5 +1,5 @@
 /**
- * 职业 Skill 口令 → ctx.tools 名。口令桥只负责亮 Panel，执行走同一套工具。
+ * 职业 Skill 口令 → ctx.tools 名。口令桥只负责亮 Panel；执行优先官方 execute。
  */
 
 export interface OccupationInvokeSpec {

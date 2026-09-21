@@ -4,6 +4,7 @@ import {
   OCCUPATION_TOOL_BUNDLES,
   occupationDirsToAdd,
   occupationInsertPatchYaml,
+  occupationNativeToolNames,
   occupationPackageDirs,
   occupationPackageDirsFromRoots,
   occupationPluginAddArgv,
@@ -14,18 +15,19 @@ import { OPC_PROFILE_NAME } from './opc-profile.ts'
 
 const repoRoot = import.meta.dirname + '/../../..'
 
-test('开源弹药手职业包可被 dsh plugin add', () => {
-  assert.deepEqual(OCCUPATION_TOOL_BUNDLES, [
-    {
-      id: 'social-ammo',
-      packageName: 'ownworkbuddy-occupation-social-ammo',
-      dirName: 'occupation-social-ammo',
-    },
-  ])
+test('开源职业包可被 dsh plugin add', () => {
+  assert.deepEqual(
+    OCCUPATION_TOOL_BUNDLES.map((row) => row.id),
+    ['social-ammo', 'kernel-work'],
+  )
   const refs = occupationPackageDirs(repoRoot)
-  assert.equal(refs.length, 1)
-  assert.equal(refs[0]?.id, 'social-ammo')
-  assert.deepEqual(occupationPackageDirsFromRoots([repoRoot]).map((ref) => ref.id), ['social-ammo'])
+  assert.deepEqual(refs.map((ref) => ref.id), ['social-ammo', 'kernel-work'])
+  assert.deepEqual(occupationPackageDirsFromRoots([repoRoot]).map((ref) => ref.id), [
+    'social-ammo',
+    'kernel-work',
+  ])
+  assert.equal(occupationNativeToolNames().includes('todos_list'), true)
+  assert.equal(occupationNativeToolNames().includes('github_status'), true)
 })
 
 test('occupationDirsToAdd 在空表上是空结果', () => {

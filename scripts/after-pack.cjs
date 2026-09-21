@@ -1,5 +1,5 @@
 const { execFileSync } = require('node:child_process')
-const { existsSync, lstatSync, rmSync, symlinkSync } = require('node:fs')
+const { existsSync, lstatSync, readdirSync, rmSync, symlinkSync } = require('node:fs')
 const { join } = require('node:path')
 
 /** extraResources 会丢掉 node_modules；打包后再把 vendor 的 dsh 整树拷进 Resources。 */
@@ -40,9 +40,16 @@ module.exports = async function afterPack(context) {
   if (!existsSync(join(stagedHost, 'package.json'))) {
     throw new Error('afterPack: 先跑 node --experimental-strip-types scripts/stage-dsh-host.mjs，安装包必须带 extraResources/dsh-host 才能官方 boot()')
   }
-  const occupation = join(context.packager.projectDir, 'packages', 'occupation-social-ammo', 'dsh-plugin.js')
-  if (!existsSync(occupation)) {
-    throw new Error(`afterPack: 缺少弹药手职业包 ${occupation}`)
+  const packagesDir = join(context.packager.projectDir, 'packages')
+  const occupations = readdirSync(packagesDir).filter((name) => name.startsWith('occupation-'))
+  if (occupations.length === 0) {
+    throw new Error('afterPack: 缺少 packages/occupation-* 职业包')
+  }
+  for (const name of occupations) {
+    const occupation = join(packagesDir, name, 'dsh-plugin.js')
+    if (!existsSync(occupation)) {
+      throw new Error(`afterPack: 缺少职业包 ${occupation}`)
+    }
   }
   const hostDest =
     context.electronPlatformName === 'darwin'

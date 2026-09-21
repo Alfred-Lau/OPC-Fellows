@@ -573,6 +573,9 @@ export class AgentsService extends Service {
     if (!agent) {
       return { kind: 'miss', text }
     }
+    if (dshTreeHasAgentFactory(this.ctx)) {
+      return { kind: 'chat', text }
+    }
     const skills = routableSkills(agent)
     try {
       const raw = await this.ctx.completions.complete({
@@ -669,14 +672,12 @@ export class AgentsService extends Service {
         })
       }
       const repoBrief = packs.includes(WORKSPACE_TOOL_PACK) ? composeRepoBrief(cwd) : ''
+      const native = dshTreeHasAgentFactory(this.ctx)
+      const persona = agentSystemPrompt(agent, tools, {
+        toolProtocol: native ? 'native' : 'json',
+      })
       const userData = app.getPath('userData')
-      writeMemberPreset(
-        userData,
-        sessionId,
-        agentSystemPrompt(agent, tools, {
-          toolProtocol: dshTreeHasAgentFactory(this.ctx) ? 'native' : 'json',
-        }),
-      )
+      writeMemberPreset(userData, sessionId, persona)
       writeMemberContext(
         userData,
         sessionId,
@@ -695,8 +696,21 @@ export class AgentsService extends Service {
         ...(hasIdentityDirectory(agent) ? { identityDirectory: this.workspaceRoot(agent.id) } : {}),
         allowedTools: tools.map((tool) => tool.name),
       })
-      let text = user
       try {
+        if (native) {
+          const turn = await this.ctx.dshRuntime.prompt({ sessionId, text: user, cwd })
+          if (composer.savePlan && !composer.writeAllowed) {
+            this.threads = applyThreadPlan(this.threads, threadId, {
+              status: 'draft',
+              text: turn.text,
+              agentId,
+            })
+            this.persist()
+            return this.reply(threadId, planSavedReply(turn.text), agentId, 'agent', undefined, turn.thinking)
+          }
+          return this.reply(threadId, turn.text, agentId, 'agent', undefined, turn.thinking)
+        }
+        let text = user
         for (let round = 0; round < TOOL_ROUND_LIMIT; round += 1) {
           const turn = await this.ctx.dshRuntime.prompt({ sessionId, text, cwd })
           const call = parseOpcToolCall(turn.text)

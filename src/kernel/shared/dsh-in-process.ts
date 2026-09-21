@@ -13,6 +13,7 @@ import {
   sessionIdFromToolExec,
   stringifyToolArgs,
 } from './opc-tool-bridge.ts'
+import { occupationNativeToolNames } from './occupation-bundles.ts'
 import type { OpcToolParameters } from './opc-tools.ts'
 import { isDshSessionExistsError, type DshPromptResult, type DshTurnCollector } from './dsh-rpc.ts'
 
@@ -153,7 +154,7 @@ export async function ensureInProcessOccupationTools(
   const catalog = await loadCatalog(base, token)
   for (const tool of catalog) {
     const toolName = typeof tool.name === 'string' ? tool.name.trim() : ''
-    if (!toolName) {
+    if (!toolName || occupationNativeToolNames().includes(toolName)) {
       continue
     }
     try {

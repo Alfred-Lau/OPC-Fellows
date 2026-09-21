@@ -1,0 +1,15 @@
+{
+  "name": "ownworkbuddy-occupation-kernel-work",
+  "version": "0.8.0",
+  "private": true,
+  "type": "module",
+  "main": "dsh-plugin.js",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "0.1.5-rc.2"
+  }
+}

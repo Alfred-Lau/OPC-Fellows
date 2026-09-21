@@ -29,10 +29,9 @@ export async function apply(ctx) {
   const base = auth.base
   const token = auth.token
   const tools = await loadCatalog(base, token)
-  const occupationOwned = new Set(['social_load', 'social_publish', 'social_metrics', 'social_recap'])
   for (const tool of tools) {
     const toolName = typeof tool.name === 'string' ? tool.name.trim() : ''
-    if (!toolName || occupationOwned.has(toolName)) {
+    if (!toolName || isOccupationOwnedTool(toolName)) {
       continue
     }
     ctx.tools.register(
@@ -318,4 +317,12 @@ function readPromptFile(kind, sessionId) {
   } catch {
     return ''
   }
+}
+
+function isOccupationOwnedTool(name) {
+  return (
+    name.startsWith('social_') ||
+    name.startsWith('todos_') ||
+    name === 'github_status'
+  )
 }

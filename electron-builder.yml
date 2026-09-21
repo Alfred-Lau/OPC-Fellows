@@ -18,6 +18,8 @@ extraResources:
     to: opc-kernel
   - from: packages/occupation-social-ammo
     to: packages/occupation-social-ammo
+  - from: packages/occupation-kernel-work
+    to: packages/occupation-kernel-work
   - from: build/dsh-host
     to: dsh-host
   - from: build/dsh-host/node_modules

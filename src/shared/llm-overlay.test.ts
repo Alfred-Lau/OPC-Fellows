@@ -7,6 +7,7 @@ import {
   DEFAULT_DEEPSEEK_URL,
   DEEPSEEK_PROVIDER,
   dshSdkCall,
+  llmCompletionsUrl,
   llmOverlayYaml,
   openaiCompatOverlayYaml,
   resolveLlmRuntime,
@@ -22,6 +23,11 @@ test('官方 DeepSeek 默认不写 overlay；自定义网关才叠 llm-deepseek'
   assert.equal(official.apiUrl, DEFAULT_DEEPSEEK_URL)
   assert.equal(llmOverlayYaml(official), null)
   assert.deepEqual(dshSdkCall(official), { provider: DEEPSEEK_PROVIDER, model: DEEPSEEK_MODEL })
+  assert.equal(llmCompletionsUrl(official.apiUrl), `${DEFAULT_DEEPSEEK_URL}/chat/completions`)
+  assert.equal(
+    llmCompletionsUrl('https://llm.example.com/v1/chat/completions'),
+    'https://llm.example.com/v1/chat/completions',
+  )
 
   const custom = resolveLlmRuntime({
     apiKey: 'sk-custom',

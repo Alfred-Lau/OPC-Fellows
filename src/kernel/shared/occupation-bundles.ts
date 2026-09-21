@@ -12,6 +12,11 @@ export const OCCUPATION_TOOL_BUNDLES: readonly { id: string; packageName: string
     packageName: 'ownworkbuddy-occupation-social-ammo',
     dirName: 'occupation-social-ammo',
   },
+  {
+    id: 'kernel-work',
+    packageName: 'ownworkbuddy-occupation-kernel-work',
+    dirName: 'occupation-kernel-work',
+  },
 ]
 
 export type OccupationToolId = string
@@ -98,7 +103,16 @@ export function occupationPluginId(id: string): string {
 }
 
 export function occupationNativeToolNames(): readonly string[] {
-  return ['social_load', 'social_publish', 'social_metrics', 'social_recap'] as const
+  return [
+    'social_load',
+    'social_publish',
+    'social_metrics',
+    'social_recap',
+    'todos_list',
+    'todos_ingest',
+    'todos_done',
+    'github_status',
+  ] as const
 }
 
 export function occupationInsertPatchYaml(

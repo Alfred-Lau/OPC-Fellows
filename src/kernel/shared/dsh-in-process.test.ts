@@ -160,6 +160,8 @@ test('能 in-process 时对话走 ctx.agents，asar 仍可 spawn opc', () => {
   assert.match(runtime, /dshTreeHasAgentFactory/)
   assert.match(runtime, /promptDshInProcess/)
   assert.match(runtime, /ensureInProcessOccupationTools/)
+  const inProcess = readFileSync(join(repoRoot, 'src/kernel/shared/dsh-in-process.ts'), 'utf8')
+  assert.match(inProcess, /occupationNativeToolNames\(\)\.includes\(toolName\)/)
   assert.match(runtime, /--profile['", ]+OPC_PROFILE_NAME/)
 })
 
@@ -171,6 +173,9 @@ test('花名册和职业工具不再占用官方 ctx.agents / ctx.tools / ctx.ll
   assert.match(tools, /super\(ctx, 'opcTools'\)/)
   assert.match(llm, /super\(ctx, 'completions'\)/)
   assert.match(llm, /completeViaOfficialLlm/)
+  assert.match(llm, /llmCompletionsUrl/)
+  assert.match(agents, /return \{ kind: 'chat', text \}/)
+  assert.match(agents, /if \(native\)/)
   assert.doesNotMatch(agents, /super\(ctx, 'agents'\)/)
   assert.doesNotMatch(tools, /super\(ctx, 'tools'\)/)
   assert.doesNotMatch(llm, /super\(ctx, 'llm'\)/)

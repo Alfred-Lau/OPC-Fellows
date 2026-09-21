@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
@@ -9,7 +9,9 @@ import {
   catalogToolsForTurn,
   denyBridgeToolNames,
   executeOfficialToolIfPossible,
+  hostFastPathInvokeGate,
   isAllowedBridgeTool,
+  loopbackToolBridgeUrl,
   officialToolText,
   pickToolBridgeTurn,
   readToolBridgeAuth,
@@ -17,6 +19,7 @@ import {
   scrubSecretEnv,
   toolBridgeEnv,
   writeToolBridgeAuth,
+  type HostFastPathInvokeGate,
   type OpcToolBridgeTurn,
 } from './opc-tool-bridge.ts'
 
@@ -162,4 +165,164 @@ test('工具桥凭据写 0600 文件，不依赖环境变量', () => {
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
+})
+
+/** 拒绝分支的收窄助手：不是 reject 就直接判失败。 */
+function rejectGateOf(gate: HostFastPathInvokeGate): { status: number; code: string; error: string } {
+  if (gate.action !== 'reject') {
+    assert.fail(`应当 409 拒绝，实际 ${gate.action}`)
+  }
+  return gate
+}
+
+test('工具桥只接受本机回环地址', () => {
+  assert.equal(loopbackToolBridgeUrl('http://127.0.0.1:18755'), 'http://127.0.0.1:18755')
+  assert.equal(loopbackToolBridgeUrl('  http://localhost:18755/  '), 'http://localhost:18755')
+  assert.equal(loopbackToolBridgeUrl('http://127.0.0.1:18755///'), 'http://127.0.0.1:18755')
+  for (const raw of [
+    'http://evil.example.com',
+    'https://evil.example.com/agent/tools',
+    'http://127.0.0.1.evil.example.com:18755',
+    'http://192.168.1.9:18755',
+    'file:///etc/passwd',
+    '',
+    '   ',
+    'not-a-url',
+  ]) {
+    assert.equal(loopbackToolBridgeUrl(raw), '', `「${raw}」不是本机，必须拒绝`)
+  }
+})
+
+test('凭据里的外部 host fail-closed，不退回环境变量', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'opc-bridge-hostile-'))
+  try {
+    writeToolBridgeAuth(dir, { url: 'http://evil.example.com', token: 'stolen' })
+    assert.equal(
+      readToolBridgeAuth(dir, {
+        OPC_TOOL_BRIDGE_URL: 'http://127.0.0.1:18755',
+        OPC_TOOL_BRIDGE_TOKEN: 'env-token',
+      }),
+      null,
+    )
+    assert.equal(
+      readToolBridgeAuth(undefined, {
+        OPC_TOOL_BRIDGE_URL: 'http://evil.example.com',
+        OPC_TOOL_BRIDGE_TOKEN: 'env-token',
+      }),
+      null,
+    )
+    writeToolBridgeAuth(dir, { url: 'http://127.0.0.1:18755/', token: 'abc' })
+    assert.deepEqual(readToolBridgeAuth(dir, { OPC_TOOL_BRIDGE_URL: 'http://evil.example.com' }), {
+      url: 'http://127.0.0.1:18755',
+      token: 'abc',
+    })
+    assert.deepEqual(
+      readToolBridgeAuth(undefined, {
+        OPC_TOOL_BRIDGE_URL: 'http://localhost:18755',
+        OPC_TOOL_BRIDGE_TOKEN: 't',
+      }),
+      { url: 'http://localhost:18755', token: 't' },
+    )
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('没有回合的快路径门：写类与目录外一律 409，只读本职才放行', () => {
+  assert.deepEqual(
+    hostFastPathInvokeGate({
+      name: 'todos_list',
+      sessionId: '',
+      turnFound: false,
+      inCatalog: true,
+      effect: 'read',
+    }),
+    { action: 'read', writeAllowed: false },
+  )
+  assert.deepEqual(
+    hostFastPathInvokeGate({
+      name: 'todos_list',
+      sessionId: 'opc:thread:kernel-work',
+      turnFound: false,
+      inCatalog: true,
+      effect: 'read',
+    }),
+    { action: 'read', writeAllowed: false },
+  )
+
+  const ingest = rejectGateOf(
+    hostFastPathInvokeGate({
+      name: 'todos_ingest',
+      sessionId: '',
+      turnFound: false,
+      inCatalog: true,
+      effect: 'write',
+    }),
+  )
+  assert.equal(ingest.status, 409)
+  assert.equal(ingest.code, 'no_turn')
+
+  const publish = rejectGateOf(
+    hostFastPathInvokeGate({
+      name: 'social_publish',
+      sessionId: '',
+      turnFound: false,
+      inCatalog: true,
+      effect: 'write',
+    }),
+  )
+  assert.equal(publish.status, 409)
+  assert.equal(publish.code, 'no_turn')
+
+  // 目录里没声明 effect 的工具按写类处理，不给快路径。
+  assert.equal(
+    rejectGateOf(hostFastPathInvokeGate({ name: 'social_recap', sessionId: '', turnFound: false, inCatalog: true }))
+      .code,
+    'no_turn',
+  )
+  // 目录外（inCatalog:false）即使 effect 是 read 也不放行。
+  assert.equal(
+    rejectGateOf(
+      hostFastPathInvokeGate({
+        name: 'todos_list',
+        sessionId: '',
+        turnFound: false,
+        inCatalog: false,
+        effect: 'read',
+      }),
+    ).code,
+    'no_turn',
+  )
+  // 非本职工具（fs / bash）本来就不在快路径。
+  assert.equal(
+    rejectGateOf(
+      hostFastPathInvokeGate({ name: 'bash', sessionId: '', turnFound: false, inCatalog: true, effect: 'read' }),
+    ).code,
+    'no_turn',
+  )
+
+  // 带 sessionId 但回合解析不到：仍是 409，只是 code 换成 turn_unresolved。
+  const unresolved = rejectGateOf(
+    hostFastPathInvokeGate({
+      name: 'social_publish',
+      sessionId: 'opc:thread:social-ammo',
+      turnFound: false,
+      inCatalog: true,
+      effect: 'write',
+    }),
+  )
+  assert.equal(unresolved.status, 409)
+  assert.equal(unresolved.code, 'turn_unresolved')
+
+  // 有回合就回到统一路径，快路径不插手。
+  assert.deepEqual(
+    hostFastPathInvokeGate({
+      name: 'social_publish',
+      sessionId: 'opc:thread:social-ammo',
+      turnFound: true,
+      inCatalog: true,
+      effect: 'write',
+    }),
+    { action: 'use-turn' },
+  )
 })

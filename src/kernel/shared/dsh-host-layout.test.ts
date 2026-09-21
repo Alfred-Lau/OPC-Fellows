@@ -8,6 +8,7 @@ import {
   dshDesktopProfileDir,
   inProcessHostBlockReason,
 } from './dsh-host-layout.ts'
+import { hostFastPathInvokeGate, type HostFastPathInvokeGate } from './opc-tool-bridge.ts'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -87,13 +88,66 @@ test('安装包带上 opc-kernel extraResources；签名身份不进仓库', () 
   assert.match(hello, /hello_ping/)
   assert.match(plugin, /tools\/pre-execute/)
   const boot = readFileSync(join(repoRoot, 'src/kernel/main/boot.ts'), 'utf8')
-  const localApi = readFileSync(join(repoRoot, 'src/main/local-api.ts'), 'utf8')
   assert.match(boot, /executeOfficialToolIfPossible/)
-  assert.match(localApi, /allowsHostFastPathInvoke/)
   assert.match(yml, /notarize:\s*false/)
   assert.match(yml, /appId:\s*tech\.bitou\.ownworkbuddy/)
   assert.match(yml, /稳定安装身份/)
   assert.match(brand, /INSTALL_APP_ID = 'tech\.bitou\.ownworkbuddy'/)
   assert.match(main, /setAppUserModelId\(INSTALL_APP_ID\)/)
   assert.doesNotMatch(yml, /CSC_NAME|CSC_LINK/)
+})
+
+/** 拒绝分支的收窄助手：不是 reject 就直接判失败。 */
+function rejectGateOf(gate: HostFastPathInvokeGate): { status: number; code: string } {
+  if (gate.action !== 'reject') {
+    assert.fail(`没有回合时应当 409 拒绝，实际 ${gate.action}`)
+  }
+  return gate
+}
+
+test('主进程快路径没有回合时只放行只读本职工具，写类一律 409', () => {
+  // 接线：local-api 的快路径必须把 gate 的结论透下去，不能自己写 writeAllowed: true。
+  // 只切出快路径那段，函数名搬家/换实现不会像旧断言那样平白失效。
+  const localApi = readFileSync(join(repoRoot, 'src/main/local-api.ts'), 'utf8')
+  const from = localApi.indexOf('if (!turn) {')
+  const to = localApi.indexOf('sendJson(res, 200, { ok: true, text: result.text })', from)
+  assert.ok(from >= 0 && to > from, 'local-api 里应还有「没有回合」的快路径分支')
+  const fastPath = localApi.slice(from, to)
+  assert.match(fastPath, /hostFastPathInvokeGate\(\{/)
+  assert.match(fastPath, /writeAllowed:\s*gate\.writeAllowed/)
+  assert.doesNotMatch(fastPath, /writeAllowed:\s*true/)
+
+  const ingest = rejectGateOf(
+    hostFastPathInvokeGate({
+      name: 'todos_ingest',
+      sessionId: '',
+      turnFound: false,
+      inCatalog: true,
+      effect: 'write',
+    }),
+  )
+  assert.equal(ingest.status, 409)
+  assert.equal(ingest.code, 'no_turn')
+
+  const publish = rejectGateOf(
+    hostFastPathInvokeGate({
+      name: 'social_publish',
+      sessionId: '',
+      turnFound: false,
+      inCatalog: true,
+      effect: 'write',
+    }),
+  )
+  assert.equal(publish.status, 409)
+
+  assert.deepEqual(
+    hostFastPathInvokeGate({
+      name: 'todos_list',
+      sessionId: '',
+      turnFound: false,
+      inCatalog: true,
+      effect: 'read',
+    }),
+    { action: 'read', writeAllowed: false },
+  )
 })

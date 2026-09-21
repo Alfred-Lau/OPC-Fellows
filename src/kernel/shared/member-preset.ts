@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export const MEMBER_PRESET_DIR = 'kernel/presets'
@@ -55,6 +55,7 @@ export function writeMemberContext(userData: string, sessionId: string, text: st
   const next = body ? (body.endsWith('\n') ? body : `${body}\n`) : ''
   try {
     if (readFileSync(path, 'utf8') === next) {
+      chmodSync(path, 0o600)
       return
     }
   } catch {
@@ -62,8 +63,9 @@ export function writeMemberContext(userData: string, sessionId: string, text: st
       return
     }
   }
-  mkdirSync(join(userData, MEMBER_CONTEXT_DIR), { recursive: true })
-  writeFileSync(path, next)
+  mkdirSync(join(userData, MEMBER_CONTEXT_DIR), { recursive: true, mode: 0o700 })
+  writeFileSync(path, next, { mode: 0o600 })
+  chmodSync(path, 0o600)
 }
 
 export function readMemberContext(userData: string, sessionId: string): string {

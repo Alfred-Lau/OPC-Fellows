@@ -6,8 +6,8 @@ import { app } from 'electron'
 import type { TodoItem } from '../shared/todo'
 import { LOCAL_API_PORT } from './local-api-port'
 import {
-  allowsHostFastPathInvoke,
   bridgeToolPolicy,
+  hostFastPathInvokeGate,
   isAllowedBridgeTool,
   invokeBodySessionId,
   stringifyToolArgs,
@@ -280,16 +280,29 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
         sendJson(res, 400, { ok: false, error: 'name required', code: 'invalid_body' })
         return
       }
-      const turn = current.currentTurn(invokeBodySessionId(body))
+      const sessionId = invokeBodySessionId(body)
+      const turn = current.currentTurn(sessionId)
       const args = stringifyToolArgs(body.args)
       if (!turn) {
-        if (!allowsHostFastPathInvoke(name)) {
+        const tool = current.catalog().find((item) => item.name === name)
+        const gate = hostFastPathInvokeGate({
+          name,
+          sessionId,
+          turnFound: false,
+          inCatalog: Boolean(tool),
+          effect: tool?.effect,
+        })
+        if (gate.action === 'reject') {
+          sendJson(res, gate.status, { ok: false, error: gate.error, code: gate.code })
+          return
+        }
+        if (gate.action !== 'read') {
           sendJson(res, 409, { ok: false, error: '没有进行中的对话回合。', code: 'no_turn' })
           return
         }
         const agentId = asNonEmptyString(args.agent_id)
         const result = await current.invoke(name, args, {
-          writeAllowed: true,
+          writeAllowed: gate.writeAllowed,
           ...(agentId ? { agentId } : {}),
         })
         sendJson(res, 200, { ok: true, text: result.text })

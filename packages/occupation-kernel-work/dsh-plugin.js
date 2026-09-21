@@ -66,21 +66,45 @@ apply.inject = inject
 
 export default { name, inject, apply }
 
-function readToolBridgeAuth() {
+const LOOPBACK_TOOL_BRIDGE_HOSTS = new Set(['127.0.0.1', 'localhost', '::1'])
+
+export function loopbackToolBridgeBase(raw) {
+  const url = typeof raw === 'string' ? raw.trim().replace(/\/+$/, '') : ''
+  if (!url) {
+    return ''
+  }
+  try {
+    const host = new URL(url).hostname
+    if (!LOOPBACK_TOOL_BRIDGE_HOSTS.has(host)) {
+      return ''
+    }
+    return url
+  } catch {
+    return ''
+  }
+}
+
+export function readToolBridgeAuth() {
   const userData = process.env.OPC_USER_DATA?.trim()
   if (userData) {
     try {
       const raw = JSON.parse(readFileSync(join(userData, 'kernel', 'tool-bridge.json'), 'utf8'))
       const url = typeof raw?.url === 'string' ? raw.url.trim().replace(/\/+$/, '') : ''
       const token = typeof raw?.token === 'string' ? raw.token.trim() : ''
-      if (url && token) {
-        return { base: url, token }
+      if (url) {
+        const base = loopbackToolBridgeBase(url)
+        if (!base) {
+          return null
+        }
+        if (token) {
+          return { base, token }
+        }
       }
     } catch {
       // 再看环境变量。
     }
   }
-  const base = process.env.OPC_TOOL_BRIDGE_URL?.trim().replace(/\/+$/, '')
+  const base = loopbackToolBridgeBase(process.env.OPC_TOOL_BRIDGE_URL)
   const token = process.env.OPC_TOOL_BRIDGE_TOKEN?.trim()
   if (base && token) {
     return { base, token }

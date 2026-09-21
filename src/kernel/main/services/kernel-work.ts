@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { Service, type Context } from '@deepseek-ai/cordis'
 import { updateTodo } from '../../../main/todo-store'
+import { scrubSecretEnv } from '../../shared/opc-tool-bridge'
 import { KERNEL_TOOL_PACK, type ToolPackId } from '../../shared/tool-packs'
 
 /**
@@ -99,7 +100,7 @@ function githubStatus(cwd: string, repo: string): string {
     cwd,
     encoding: 'utf8',
     timeout: 20_000,
-    env: process.env,
+    env: scrubSecretEnv(process.env),
   })
   if (result.error) {
     return '本机没有 gh，或无法启动。装好 GitHub CLI 并 gh auth login 后再试。'

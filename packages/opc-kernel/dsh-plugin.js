@@ -90,26 +90,73 @@ async function answerApproval(request) {
   }
 }
 
-function readToolBridgeAuth() {
+const LOOPBACK_TOOL_BRIDGE_HOSTS = new Set(['127.0.0.1', 'localhost', '::1'])
+
+export function loopbackToolBridgeBase(raw) {
+  const url = typeof raw === 'string' ? raw.trim().replace(/\/+$/, '') : ''
+  if (!url) {
+    return ''
+  }
+  try {
+    const host = new URL(url).hostname
+    if (!LOOPBACK_TOOL_BRIDGE_HOSTS.has(host)) {
+      return ''
+    }
+    return url
+  } catch {
+    return ''
+  }
+}
+
+export function readToolBridgeAuth() {
   const userData = process.env.OPC_USER_DATA?.trim()
   if (userData) {
     try {
       const raw = JSON.parse(readFileSync(join(userData, 'kernel', 'tool-bridge.json'), 'utf8'))
       const url = typeof raw?.url === 'string' ? raw.url.trim().replace(/\/+$/, '') : ''
       const token = typeof raw?.token === 'string' ? raw.token.trim() : ''
-      if (url && token) {
-        return { base: url, token }
+      if (url) {
+        const base = loopbackToolBridgeBase(url)
+        if (!base) {
+          return null
+        }
+        if (token) {
+          return { base, token }
+        }
       }
     } catch {
       // 再看环境变量。
     }
   }
-  const base = process.env.OPC_TOOL_BRIDGE_URL?.trim().replace(/\/+$/, '')
+  const base = loopbackToolBridgeBase(process.env.OPC_TOOL_BRIDGE_URL)
   const token = process.env.OPC_TOOL_BRIDGE_TOKEN?.trim()
   if (base && token) {
     return { base, token }
   }
   return null
+}
+
+/** 官方 PreToolDecision。未知政策必须交给 next()，不能返回裸字符串。 */
+export function toPreToolDecision(decision, reason) {
+  const text = typeof reason === 'string' ? reason.trim() : ''
+  if (decision === 'allow') {
+    return { kind: 'allow' }
+  }
+  if (decision === 'deny') {
+    return { kind: 'deny', reason: text || 'OPC 拒绝这次工具调用。' }
+  }
+  if (decision === 'ask') {
+    return text ? { kind: 'ask', reason: text } : { kind: 'ask' }
+  }
+  return null
+}
+
+export function preExecuteDecision(decision, reason, next) {
+  const mapped = toPreToolDecision(decision, reason)
+  if (!mapped) {
+    return next()
+  }
+  return mapped
 }
 
 async function answerToolPolicy(call, next) {
@@ -133,10 +180,7 @@ async function answerToolPolicy(call, next) {
       signal: call?.signal,
     })
     const payload = await response.json().catch(() => ({}))
-    const decision = payload?.decision
-    if (decision === 'deny' || decision === 'allow' || decision === 'ask') {
-      return decision
-    }
+    return preExecuteDecision(payload?.decision, payload?.reason, next)
   } catch {
     // 政策服务不可用时交给后面的官方管道，不要误杀 fs / bash。
   }

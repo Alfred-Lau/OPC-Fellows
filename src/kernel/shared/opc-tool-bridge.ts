@@ -8,7 +8,7 @@ import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { LOCAL_API_PORT } from '../../main/local-api-port.ts'
 import { occupationNativeToolNames } from './occupation-bundles.ts'
-import type { OpcToolInfo, OpcToolParameters } from './opc-tools.ts'
+import { isWriteTool, type OpcToolEffect, type OpcToolInfo, type OpcToolParameters } from './opc-tools.ts'
 
 export const OPC_TOOL_BRIDGE_URL_ENV = 'OPC_TOOL_BRIDGE_URL'
 export const OPC_TOOL_BRIDGE_TOKEN_ENV = 'OPC_TOOL_BRIDGE_TOKEN'
@@ -94,6 +94,25 @@ export function writeToolBridgeAuth(userData: string, auth: ToolBridgeAuth): voi
   chmodSync(path, 0o600)
 }
 
+const LOOPBACK_TOOL_BRIDGE_HOSTS = new Set(['127.0.0.1', 'localhost', '::1'])
+
+/** 工具桥只接受本机。外部 host 返回空串，调用方必须拒绝加载。 */
+export function loopbackToolBridgeUrl(raw: string): string {
+  const url = raw.trim().replace(/\/+$/, '')
+  if (!url) {
+    return ''
+  }
+  try {
+    const host = new URL(url).hostname
+    if (!LOOPBACK_TOOL_BRIDGE_HOSTS.has(host)) {
+      return ''
+    }
+    return url
+  } catch {
+    return ''
+  }
+}
+
 export function readToolBridgeAuth(userData?: string, env: NodeJS.ProcessEnv = process.env): ToolBridgeAuth | null {
   const root = userData?.trim() || env.OPC_USER_DATA?.trim() || ''
   if (root) {
@@ -103,15 +122,21 @@ export function readToolBridgeAuth(userData?: string, env: NodeJS.ProcessEnv = p
         const row = raw as { url?: unknown; token?: unknown }
         const url = typeof row.url === 'string' ? row.url.trim().replace(/\/+$/, '') : ''
         const token = typeof row.token === 'string' ? row.token.trim() : ''
-        if (url && token) {
-          return { url, token }
+        if (url) {
+          const base = loopbackToolBridgeUrl(url)
+          if (!base) {
+            return null
+          }
+          if (token) {
+            return { url: base, token }
+          }
         }
       }
     } catch {
       // 文件还没写或坏了，再看环境变量。
     }
   }
-  const url = env[OPC_TOOL_BRIDGE_URL_ENV]?.trim().replace(/\/+$/, '') ?? ''
+  const url = loopbackToolBridgeUrl(env[OPC_TOOL_BRIDGE_URL_ENV] ?? '')
   const token = env[OPC_TOOL_BRIDGE_TOKEN_ENV]?.trim() ?? ''
   if (url && token) {
     return { url, token }
@@ -291,6 +316,41 @@ export interface OfficialToolRuntime {
 /** 口令快路径：本职工具没有对话回合也可以经 Local API 执行，不开放 fs/bash。 */
 export function allowsHostFastPathInvoke(name: string): boolean {
   return occupationNativeToolNames().includes(name)
+}
+
+export type HostFastPathCode = 'no_turn' | 'turn_unresolved'
+
+export type HostFastPathInvokeGate =
+  | { action: 'use-turn' }
+  | { action: 'read'; writeAllowed: false }
+  | { action: 'reject'; status: 409; code: HostFastPathCode; error: string }
+
+/**
+ * 没有回合时只放行 effect:read 的本职工具，且不得带写权限。
+ * 写类工具、目录外工具、非本职工具一律 409，不退化为放行。
+ */
+export function hostFastPathInvokeGate(input: {
+  name: string
+  sessionId: string
+  turnFound: boolean
+  inCatalog: boolean
+  effect?: OpcToolEffect
+}): HostFastPathInvokeGate {
+  if (input.turnFound) {
+    return { action: 'use-turn' }
+  }
+  const occupation = allowsHostFastPathInvoke(input.name)
+  const readOnly = occupation && input.inCatalog && !isWriteTool({ name: input.name, effect: input.effect })
+  if (readOnly) {
+    return { action: 'read', writeAllowed: false }
+  }
+  const unresolved = Boolean(input.sessionId.trim()) && occupation
+  return {
+    action: 'reject',
+    status: 409,
+    code: unresolved ? 'turn_unresolved' : 'no_turn',
+    error: unresolved ? '对话回合无法解析，拒绝这次调用。' : '没有进行中的对话回合。',
+  }
 }
 
 export function officialToolText(result: {

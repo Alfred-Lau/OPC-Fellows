@@ -9,6 +9,7 @@ import { installShell } from './shell'
 import { isShortListing } from '../../shared/listing'
 import type { ProjectContextFile } from '../shared/agent'
 import { asToolArgs } from '../shared/opc-tools'
+import { executeOfficialToolIfPossible, type OfficialToolRuntime } from '../shared/opc-tool-bridge'
 import { isToolPackId } from '../shared/tool-packs'
 import { parseChatTurnOptions, parseComposerMode } from '../shared/plan-mode'
 import { bootKernelTree } from '../shared/dsh-desktop-profile'
@@ -131,9 +132,18 @@ function registerKernelIpc(ctx: Context): void {
       input.planMode === true,
     ),
   )
-  ctx.bridge.handle('tools:invoke', (_event, name: string, args: unknown) => {
+  ctx.bridge.handle('tools:invoke', async (_event, name: string, args: unknown) => {
     const record = asToolArgs(args)
-    return ctx.opcTools.invoke(String(name), record, {
+    const toolName = String(name)
+    const native = await executeOfficialToolIfPossible(
+      ctx.get('tools') as OfficialToolRuntime | undefined,
+      toolName,
+      record,
+    )
+    if (native !== undefined) {
+      return { text: native }
+    }
+    return ctx.opcTools.invoke(toolName, record, {
       writeAllowed: true,
       ...(record.agent_id ? { agentId: record.agent_id } : {}),
     })

@@ -17,6 +17,10 @@ export function stripLlmUrl(url: string): string {
   return url.trim().replace(/\/+$/, '').replace(/\/chat\/completions$/i, '')
 }
 
+export function llmCompletionsUrl(apiUrl: string): string {
+  return `${stripLlmUrl(apiUrl)}/chat/completions`
+}
+
 export function resolveLlmRuntime(input: {
   apiKey?: string | null
   keySource?: LlmKeySource

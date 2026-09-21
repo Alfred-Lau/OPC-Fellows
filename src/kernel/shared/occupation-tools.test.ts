@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  composeSocialMetricsText,
+  composeSocialPublishText,
   flagArg,
   occupationInvokeSpec,
   occupationToolForInvoke,
@@ -24,4 +26,12 @@ test('钉死 id 和布尔参数走字符串表', () => {
   assert.equal(flagArg(true), 'true')
   assert.equal(parseFlagArg('true'), true)
   assert.equal(parseFlagArg('no'), false)
+})
+
+test('结构化弹药参数折回口令句子', () => {
+  assert.equal(composeSocialPublishText({ url: 'https://x.com/a', which: '第一条' }), '第一条 https://x.com/a')
+  assert.equal(
+    composeSocialMetricsText({ which: '第一条', views: '120', likes: '3' }),
+    '第一条 浏览 120 赞 3',
+  )
 })

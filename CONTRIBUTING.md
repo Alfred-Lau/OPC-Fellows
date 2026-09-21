@@ -42,7 +42,7 @@ pnpm test
 
 新功能加模块，不改内核的视图联合类型。跨模块只走内核服务（例如 `todos.ingestAgent`），不要直连对方 store。
 
-第三方模块的形状见 [`examples/hello-module`](examples/hello-module)：`ownworkbuddy`（工作台 Panel）+ `dsh.bundle`（`dsh plugin --profile opc add`）双写 + `apply(ctx)` + 可选 `mount(root, api)`。只声明用得到的 capability；`subprocess` / `secrets` / `net:listen:*` 是高危项，能不用就不用。
+第三方模块的形状见 [`examples/hello-module`](examples/hello-module)：`ownworkbuddy`（工作台 Panel）+ `dsh.bundle`（`dsh plugin --profile opc add`）双写 + `apply(ctx)` 里 `defineTool` + 可选 `mount(root, api)`。只声明用得到的 capability；`subprocess` / `secrets` / `net:listen:*` 是高危项，能不用就不用。`@deepseek-ai/dsh-tools` 写 peer，不要再拷一份。
 
 ## 好上手的第一刀
 

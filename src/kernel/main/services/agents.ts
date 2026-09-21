@@ -19,6 +19,7 @@ import {
   type WorkspaceEntry,
 } from '../../shared/agent'
 import {
+  agentRuntimeContext,
   agentSystemPrompt,
   appendMessage,
   applyThreadListing,
@@ -69,6 +70,7 @@ import {
   workbenchSkillById,
 } from '../../shared/workbench-skills'
 import { composeToolFollowUp, dshSessionId } from '../../shared/dsh-rpc'
+import { dshTreeHasAgentFactory } from '../../shared/dsh-in-process'
 import { parseOpcToolCall, TOOL_ROUND_LIMIT } from '../../shared/opc-tools'
 import { defaultToolPacks, normalizeToolPacks, WORKSPACE_TOOL_PACK, type ToolPackId } from '../../shared/tool-packs'
 import {
@@ -84,7 +86,7 @@ import {
   type ComposerMode,
 } from '../../shared/plan-mode'
 import { composeRepoBrief } from '../../shared/coding-context'
-import { writeMemberPreset } from '../../shared/member-preset'
+import { writeMemberContext, writeMemberPreset } from '../../shared/member-preset'
 import { citeAttachments, composeAttachmentCiteText } from '../../shared/dsh-attachment'
 import { resolveAgentWorkspacePath } from '../../shared/identity-directory'
 import { readJson, writeJson } from './storage'
@@ -571,6 +573,9 @@ export class AgentsService extends Service {
     if (!agent) {
       return { kind: 'miss', text }
     }
+    if (dshTreeHasAgentFactory(this.ctx)) {
+      return { kind: 'chat', text }
+    }
     const skills = routableSkills(agent)
     try {
       const raw = await this.ctx.completions.complete({
@@ -667,13 +672,21 @@ export class AgentsService extends Service {
         })
       }
       const repoBrief = packs.includes(WORKSPACE_TOOL_PACK) ? composeRepoBrief(cwd) : ''
-      const persona = [
-        agentSystemPrompt(agent, tools, { cwd, repoBrief }),
-        composerModePrompt(composer, threadPlanOf(this.thread(threadId), agentId)?.text ?? ''),
-      ]
-        .filter(Boolean)
-        .join('\n')
-      writeMemberPreset(app.getPath('userData'), sessionId, persona)
+      const native = dshTreeHasAgentFactory(this.ctx)
+      const persona = agentSystemPrompt(agent, tools, {
+        toolProtocol: native ? 'native' : 'json',
+      })
+      const userData = app.getPath('userData')
+      writeMemberPreset(userData, sessionId, persona)
+      writeMemberContext(
+        userData,
+        sessionId,
+        agentRuntimeContext({
+          cwd,
+          repoBrief,
+          composer: composerModePrompt(composer, threadPlanOf(this.thread(threadId), agentId)?.text ?? ''),
+        }),
+      )
       this.ctx.dshRuntime.beginTurn({
         sessionId,
         threadId,
@@ -683,8 +696,21 @@ export class AgentsService extends Service {
         ...(hasIdentityDirectory(agent) ? { identityDirectory: this.workspaceRoot(agent.id) } : {}),
         allowedTools: tools.map((tool) => tool.name),
       })
-      let text = user
       try {
+        if (native) {
+          const turn = await this.ctx.dshRuntime.prompt({ sessionId, text: user, cwd })
+          if (composer.savePlan && !composer.writeAllowed) {
+            this.threads = applyThreadPlan(this.threads, threadId, {
+              status: 'draft',
+              text: turn.text,
+              agentId,
+            })
+            this.persist()
+            return this.reply(threadId, planSavedReply(turn.text), agentId, 'agent', undefined, turn.thinking)
+          }
+          return this.reply(threadId, turn.text, agentId, 'agent', undefined, turn.thinking)
+        }
+        let text = user
         for (let round = 0; round < TOOL_ROUND_LIMIT; round += 1) {
           const turn = await this.ctx.dshRuntime.prompt({ sessionId, text, cwd })
           const call = parseOpcToolCall(turn.text)

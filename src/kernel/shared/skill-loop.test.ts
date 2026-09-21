@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { AgentRecord } from './agent.ts'
 import {
+  agentRuntimeContext,
   agentSystemPrompt,
   occupationSkills,
   planDispatch,
@@ -53,7 +54,7 @@ function promoted(member: AgentRecord, text: string, hasKey: boolean) {
   }
 }
 
-test('金句：有 key 时读句进 Agent Loop，零歧义写口令仍走 bridge', () => {
+test('金句：有 key 时读句进 Agent Loop，零歧义写口令仍走快路径', () => {
   const cases: Array<[keyof typeof roster, string, 'invoke' | 'chat']> = [
     ['ammo', '装填弹药', 'invoke'],
     ['ammo', '帮我写几条文案', 'chat'],
@@ -98,6 +99,21 @@ test('职业 Skill 合同写进人设；miss 会列出能力而不是空菜单',
   assert.match(prompt, /本职 Skill/)
   assert.match(prompt, /social_load/)
   assert.match(prompt, /不要编数据/)
+  const native = agentSystemPrompt(roster.ammo, [
+    {
+      name: 'social_load',
+      description: '装填六平台弹药',
+      moduleId: 'social-ammo',
+      parameters: {},
+    },
+  ], { toolProtocol: 'native' })
+  assert.match(native, /social_load/)
+  assert.doesNotMatch(native, /"tool"/)
+  assert.doesNotMatch(native, /当前项目工作目录/)
+  const runtime = agentRuntimeContext({ cwd: '/tmp/site', composer: '先出计划，未批准前不要写。' })
+  assert.match(runtime, /\/tmp\/site/)
+  assert.match(runtime, /先出计划/)
+  assert.doesNotMatch(agentSystemPrompt(roster.ammo), /\/tmp\/site/)
   const miss = skillMissReply(roster.ammo, '线上有没有动静')
   assert.match(miss, /装填弹药/)
   assert.match(miss, /复盘热帖/)

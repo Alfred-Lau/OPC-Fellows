@@ -3,9 +3,12 @@ import {
   loadLlmCredentials,
   llmSettings,
   readDeepSeekApiKey,
+  resolveActiveLlm,
   setDeepSeekApiKey,
 } from '../../../main/credentials'
-import { DEEPSEEK_MODEL, MISSING_LLM_KEY_HINT } from '../../../shared/deepseek'
+import { MISSING_LLM_KEY_HINT } from '../../../shared/deepseek'
+import { dshSdkCall, llmCompletionsUrl } from '../../../shared/llm-overlay'
+import { completeViaOfficialLlm, type OfficialLlmRuntime } from '../../shared/official-llm'
 
 export interface LlmTurn {
   role: 'user' | 'assistant'
@@ -67,14 +70,26 @@ export class LlmService extends Service {
 
     const timeout = AbortSignal.timeout(input.timeoutMs ?? 45_000)
     const signal = input.signal ? AbortSignal.any([input.signal, timeout]) : timeout
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+    const runtime = resolveActiveLlm()
+    const official = await completeViaOfficialLlm(this.ctx.get('llm') as OfficialLlmRuntime | undefined, {
+      ...dshSdkCall(runtime),
+      system: input.system,
+      messages,
+      temperature: input.temperature,
+      json: input.json,
+      signal,
+    })
+    if (official) {
+      return official
+    }
+    const response = await fetch(llmCompletionsUrl(runtime.apiUrl), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: DEEPSEEK_MODEL,
+        model: runtime.model,
         temperature: input.temperature ?? 0.7,
         ...(input.json ? { response_format: { type: 'json_object' } } : {}),
         messages: [{ role: 'system', content: input.system }, ...messages],

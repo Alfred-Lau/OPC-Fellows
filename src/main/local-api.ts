@@ -6,6 +6,8 @@ import { app } from 'electron'
 import type { TodoItem } from '../shared/todo'
 import { LOCAL_API_PORT } from './local-api-port'
 import {
+  allowsHostFastPathInvoke,
+  bridgeToolPolicy,
   isAllowedBridgeTool,
   invokeBodySessionId,
   stringifyToolArgs,
@@ -14,9 +16,10 @@ import {
   OPC_TOOL_BRIDGE_APPROVAL_PATH,
   OPC_TOOL_BRIDGE_CATALOG_PATH,
   OPC_TOOL_BRIDGE_INVOKE_PATH,
+  OPC_TOOL_BRIDGE_POLICY_PATH,
 } from '../kernel/shared/opc-tool-bridge'
 import { parseApprovalAskBody, type ApprovalOutcome } from '../kernel/shared/approval'
-import type { OpcToolInfo } from '../kernel/shared/opc-tools'
+import { isWriteTool, type OpcToolInfo } from '../kernel/shared/opc-tools'
 import type { ToolInvokeMeta, ToolInvokeResult } from '../kernel/main/services/tools'
 import {
   composeLocalApiTask,
@@ -240,6 +243,31 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
       return
     }
 
+    if (method === 'POST' && path === OPC_TOOL_BRIDGE_POLICY_PATH) {
+      const current = runtime
+      if (!current) {
+        sendJson(res, 503, { ok: false, error: '内核未就绪。' })
+        return
+      }
+      const body = await readJsonBody(req)
+      const toolName = asNonEmptyString(body.name) || asNonEmptyString(body.toolName)
+      if (!toolName) {
+        sendJson(res, 400, { ok: false, error: 'name required', code: 'invalid_body' })
+        return
+      }
+      const sessionId = invokeBodySessionId(body)
+      const turn = current.currentTurn(sessionId)
+      const tool = current.catalog().find((item) => item.name === toolName)
+      const decision = bridgeToolPolicy({
+        toolName,
+        turn,
+        inCatalog: Boolean(tool),
+        writeTool: tool ? isWriteTool(tool) : false,
+      })
+      sendJson(res, 200, { ok: true, decision })
+      return
+    }
+
     if (method === 'POST' && path === OPC_TOOL_BRIDGE_INVOKE_PATH) {
       const current = runtime
       if (!current) {
@@ -253,15 +281,24 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
         return
       }
       const turn = current.currentTurn(invokeBodySessionId(body))
+      const args = stringifyToolArgs(body.args)
       if (!turn) {
-        sendJson(res, 409, { ok: false, error: '没有进行中的对话回合。', code: 'no_turn' })
+        if (!allowsHostFastPathInvoke(name)) {
+          sendJson(res, 409, { ok: false, error: '没有进行中的对话回合。', code: 'no_turn' })
+          return
+        }
+        const agentId = asNonEmptyString(args.agent_id)
+        const result = await current.invoke(name, args, {
+          writeAllowed: true,
+          ...(agentId ? { agentId } : {}),
+        })
+        sendJson(res, 200, { ok: true, text: result.text })
         return
       }
       if (!isAllowedBridgeTool(turn, name)) {
         sendJson(res, 403, { ok: false, error: `当前成员不能调用「${name}」。`, code: 'forbidden_tool' })
         return
       }
-      const args = stringifyToolArgs(body.args)
       const result = await current.invoke(name, args, {
         threadId: turn.threadId,
         agentId: turn.agentId,

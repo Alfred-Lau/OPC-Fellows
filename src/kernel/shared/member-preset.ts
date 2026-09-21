@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export const MEMBER_PRESET_DIR = 'kernel/presets'
+export const MEMBER_CONTEXT_DIR = 'kernel/contexts'
 
 export function memberPresetFileName(sessionId: string): string {
   const id = sessionId.trim().replace(/[^a-zA-Z0-9:_-]/g, '_')
@@ -36,6 +37,41 @@ export function readMemberPreset(userData: string, sessionId: string): string {
   }
   try {
     return readFileSync(memberPresetPath(userData, sessionId), 'utf8').trim()
+  } catch {
+    return ''
+  }
+}
+
+export function memberContextPath(userData: string, sessionId: string): string {
+  return join(userData, MEMBER_CONTEXT_DIR, memberPresetFileName(sessionId))
+}
+
+export function writeMemberContext(userData: string, sessionId: string, text: string): void {
+  const body = text.trim()
+  if (!userData.trim() || !sessionId.trim()) {
+    return
+  }
+  const path = memberContextPath(userData, sessionId)
+  const next = body ? (body.endsWith('\n') ? body : `${body}\n`) : ''
+  try {
+    if (readFileSync(path, 'utf8') === next) {
+      return
+    }
+  } catch {
+    if (!next) {
+      return
+    }
+  }
+  mkdirSync(join(userData, MEMBER_CONTEXT_DIR), { recursive: true })
+  writeFileSync(path, next)
+}
+
+export function readMemberContext(userData: string, sessionId: string): string {
+  if (!userData.trim() || !sessionId.trim()) {
+    return ''
+  }
+  try {
+    return readFileSync(memberContextPath(userData, sessionId), 'utf8').trim()
   } catch {
     return ''
   }

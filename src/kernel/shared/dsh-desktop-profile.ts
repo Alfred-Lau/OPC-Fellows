@@ -27,6 +27,12 @@ import {
   resolveDesktopHostRoot,
   resolveOpcKernelDir,
 } from './dsh-host-layout.ts'
+import {
+  occupationInsertPatchYaml,
+  occupationPackageDirsFromRoots,
+  occupationPluginPath,
+  occupationSearchRoots,
+} from './occupation-bundles.ts'
 
 export const DESKTOP_PROFILE_BUNDLES = DEFAULT_PROFILE_BUNDLES
 export const DESKTOP_BOOT_BIN = 'dsh'
@@ -51,6 +57,22 @@ export function rewriteOpcKernelPluginName(yaml: string, pluginPath: string): st
   return yaml.replace(/^(\s*name:\s*)ownworkbuddy-kernel\s*$/m, `$1${JSON.stringify(pluginPath)}`)
 }
 
+function ensureDesktopOccupations(dir: string, refs: readonly { id: string; dir: string }[]): void {
+  const ready = refs
+    .map((ref) => ({ id: ref.id, pluginPath: occupationPluginPath(ref.dir) }))
+    .filter((ref) => existsSync(ref.pluginPath))
+  if (ready.length === 0) {
+    return
+  }
+  const patchPath = join(dir, OPC_KERNEL_PATCH)
+  const current = existsSync(patchPath) ? readFileSync(patchPath, 'utf8') : ''
+  const insert = occupationInsertPatchYaml(ready)
+  if (!insert || current.startsWith(insert)) {
+    return
+  }
+  writeFileSync(patchPath, `${insert}${current}`)
+}
+
 function ensureDesktopOpcKernel(dir: string, kernelDir: string): void {
   if (!existsSync(join(kernelDir, 'package.json'))) {
     return
@@ -73,6 +95,7 @@ export function composeDesktopProfile(input: {
   home: string
   installAnchor: string
   kernelDir?: string
+  occupationDirs?: readonly { id: string; dir: string }[]
 }): ComposedDesktopProfile {
   const dir = dshDesktopProfileDir(input.home)
   initProfile(dir, [...DESKTOP_PROFILE_BUNDLES], 'startup')
@@ -80,6 +103,7 @@ export function composeDesktopProfile(input: {
   if (kernelDir) {
     ensureDesktopOpcKernel(dir, kernelDir)
   }
+  ensureDesktopOccupations(dir, input.occupationDirs ?? [])
   const profile = loadProfileDirectory(DESKTOP_BOOT_BIN, dir, input.installAnchor)
   const configPath = join(dir, DESKTOP_PROFILE_ROOT)
   writeFileSync(configPath, DESKTOP_ROOT_CONFIG)
@@ -119,10 +143,14 @@ export async function bootKernelTree(input: {
   }
   const installAnchor = dshAppInstallAnchor(hostRoot)
   const kernelDir = resolveOpcKernelDir({ ...input, hostRoot })
+  const occupationDirs = occupationPackageDirsFromRoots(
+    occupationSearchRoots(hostRoot, input.resourcesPath ?? input.appPath),
+  )
   const composed = composeDesktopProfile({
     home: input.dshHome,
     installAnchor,
     ...(kernelDir ? { kernelDir } : {}),
+    occupationDirs,
   })
   process.env.DSH_HOME = input.dshHome
   await healProfilesModuleFallback({

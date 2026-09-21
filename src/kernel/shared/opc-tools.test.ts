@@ -30,6 +30,14 @@ test('工具目录告诉模型用 JSON 点名', () => {
   assert.match(prompt, /一次只调一个工具/)
 })
 
+test('in-process 人设只列工具，不教 JSON 点名', () => {
+  const prompt = formatOpcToolsPrompt([social], 'native')
+  assert.match(prompt, /social_load/)
+  assert.match(prompt, /defineTool/)
+  assert.doesNotMatch(prompt, /"tool"/)
+  assert.doesNotMatch(prompt, /JSON 对象/)
+})
+
 test('从助手回复里抽出工具调用；围栏和多余文字都能吃', () => {
   assert.deepEqual(parseOpcToolCall('{"tool":"social_load","args":{"text":"装填弹药"}}'), {
     name: 'social_load',

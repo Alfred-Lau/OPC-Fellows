@@ -3,9 +3,11 @@
  * 职业执行仍在主进程；模型看见的是 dsh 原生工具 schema。
  */
 
+import { randomUUID } from 'node:crypto'
 import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { LOCAL_API_PORT } from '../../main/local-api-port.ts'
+import { occupationNativeToolNames } from './occupation-bundles.ts'
 import type { OpcToolInfo, OpcToolParameters } from './opc-tools.ts'
 
 export const OPC_TOOL_BRIDGE_URL_ENV = 'OPC_TOOL_BRIDGE_URL'
@@ -13,6 +15,7 @@ export const OPC_TOOL_BRIDGE_TOKEN_ENV = 'OPC_TOOL_BRIDGE_TOKEN'
 
 export const OPC_TOOL_BRIDGE_CATALOG_PATH = '/agent/tools'
 export const OPC_TOOL_BRIDGE_INVOKE_PATH = '/agent/tools/invoke'
+export const OPC_TOOL_BRIDGE_POLICY_PATH = '/agent/tools/policy'
 export const OPC_TOOL_BRIDGE_APPROVAL_PATH = '/agent/approval/ask'
 export const OPC_TOOL_BRIDGE_FILE = 'kernel/tool-bridge.json'
 
@@ -145,6 +148,56 @@ export function isAllowedBridgeTool(turn: Pick<OpcToolBridgeTurn, 'allowedTools'
   return turn.allowedTools.includes(name)
 }
 
+export type BridgeToolPolicy = 'allow' | 'deny' | 'unknown'
+
+export function denyBridgeToolNames(
+  catalogNames: readonly string[],
+  allowedTools: readonly string[] | undefined,
+): string[] {
+  if (!allowedTools) {
+    return []
+  }
+  const allowed = new Set(allowedTools)
+  return catalogNames.filter((name) => name.trim() && !allowed.has(name))
+}
+
+/** 官方 ctx.tools.restrict 的 deny 名单：只藏本回合不该看见的 OPC 工具，不动 dsh-base。 */
+export function restrictToolsIfPossible(
+  tools: { restrict?: (filter: unknown) => unknown } | undefined,
+  deny: readonly string[],
+): (() => void) | undefined {
+  if (!tools || typeof tools.restrict !== 'function' || deny.length === 0) {
+    return undefined
+  }
+  try {
+    const lift = tools.restrict({ deny: [...deny] })
+    return typeof lift === 'function' ? () => lift() : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function bridgeToolPolicy(input: {
+  toolName: string
+  turn: Pick<OpcToolBridgeTurn, 'allowedTools' | 'writeAllowed'> | null
+  inCatalog: boolean
+  writeTool: boolean
+}): BridgeToolPolicy {
+  if (!input.inCatalog) {
+    return 'unknown'
+  }
+  if (!input.turn) {
+    return 'unknown'
+  }
+  if (!isAllowedBridgeTool(input.turn, input.toolName)) {
+    return 'deny'
+  }
+  if (input.writeTool && input.turn.writeAllowed === false) {
+    return 'deny'
+  }
+  return 'allow'
+}
+
 export function catalogToolsForTurn<T extends { name: string }>(
   tools: readonly T[],
   turn: Pick<OpcToolBridgeTurn, 'allowedTools'> | null,
@@ -219,6 +272,78 @@ export function defineToolParameters(
       : { type: 'string', required: true }
   }
   return next
+}
+
+export interface OfficialToolRuntime {
+  execute?: (exec: {
+    callId: string
+    name: string
+    arguments: unknown
+    signal: AbortSignal
+  }) => Promise<{
+    isError?: boolean
+    value?: unknown
+    content?: unknown
+    error?: unknown
+  }>
+}
+
+/** 口令快路径：本职工具没有对话回合也可以经 Local API 执行，不开放 fs/bash。 */
+export function allowsHostFastPathInvoke(name: string): boolean {
+  return occupationNativeToolNames().includes(name)
+}
+
+export function officialToolText(result: {
+  isError?: boolean
+  value?: unknown
+  content?: unknown
+}): string | undefined {
+  if (result.isError) {
+    return undefined
+  }
+  if (typeof result.value === 'string') {
+    return result.value
+  }
+  return textFromContentBlocks(result.content)
+}
+
+export async function executeOfficialToolIfPossible(
+  tools: OfficialToolRuntime | undefined,
+  name: string,
+  args: Record<string, string>,
+  signal?: AbortSignal,
+): Promise<string | undefined> {
+  if (!tools || typeof tools.execute !== 'function') {
+    return undefined
+  }
+  try {
+    const result = await tools.execute({
+      callId: randomUUID(),
+      name,
+      arguments: args,
+      signal: signal ?? AbortSignal.timeout(60_000),
+    })
+    return officialToolText(result)
+  } catch {
+    return undefined
+  }
+}
+
+function textFromContentBlocks(content: unknown): string | undefined {
+  if (!Array.isArray(content)) {
+    return undefined
+  }
+  const parts: string[] = []
+  for (const block of content) {
+    if (!block || typeof block !== 'object') {
+      continue
+    }
+    const text = (block as { text?: unknown }).text
+    if (typeof text === 'string' && text.trim()) {
+      parts.push(text)
+    }
+  }
+  return parts.length > 0 ? parts.join('\n') : undefined
 }
 
 export function parseToolBridgeTurn(value: unknown): OpcToolBridgeTurn | null {

@@ -13,8 +13,14 @@ export async function apply(ctx) {
   ctx.systemPrompt.section({
     name: 'opc:member-preset',
     order: 0,
-    text: (context) => readPreset(sessionIdOfAgent(context?.agent)),
+    text: (context) => readPreset(sessionIdOfPrompt(context)),
   })
+  ctx.systemPrompt.context({
+    name: 'opc:turn-context',
+    order: 200,
+    text: (context) => readTurnContext(sessionIdOfPrompt(context)),
+  })
+  ctx.on('tools/pre-execute', (call, next) => answerToolPolicy(call, next))
   ctx.on('approval/request', (request) => answerApproval(request))
   const auth = readToolBridgeAuth()
   if (!auth) {
@@ -25,7 +31,7 @@ export async function apply(ctx) {
   const tools = await loadCatalog(base, token)
   for (const tool of tools) {
     const toolName = typeof tool.name === 'string' ? tool.name.trim() : ''
-    if (!toolName) {
+    if (!toolName || isOccupationOwnedTool(toolName)) {
       continue
     }
     ctx.tools.register(
@@ -104,6 +110,37 @@ function readToolBridgeAuth() {
     return { base, token }
   }
   return null
+}
+
+async function answerToolPolicy(call, next) {
+  const auth = readToolBridgeAuth()
+  if (!auth) {
+    return next()
+  }
+  const toolName = typeof call?.name === 'string' ? call.name.trim() : typeof call?.toolName === 'string' ? call.toolName.trim() : ''
+  const sessionId = sessionIdOf(call)
+  if (!toolName) {
+    return next()
+  }
+  try {
+    const response = await fetch(`${auth.base}/agent/tools/policy`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${auth.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: toolName, sessionId }),
+      signal: call?.signal,
+    })
+    const payload = await response.json().catch(() => ({}))
+    const decision = payload?.decision
+    if (decision === 'deny' || decision === 'allow' || decision === 'ask') {
+      return decision
+    }
+  } catch {
+    // 政策服务不可用时交给后面的官方管道，不要误杀 fs / bash。
+  }
+  return next()
 }
 
 async function askApproval(base, token, request) {
@@ -223,6 +260,26 @@ function sessionIdOfApproval(request) {
   return sessionIdOfAgent(agent)
 }
 
+function sessionIdOfPrompt(context) {
+  const fromAgent = sessionIdOfAgent(context?.agent)
+  if (fromAgent) {
+    return fromAgent
+  }
+  const scope = context?.scope
+  if (typeof scope === 'string' && scope.trim()) {
+    return scope.trim()
+  }
+  if (scope && typeof scope === 'object') {
+    if (typeof scope.id === 'string' && scope.id.trim()) {
+      return scope.id.trim()
+    }
+    if (typeof scope.key === 'string' && scope.key.trim()) {
+      return scope.key.trim()
+    }
+  }
+  return ''
+}
+
 function sessionIdOfAgent(agent) {
   if (!agent || typeof agent !== 'object') {
     return ''
@@ -243,13 +300,29 @@ function presetFileName(sessionId) {
 }
 
 function readPreset(sessionId) {
+  return readPromptFile('presets', sessionId)
+}
+
+function readTurnContext(sessionId) {
+  return readPromptFile('contexts', sessionId)
+}
+
+function readPromptFile(kind, sessionId) {
   const root = process.env.OPC_USER_DATA?.trim()
   if (!root || !sessionId) {
     return ''
   }
   try {
-    return readFileSync(join(root, 'kernel', 'presets', presetFileName(sessionId)), 'utf8').trim()
+    return readFileSync(join(root, 'kernel', kind, presetFileName(sessionId)), 'utf8').trim()
   } catch {
     return ''
   }
+}
+
+function isOccupationOwnedTool(name) {
+  return (
+    name.startsWith('social_') ||
+    name.startsWith('todos_') ||
+    name === 'github_status'
+  )
 }

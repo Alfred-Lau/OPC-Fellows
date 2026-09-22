@@ -148,13 +148,11 @@ docs/           architecture and ADRs
 
 Runtime: [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness). Peer desktop hosts: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
-The author runs this workbench against [SoloKit](https://www.solokit.run/) and [榆关](https://pen.bitou.tech/). That is a configuration, not the trunk defaults.
-
 ## Contributing
 
-Public trunk: [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows). PRs against kernel services, manifests, capabilities, samples, and docs are welcome.
+This repository is the public trunk: [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows). PRs against kernel services, manifests, capabilities, samples, and docs are welcome.
 
-Do not weld personal site catalogs, signing identities, secret defaults, or machine-absolute paths into `src/shared`. The default identity directory is `~/OPC-Fellows/agents/{title}`. Aligning a private reference tree copies mechanisms only — [ADR 0007](docs/adr/0007-opensource-sanitization.md).
+Do not add real site catalogs, signing identities, secret defaults, or machine-absolute paths to `src/shared`. The default identity directory is `~/OPC-Fellows/agents/{title}`. See [ADR 0007](docs/adr/0007-opensource-sanitization.md).
 
 - [CONTRIBUTING.en.md](CONTRIBUTING.en.md) · [CONTRIBUTING.md](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md) · [Security policy](SECURITY.md)

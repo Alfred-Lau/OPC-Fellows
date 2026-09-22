@@ -152,13 +152,11 @@ docs/           架构与 ADR
 
 运行时是 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。同类桌面宿主见 [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
-作者用这张台跑 [SoloKit](https://www.solokit.run/) 和 [榆关](https://pen.bitou.tech/)。那是一份配置，不是主干默认值。
-
 ## 贡献
 
-公开主干：[Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)。欢迎改内核服务、模块 manifest、capability、示例和文档。
+本仓库即公开主干：[Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)。欢迎改内核服务、模块 manifest、capability、示例和文档。
 
-不要把个人站点清单、签名身份、真实密钥或本机绝对路径写进 `src/shared`。身份目录默认 `~/OPC-Fellows/agents/{标题}`。对齐私有参考树只复制机制，见 [ADR 0007](docs/adr/0007-opensource-sanitization.md)。
+不要把真实站点清单、签名身份、真实密钥或本机绝对路径写进 `src/shared`。身份目录默认 `~/OPC-Fellows/agents/{标题}`。边界见 [ADR 0007](docs/adr/0007-opensource-sanitization.md)。
 
 - [贡献指南](CONTRIBUTING.md) · [Contributing (English)](CONTRIBUTING.en.md)
 - [行为准则](CODE_OF_CONDUCT.md) · [安全披露](SECURITY.md)

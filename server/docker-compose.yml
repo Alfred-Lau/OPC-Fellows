@@ -1,0 +1,55 @@
+# OPC-Fellows 可选、自托管的参考后端（server + postgres）。
+#
+# 安全默认值都落在这个文件里：
+#   - db 不写 ports:，数据库只在 compose 内部网络可达，不暴露到宿主机/公网；
+#   - server 只发布到宿主机的 127.0.0.1，公网访问请自备带 TLS 的反向代理；
+#   - 数据落在命名 volume，删容器不丢数据；
+#   - 变量从 .env 读（模板见 .env.example），compose 的变量插值用的是同一个 .env。
+#
+# 起之前：cp .env.example .env，然后把 SERVER_TOKEN / POSTGRES_PASSWORD 换成强随机值。
+
+name: opc-fellows-server
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-opc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      POSTGRES_DB: ${POSTGRES_DB:-opc_fellows}
+    # 故意不写 ports: —— 数据库只在下面的默认网络里可达，宿主机和公网都连不上它。
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    # 让 node 以 PID 1 之外的身份拿到信号，SIGTERM 才能走到优雅退出。
+    init: true
+    env_file:
+      - .env
+    environment:
+      # 覆盖 .env 里可能的 DATABASE_URL：容器里要连的是 compose 服务名 db，不是 localhost。
+      DATABASE_URL: postgres://${POSTGRES_USER:-opc}:${POSTGRES_PASSWORD:-}@db:5432/${POSTGRES_DB:-opc_fellows}
+      STORE: postgres
+      HOST: 0.0.0.0
+      PORT: 8787
+    ports:
+      # 只绑到宿主机回环。要对外服务，请在前面放一个带 TLS 的反向代理。
+      - '127.0.0.1:${SERVER_PORT:-8787}:8787'
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  # 命名 volume：容器重建/升级都不会丢数据。
+  db-data:

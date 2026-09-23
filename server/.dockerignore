@@ -1,0 +1,10 @@
+# 构建上下文里不需要的东西：镜像更小，也彻底没有把测试/密钥打进镜像的机会。
+node_modules
+test
+Dockerfile
+.dockerignore
+docker-compose.yml
+README.md
+.env
+.env.*
+*.log

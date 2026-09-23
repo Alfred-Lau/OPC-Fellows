@@ -85,10 +85,10 @@ pnpm dsh                      # 本机 DeepSeek Harness CLI
 
 ## 下载安装包
 
-不想跑源码时，用 [v0.8.0](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.8.0)（目前只有 macOS Apple Silicon）。
+不想跑源码时，用 [v0.8.1](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.8.1)（目前只有 macOS Apple Silicon）。
 
-- [dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.0/OPC-Fellows-0.8.0-mac-arm64.dmg) — 拖进「应用程序」
-- [zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.0/OPC-Fellows-0.8.0-mac-arm64.zip)
+- [dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.1/OPC-Fellows-0.8.1-mac-arm64.dmg) — 拖进「应用程序」
+- [zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.1/OPC-Fellows-0.8.1-mac-arm64.zip)
 
 构建已做 Apple 签名与公证，拖进「应用程序」后直接打开即可；若因离线等原因首次启动被拦，执行一次：
 

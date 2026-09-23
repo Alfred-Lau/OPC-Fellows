@@ -147,8 +147,11 @@ Electron 是薄壳。对话和工具走 DeepSeek Harness；内核花名册、待
 src/kernel/     启动、IPC、存储、待办、导航、模块仓库、成员
 src/modules/    内置职业（参考实现）
 examples/       第三方模块最小示例
+server/         可选自托管参考后端（独立包）
 docs/           架构与 ADR
 ```
+
+`server/` 是可选的自托管参考后端：给想把自己的全栈应用部署起来的用户一份起步模板。它刻意不在桌面端构建里 —— 有自己的 `package.json`、不在任何 pnpm workspace、桌面端没有任何代码 import 它。见 [server/README.md](server/README.md)。
 
 运行时是 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。同类桌面宿主见 [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
@@ -168,7 +171,7 @@ UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。�
 
 ## 安全
 
-- 业务数据在本机 `userData`，不经过项目自己的服务器。
+- 业务数据在本机 `userData`，不经过项目自己的服务器。（`server/` 是**你自己**部署、自己掌控的可选示例，它不接收桌面端数据。）
 - 微信情报只读本机索引；邮件只整理、写草稿，不代发。
 - 第三方模块按 capability 白名单运行。
 - 漏洞走 [SECURITY.md](SECURITY.md)，不要在公开 Issue 里贴凭据。

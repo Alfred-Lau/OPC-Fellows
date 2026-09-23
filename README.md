@@ -143,8 +143,11 @@ Electron is a thin shell. Chat and tools run on DeepSeek Harness; the roster, to
 src/kernel/     boot, IPC, storage, todos, nav, module registry, members
 src/modules/    built-in occupations (reference implementations)
 examples/       smallest third-party module
+server/         optional self-hosted reference backend (independent package)
 docs/           architecture and ADRs
 ```
+
+`server/` is an optional, self-hosted reference backend for users who want to stand up their own full-stack app. It is deliberately outside the desktop build: its own `package.json`, not in any pnpm workspace, and nothing here imports it — see [server/README.md](server/README.md).
 
 Runtime: [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness). Peer desktop hosts: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
@@ -164,7 +167,7 @@ UI copy is still hardcoded Chinese. Plan: [docs/i18n-plan.md](docs/i18n-plan.md)
 
 ## Security
 
-- Business data stays in on-device `userData`. There is no first-party backend for it.
+- Business data stays in on-device `userData`. There is no first-party backend for it. (`server/` is an optional self-hosted sample *you* deploy and control; it never receives desktop data.)
 - WeChat intel is a local read-only index. Mail triage writes local drafts and does not send.
 - Third-party modules run on a capability allow-list.
 - Report vulnerabilities in private. See [SECURITY.md](SECURITY.md).

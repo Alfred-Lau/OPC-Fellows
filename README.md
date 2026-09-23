@@ -81,10 +81,10 @@ A **project** is one multi-member job. With no `@`, only the lead member hears y
 
 ## Download a build
 
-If you do not want source: [v0.8.0](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.8.0) (macOS Apple Silicon only).
+If you do not want source: [v0.8.1](https://github.com/Alfred-Lau/OPC-Fellows/releases/tag/v0.8.1) (macOS Apple Silicon only).
 
-- [dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.0/OPC-Fellows-0.8.0-mac-arm64.dmg) — drag into Applications
-- [zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.0/OPC-Fellows-0.8.0-mac-arm64.zip)
+- [dmg](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.1/OPC-Fellows-0.8.1-mac-arm64.dmg) — drag into Applications
+- [zip](https://github.com/Alfred-Lau/OPC-Fellows/releases/download/v0.8.1/OPC-Fellows-0.8.1-mac-arm64.zip)
 
 The build is signed and notarized by Apple, so it opens without any extra step. If the first launch is
 still blocked (for example while offline), run this once:

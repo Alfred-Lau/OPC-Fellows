@@ -329,7 +329,7 @@ async function saveCatalog(): Promise<void> {
 }
 
 async function resetCatalog(): Promise<void> {
-  if (!window.confirm('清空产品清单、标签和社媒签名？个人站点不会再从代码里回来。')) {
+  if (!window.confirm('清空产品清单、标签和社媒签名？工作情况会回到空白默认值。')) {
     return
   }
   fillCatalog(await window.ownworkbuddy.workbench.resetCatalog())

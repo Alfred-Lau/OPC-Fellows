@@ -546,7 +546,7 @@ test('花名册按 sortOrder 排，缺省先按最近活动再钉死顺序', () 
   }
   const project = {
     id: 'thread:user:poem',
-    title: '古诗',
+    title: '示例项目',
     kind: 'user' as const,
     agentIds: ['rumi', 'mina'],
     workspaceAgentId: 'rumi',

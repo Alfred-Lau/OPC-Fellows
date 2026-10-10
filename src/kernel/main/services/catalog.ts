@@ -7,7 +7,7 @@ import { unlinkSync, existsSync } from 'node:fs'
 
 /**
  * 用户的工作情况：监控哪些产品、待办默认标签、社媒签名。
- * 没改过就是空目录；个人站点不要焊进代码。
+ * 没改过就是空目录；真实站点不要写进默认代码。
  */
 export class CatalogService extends Service {
   static inject = ['bridge']

@@ -5,7 +5,7 @@ import { OPC_PROJECT_TAG, getProjectTag, setProjectTag } from '../../shared/tags
 import { applyCatalog, defaultCatalog, normalizeCatalog } from './catalog.ts'
 import { getSocialSignature, setSocialSignature } from '../../shared/social-copy.ts'
 
-test('空输入退回空白目录，不带个人站点', () => {
+test('空输入退回空白目录，不带示例站点', () => {
   const catalog = normalizeCatalog(null)
   assert.equal(catalog.defaultProjectTag, OPC_PROJECT_TAG)
   assert.equal(catalog.socialSignature, '')

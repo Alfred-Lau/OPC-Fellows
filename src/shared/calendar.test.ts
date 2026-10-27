@@ -68,7 +68,7 @@ test('定时待办落到 notifyAt 那天，未定时未完成的落到今天', (
     [
       todo({ id: 'timed', title: '剪视频', notifyAt: '2026-09-12T09:00:00' }),
       todo({ id: 'later', title: '周日晚上', notifyAt: '2026-09-13T18:00:00' }),
-      todo({ id: 'untimed', title: '随手记升格' }),
+      todo({ id: 'untimed', title: '周会准备' }),
       todo({ id: 'done-open', title: '已完成无时', done: true }),
       todo({ id: 'past', title: '上个月', notifyAt: '2026-08-01T09:00:00' }),
     ],

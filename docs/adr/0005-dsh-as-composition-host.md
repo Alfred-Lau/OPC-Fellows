@@ -68,8 +68,8 @@ Electron 薄壳（窗 / 托盘 / 台伴 / 通知 / safeStorage）
   └── 启动 dsh --profile opc（或官方 desktop host 同款：进程内 host，不开 :port）
         ├── @deepseek-ai/dsh-base          llm / tools / sessions / agent-loop / credentials
         ├── @deepseek-ai/dsh-web-app       或 OPC 自己的 client 面
-        ├── @solokit/opc-kernel            todos、成员花名册、项目、workbench chrome
-        └── @solokit/occupation-*          收款 / 监控 / 选品 / … → ctx.tools + client Panel
+        ├── ownworkbuddy-kernel            todos、成员花名册、项目、workbench chrome
+        └── occupation-*                   收款 / 监控 / 选品 / … → ctx.tools + client Panel
 ```
 
 组合根是 dsh 的 Context。OPC 内核变成 bundle，不是第二棵树。职业模块的 package.json 主字段从 `ownworkbuddy` 迁到 `dsh`（过渡期可以双写）。Electron 只做官方 desktop 已经做过的事：生命周期、安全协议、本机能力。

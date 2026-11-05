@@ -15,20 +15,20 @@ test('空输入回落到默认档案', () => {
 })
 
 test('显示名会去空白并截断', () => {
-  const next = normalizeProfile({ displayName: `  阿宁${'啊'.repeat(50)}  `, avatarPath: '/tmp/a.png' })
+  const next = normalizeProfile({ displayName: `  示例用户${'啊'.repeat(50)}  `, avatarPath: '/tmp/a.png' })
   assert.equal(next.displayName.length, 40)
-  assert.equal(next.displayName.startsWith('阿宁'), true)
+  assert.equal(next.displayName.startsWith('示例用户'), true)
   assert.equal(next.avatarPath, '/tmp/a.png')
 })
 
 test('没有显示名时用机器名', () => {
   assert.equal(profileLabel(defaultProfile(), 'opc.local'), 'opc.local')
-  assert.equal(profileLabel({ displayName: '阿宁', avatarPath: '' }, 'opc.local'), '阿宁')
+  assert.equal(profileLabel({ displayName: '示例用户', avatarPath: '' }, 'opc.local'), '示例用户')
 })
 
 test('当前档案是空的才认领旧目录里的称呼和头像', () => {
   const empty = defaultProfile()
-  const saved = { displayName: '硬核老 K', avatarPath: '/tmp/a.png' }
+  const saved = { displayName: '示例用户', avatarPath: '/tmp/a.png' }
   assert.equal(profileHasIdentity(empty), false)
   assert.equal(shouldAdoptProfile(empty, saved), true)
   assert.equal(shouldAdoptProfile(saved, { displayName: '别人', avatarPath: '' }), false)

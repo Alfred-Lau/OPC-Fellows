@@ -26,4 +26,4 @@
 
 ## 落地检查
 
-每阶段合并前用搜索扫品牌私有路径、真实域名、密钥、Team ID。示例数据继续走 [`examples/catalog.example.json`](../../examples/catalog.example.json)。
+每阶段合并前跑 `pnpm test:sanitize`，扫运营者产品站、个人路径、密钥、Team ID。公开 README / FUNDING / SUPPORT / CITATION / 封面只指向本仓库与运行时上游。示例数据继续走 [`examples/catalog.example.json`](../../examples/catalog.example.json)。安装身份与旧 userData 别名留在 `brand.ts`，不写进对外文案当品牌。

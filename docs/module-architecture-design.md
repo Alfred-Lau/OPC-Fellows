@@ -625,7 +625,7 @@ userData/
       disabled: true              # ← 用户关掉的
       config:
         heartbeatHours: 24
-        proxy: http://127.0.0.1:7890
+        proxy: http://127.0.0.1:8080
 
 - id: feishu-tasks
   name: ./modules/feishu-tasks/lib/main.js   # 第三方，绝对/相对路径

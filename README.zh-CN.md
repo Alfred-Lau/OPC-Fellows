@@ -30,7 +30,7 @@
   <a href="#贡献">贡献</a>
 </p>
 
-你是开发者，同时一个人扛销售、内容、研究和账。这张工作台不是再介绍一遍「本地优先桌面应用」，而是让你 **clone 之后，把成员雇到自己的文件夹和站点上，当天就能干活**。
+你是开发者，同时一个人扛销售、内容、研究和账。clone 之后，把成员雇到自己的文件夹和站点上，**当天就能干活**。
 
 数据在本机 `userData`，模型密钥走「设置 → 模型」的 `safeStorage`，没有账号、不上传、无遥测。默认产品目录是空的——填你自己的站，不要用别人的。
 
@@ -97,9 +97,7 @@ xattr -cr "/Applications/OPC-Fellows.app"
 ```
 
 
-**从 v0.7.3 升级注意：** 本版的应用名是 **OPC-Fellows**，因此会以全新的工作区启动 —— 旧版把数据放在 `~/Library/Application Support/OPC Agent Team - Solokit`，新名字不会去读它。
-
-屏幕上的名字仍是 **OPC Agent Team - Solokit**（改名会迁移 `userData`，留到后续版本）。接到业务的步骤和从源码启动相同：模型 key → 雇成员 → 绑目录 → 工作情况。
+**从 v0.7.3 升级注意：** 本版的应用名是 **OPC-Fellows**，因此会以全新的工作区启动 —— 旧版把数据放在 `~/Library/Application Support/OPC Agent Team - Solokit`，新名字不会去读它。接到业务的步骤和从源码启动相同：模型 key → 雇成员 → 绑目录 → 工作情况。
 
 ## 扩展花名册：加你自己的成员
 
@@ -155,13 +153,11 @@ docs/           架构与 ADR
 
 运行时是 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。同类桌面宿主见 [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
-作者用这张台跑 [SoloKit](https://www.solokit.run/) 和 [榆关](https://pen.bitou.tech/)。那是一份配置，不是主干默认值。
-
 ## 贡献
 
-公开主干：[Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)。欢迎改内核服务、模块 manifest、capability、示例和文档。
+本仓库即公开主干：[Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)。欢迎改内核服务、模块 manifest、capability、示例和文档。
 
-不要把个人站点清单、签名身份、真实密钥或本机绝对路径写进 `src/shared`。身份目录默认 `~/OPC-Fellows/agents/{标题}`。对齐私有参考树只复制机制，见 [ADR 0007](docs/adr/0007-opensource-sanitization.md)。
+不要把真实站点清单、签名身份、真实密钥或本机绝对路径写进 `src/shared`。身份目录默认 `~/OPC-Fellows/agents/{标题}`。边界见 [ADR 0007](docs/adr/0007-opensource-sanitization.md)。
 
 - [贡献指南](CONTRIBUTING.md) · [Contributing (English)](CONTRIBUTING.en.md)
 - [行为准则](CODE_OF_CONDUCT.md) · [安全披露](SECURITY.md)
@@ -179,5 +175,3 @@ UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。�
 ## 许可
 
 [MIT License](LICENSE)。运行时依赖 [Cordis](https://github.com/cordiverse/cordis) 与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。
-
-站点：[OPC-Fellows](https://opc-fellows.solokit.run/) · 维护者 [bitou.tech](https://pen.bitou.tech/)

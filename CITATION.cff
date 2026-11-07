@@ -3,10 +3,9 @@ title: OPC-Fellows
 message: If you use this software, please cite it as below.
 type: software
 authors:
-  - name: bitou.tech
-    website: https://pen.bitou.tech/
+  - name: OPC-Fellows contributors
 repository-code: https://github.com/Alfred-Lau/OPC-Fellows
-url: https://www.solokit.run/
+url: https://github.com/Alfred-Lau/OPC-Fellows
 abstract: >-
   Local-first Electron workbench for a one-person company.
   A small kernel (shell, todos, module contract) plus occupation

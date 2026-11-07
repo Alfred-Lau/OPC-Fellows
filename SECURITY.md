@@ -14,7 +14,7 @@ OPC-Fellows 是本地优先桌面工作台。
 - 邮件整理只读收件箱并写本机草稿，不代发。
 - 第三方模块只能调用 manifest 声明的 capability。`secrets` / `subprocess` / `net:listen:*` 安装前必须确认。
 
-请不要把已签名的 `.app` / `.dmg`、`.env`、本机 `userData` 或 Apple 公证凭据推进 git。身份目录默认在用户家目录下的 `OPC-Fellows/agents`，不要把能标识运营者的路径写进默认值。对齐参考实现时只复制运行时机制，见 [ADR 0007](docs/adr/0007-opensource-sanitization.md)。
+请不要把已签名的 `.app` / `.dmg`、`.env`、本机 `userData` 或 Apple 公证凭据推进 git。身份目录默认在用户家目录下的 `OPC-Fellows/agents`，不要把能标识运营者的路径写进默认值。默认值与身份标识的边界见 [ADR 0007](docs/adr/0007-opensource-sanitization.md)。
 
 ### 如何披露
 
@@ -45,7 +45,7 @@ OPC-Fellows is a local-first desktop workbench.
 - Mail triage reads the inbox and writes local drafts. It does not send mail.
 - Third-party modules may call only capabilities declared in their manifest. `secrets` / `subprocess` / `net:listen:*` confirm at install.
 
-Do not push signed `.app` / `.dmg` files, `.env`, on-device `userData`, or Apple notarization credentials. The default identity directory is `OPC-Fellows/agents` under the user home. Do not bake operator-identifying paths into defaults. When aligning a private reference tree, copy runtime mechanisms only. See [ADR 0007](docs/adr/0007-opensource-sanitization.md).
+Do not push signed `.app` / `.dmg` files, `.env`, on-device `userData`, or Apple notarization credentials. The default identity directory is `OPC-Fellows/agents` under the user home. Do not bake operator-identifying paths into defaults. Defaults and identity stay out of trunk code. See [ADR 0007](docs/adr/0007-opensource-sanitization.md).
 
 ### Reporting
 

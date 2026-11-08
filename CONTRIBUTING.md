@@ -11,7 +11,7 @@
 1. 提交 Pull Request 即表示你把该次贡献按 [MIT License](LICENSE) 授权给本项目，并确认你有权这样授权。
 2. 你保证贡献里**没有**别人的密钥、聊天记录、收款流水、未授权的版权材料，也没有你自己的生产凭据。
 3. 你同意遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
-4. 版权仍归各位作者；许可证要求保留版权与许可声明。维护者是 [bitou.tech](https://pen.bitou.tech/)。
+4. 版权仍归各位作者；许可证要求保留版权与许可声明。维护者是 GitHub [@Alfred-Lau](https://github.com/Alfred-Lau)。
 
 不另签 CLA。许可条件以 MIT 全文为准。
 
@@ -74,4 +74,4 @@ Issue 同样写清范围。安全漏洞不要开公开 Issue：走 [SECURITY.md]
 
 ## 许可
 
-提交即按 [MIT License](LICENSE) 授权。版权归各位作者与 [bitou.tech](https://pen.bitou.tech/)。
+提交即按 [MIT License](LICENSE) 授权。版权归各位作者；许可声明见 [LICENSE](LICENSE)。

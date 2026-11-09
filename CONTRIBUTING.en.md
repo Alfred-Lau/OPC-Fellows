@@ -11,7 +11,7 @@ Vocabulary follows [CONTEXT.md](CONTEXT.md): the UI says “member”, never Age
 1. Opening a pull request licenses that contribution to this project under the [MIT License](LICENSE), and you confirm you have the right to grant that license.
 2. You warrant the contribution contains **no** third-party secrets, chat logs, payment ledgers, unlicensed copyrighted material, or your own production credentials.
 3. You agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
-4. Copyright stays with each author. The license requires keeping the copyright and permission notices. The maintainer is [bitou.tech](https://pen.bitou.tech/).
+4. Copyright stays with each author. The license requires keeping the copyright and permission notices. The maintainer is GitHub [@Alfred-Lau](https://github.com/Alfred-Lau).
 
 There is no separate CLA. The MIT text is the license.
 
@@ -74,4 +74,4 @@ Issues need the same scope. Security bugs are not public issues: follow [SECURIT
 
 ## License
 
-Contributions are licensed under the [MIT License](LICENSE). Copyright belongs to each author and [bitou.tech](https://pen.bitou.tech/).
+Contributions are licensed under the [MIT License](LICENSE). Copyright belongs to each author. See [LICENSE](LICENSE) for the notice.

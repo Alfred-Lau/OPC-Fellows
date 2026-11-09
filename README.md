@@ -151,7 +151,7 @@ docs/           architecture and ADRs
 
 Runtime: [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness). Peer desktop hosts: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
-The author runs this workbench against [SoloKit](https://www.solokit.run/) and [榆关](https://pen.bitou.tech/). That is a configuration, not the trunk defaults.
+The trunk catalog is empty. Register *your* sites in Work situation; do not copy someone else's list.
 
 ## Contributing
 
@@ -176,4 +176,4 @@ UI copy is still hardcoded Chinese. Plan: [docs/i18n-plan.md](docs/i18n-plan.md)
 
 [MIT License](LICENSE). Runtime depends on [Cordis](https://github.com/cordiverse/cordis) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-Site: [OPC-Fellows](https://opc-fellows.solokit.run/)
+Site: [OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)

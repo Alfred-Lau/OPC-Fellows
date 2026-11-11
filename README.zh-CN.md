@@ -155,7 +155,7 @@ docs/           架构与 ADR
 
 运行时是 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。同类桌面宿主见 [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
-作者用这张台跑 [SoloKit](https://www.solokit.run/) 和 [榆关](https://pen.bitou.tech/)。那是一份配置，不是主干默认值。
+主干默认产品目录是空的。在工作情况里登记**你自己的**站，不要拷别人的清单。
 
 ## 贡献
 
@@ -180,4 +180,4 @@ UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。�
 
 [MIT License](LICENSE)。运行时依赖 [Cordis](https://github.com/cordiverse/cordis) 与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。
 
-站点：[OPC-Fellows](https://opc-fellows.solokit.run/) · 维护者 [bitou.tech](https://pen.bitou.tech/)
+站点：[OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)

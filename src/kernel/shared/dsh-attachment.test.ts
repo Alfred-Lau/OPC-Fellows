@@ -8,9 +8,9 @@ import {
 } from './dsh-attachment.ts'
 
 test('引用文件只列路径，不把正文写进 prompt', () => {
-  const cites = citeAttachments('/Users/me/notes', [
-    { path: '/Users/me/notes/readme.md', name: 'readme.md' },
-    { path: '/Users/me/notes/shot.png', name: 'shot.png' },
+  const cites = citeAttachments('/tmp/opc-fellows/notes', [
+    { path: '/tmp/opc-fellows/notes/readme.md', name: 'readme.md' },
+    { path: '/tmp/opc-fellows/notes/shot.png', name: 'shot.png' },
     { path: '/etc/passwd', name: 'passwd' },
   ])
   assert.deepEqual(
@@ -33,13 +33,13 @@ test('引用文件只列路径，不把正文写进 prompt', () => {
 })
 
 test('没有项目文件夹时引用也只写文件名', () => {
-  const cites = citeAttachments(undefined, [{ path: '/Users/me/notes/readme.md', name: 'readme.md' }])
+  const cites = citeAttachments(undefined, [{ path: '/tmp/opc-fellows/notes/readme.md', name: 'readme.md' }])
   assert.deepEqual(cites.map((cite) => cite.shown), ['readme.md'])
   assert.doesNotMatch(composeAttachmentCiteText(cites), /\/Users\//)
 })
 
 test('prompt 块先路径指针，再图片，再用户话', () => {
-  const cites = citeAttachments('/Users/me/notes', [{ path: '/Users/me/notes/shot.png', name: 'shot.png' }])
+  const cites = citeAttachments('/tmp/opc-fellows/notes', [{ path: '/tmp/opc-fellows/notes/shot.png', name: 'shot.png' }])
   const blocks = composeDshPromptContentBlocks({
     text: '看这张图',
     cites,

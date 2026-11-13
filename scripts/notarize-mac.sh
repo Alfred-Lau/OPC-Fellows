@@ -30,9 +30,9 @@ elif [[ -n "${APPLE_ID:-}" && -n "${APPLE_APP_SPECIFIC_PASSWORD:-}" && -n "${APP
   args+=(--apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID")
 else
   echo "没有公证凭据。先存一把钥匙串 profile：" >&2
-  echo "  xcrun notarytool store-credentials ownworkbuddy --apple-id <你的Apple ID> --team-id <TEAM_ID>" >&2
+  echo "  xcrun notarytool store-credentials opc-fellows-notary --apple-id <你的Apple ID> --team-id <TEAM_ID>" >&2
   echo "然后：" >&2
-  echo "  NOTARY_PROFILE=ownworkbuddy bash scripts/notarize-mac.sh" >&2
+  echo "  NOTARY_PROFILE=opc-fellows-notary bash scripts/notarize-mac.sh" >&2
   exit 2
 fi
 

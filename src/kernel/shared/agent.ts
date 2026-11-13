@@ -197,7 +197,7 @@ export const AGENT_NAME_POOL = [
   '南风',
   '台伴',
   '墨铜',
-  '扣子',
+  '星河',
 ] as const
 
 export function describeAgentKind(kind: AgentKind): string {

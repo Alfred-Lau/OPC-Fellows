@@ -26,4 +26,4 @@
 
 ## 落地检查
 
-每阶段合并前用搜索扫品牌私有路径、真实域名、密钥、Team ID。示例数据继续走 [`examples/catalog.example.json`](../../examples/catalog.example.json)。
+每阶段合并前用搜索扫品牌私有路径、真实域名、密钥、Team ID。回归测试见 `src/kernel/shared/opensource-sanitization.test.ts`。示例数据继续走 [`examples/catalog.example.json`](../../examples/catalog.example.json)。

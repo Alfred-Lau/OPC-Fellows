@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="docs/cover.png" alt="OPC-Fellows — local-first workbench for a one-person company" width="100%">
+</p>
+
+<p align="center">
   <strong>OPC-Fellows</strong> · hire occupations as members, then point them at <em>your</em> work<br>
   A small kernel (shell, todos, contracts) plus occupation plugins you can enable or write.
 </p>
@@ -151,7 +155,7 @@ docs/           architecture and ADRs
 
 Runtime: [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness). Peer desktop hosts: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
-The author runs this workbench against [SoloKit](https://www.solokit.run/) and [榆关](https://pen.bitou.tech/). That is a configuration, not the trunk defaults.
+The trunk catalog is empty. Register *your* sites in Work situation; do not copy someone else's list.
 
 ## Contributing
 
@@ -176,4 +180,4 @@ UI copy is still hardcoded Chinese. Plan: [docs/i18n-plan.md](docs/i18n-plan.md)
 
 [MIT License](LICENSE). Runtime depends on [Cordis](https://github.com/cordiverse/cordis) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-Site: [OPC-Fellows](https://opc-fellows.solokit.run/)
+Site: [OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)

@@ -190,7 +190,7 @@ export const HOST_BADGE_TITLE = '每个项目都在场的默认主成员'
 export const AGENT_NAME_POOL = [
   'Rumi',
   'Mina',
-  '阿宁',
+  '星河',
   '小禾',
   '青石',
   '木白',

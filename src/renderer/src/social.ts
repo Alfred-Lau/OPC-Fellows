@@ -319,7 +319,7 @@ async function showState(): Promise<void> {
   try {
     renderSocial(await window.ownworkbuddy.social.state())
   } catch {
-    statusEl.textContent = '还没有弹药。点装填，或先让项目监控官刷新一次再来。'
+    statusEl.textContent = '还没有弹药。点装填，或先在工作情况里登记你的站点再来。'
   }
 }
 

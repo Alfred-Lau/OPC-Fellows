@@ -94,8 +94,8 @@ xattr -cr "/Applications/OPC-Fellows.app"
 ```
 
 Then open the app. **Upgrading from v0.7.3:** this release builds under the name **OPC-Fellows**, so it starts
-with a fresh workspace — the previous build kept its data in `~/Library/Application Support/OPC Agent Team - Solokit`
-and the new name does not read it. The same first-hour path applies: model key → hire → bind a folder → Work situation.
+with a fresh workspace — data from the previous install identity stays in that Application Support
+folder; the new name does not read it. The same first-hour path applies: model key → hire → bind a folder → Work situation.
 
 ## Extend the roster: add your own member
 
@@ -151,8 +151,6 @@ docs/           architecture and ADRs
 
 Runtime: [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness). Peer desktop hosts: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
 
-The author runs this workbench against [SoloKit](https://www.solokit.run/) and [榆关](https://pen.bitou.tech/). That is a configuration, not the trunk defaults.
-
 ## Contributing
 
 Public trunk: [Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows). PRs against kernel services, manifests, capabilities, samples, and docs are welcome.
@@ -168,7 +166,6 @@ UI copy is still hardcoded Chinese. Plan: [docs/i18n-plan.md](docs/i18n-plan.md)
 ## Security
 
 - Business data stays in on-device `userData`. There is no first-party backend for it. (`server/` is an optional self-hosted sample *you* deploy and control; it never receives desktop data.)
-- WeChat intel is a local read-only index. Mail triage writes local drafts and does not send.
 - Third-party modules run on a capability allow-list.
 - Report vulnerabilities in private. See [SECURITY.md](SECURITY.md).
 
@@ -176,4 +173,4 @@ UI copy is still hardcoded Chinese. Plan: [docs/i18n-plan.md](docs/i18n-plan.md)
 
 [MIT License](LICENSE). Runtime depends on [Cordis](https://github.com/cordiverse/cordis) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-Site: [OPC-Fellows](https://opc-fellows.solokit.run/)
+Repository: [OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)

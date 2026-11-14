@@ -39,19 +39,19 @@ function agent(overrides: Partial<AgentRecord> = {}): AgentRecord {
 }
 
 test('默认身份目录用公开产品名 OPC-Fellows/agents', () => {
-  assert.equal(identityDirectorySlug('随手记'), '随手记')
+  assert.equal(identityDirectorySlug('青石'), '青石')
   assert.equal(identityDirectorySlug('Hello World'), 'hello-world')
   assert.equal(identityDirectoryRoot('/tmp/home'), resolve('/tmp/home/OPC-Fellows/agents'))
-  assert.equal(defaultIdentityDirectory('/tmp/home', '随手记'), resolve('/tmp/home/OPC-Fellows/agents/随手记'))
+  assert.equal(defaultIdentityDirectory('/tmp/home', '青石'), resolve('/tmp/home/OPC-Fellows/agents/青石'))
   assert.equal(
-    defaultIdentityDirectory('/tmp/home', '随手记', ['/tmp/home/OPC-Fellows/agents/随手记']),
-    resolve('/tmp/home/OPC-Fellows/agents/随手记-2'),
+    defaultIdentityDirectory('/tmp/home', '青石', ['/tmp/home/OPC-Fellows/agents/青石']),
+    resolve('/tmp/home/OPC-Fellows/agents/青石-2'),
   )
 })
 
 test('表单另选的路径优先生效，不跟默认 slug', () => {
   assert.equal(
-    resolveIdentityDirectory('/tmp/home', '随手记', [], '/tmp/opc-fellows/agents/notes'),
+    resolveIdentityDirectory('/tmp/home', '青石', [], '/tmp/opc-fellows/agents/notes'),
     resolve('/tmp/opc-fellows/agents/notes'),
   )
 })
@@ -70,12 +70,12 @@ test('绑在 Electron userData 根目录上的不算身份目录', () => {
     resolveAgentWorkspacePath({
       kind: 'dashboard',
       workspacePath: '/tmp/userData',
-      title: '随手记',
+      title: '青石',
       agentId: 'notes',
       home: '/tmp/home',
       userData: '/tmp/userData',
     }),
-    resolve('/tmp/home/OPC-Fellows/agents/随手记'),
+    resolve('/tmp/home/OPC-Fellows/agents/青石'),
   )
 })
 
@@ -85,10 +85,10 @@ test('已有 workspacePath 的成员不会被改绑', () => {
     title: '主理人',
     workspacePath: '/tmp/userData/workspaces/host',
   })
-  const fresh = agent({ id: 'notes', title: '随手记' })
+  const fresh = agent({ id: 'notes', title: '青石' })
   const next = fillMissingIdentityDirectories([existing, fresh], '/tmp/home', takenIdentityDirectories([existing]))
   assert.equal(next[0]?.workspacePath, resolve('/tmp/userData/workspaces/host'))
-  assert.equal(next[1]?.workspacePath, resolve('/tmp/home/OPC-Fellows/agents/随手记'))
+  assert.equal(next[1]?.workspacePath, resolve('/tmp/home/OPC-Fellows/agents/青石'))
 })
 
 test('旧成员回落仍是 userData/workspaces，不自动搬家', () => {

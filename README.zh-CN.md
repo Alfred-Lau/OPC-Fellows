@@ -97,9 +97,7 @@ xattr -cr "/Applications/OPC-Fellows.app"
 ```
 
 
-**从 v0.7.3 升级注意：** 本版的应用名是 **OPC-Fellows**，因此会以全新的工作区启动 —— 旧版把数据放在 `~/Library/Application Support/OPC Agent Team - Solokit`，新名字不会去读它。
-
-屏幕上的名字仍是 **OPC Agent Team - Solokit**（改名会迁移 `userData`，留到后续版本）。接到业务的步骤和从源码启动相同：模型 key → 雇成员 → 绑目录 → 工作情况。
+**从 v0.7.3 升级注意：** 本版的应用名是 **OPC-Fellows**，因此会以全新的工作区启动 —— 旧版把数据放在先前安装身份对应的 Application Support 目录里，新名字不会去读它。接到业务的步骤和从源码启动相同：模型 key → 雇成员 → 绑目录 → 工作情况。
 
 ## 扩展花名册：加你自己的成员
 
@@ -155,8 +153,6 @@ docs/           架构与 ADR
 
 运行时是 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。同类桌面宿主见 [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin)。
 
-作者用这张台跑 [SoloKit](https://www.solokit.run/) 和 [榆关](https://pen.bitou.tech/)。那是一份配置，不是主干默认值。
-
 ## 贡献
 
 公开主干：[Alfred-Lau/OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)。欢迎改内核服务、模块 manifest、capability、示例和文档。
@@ -172,7 +168,6 @@ UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。�
 ## 安全
 
 - 业务数据在本机 `userData`，不经过项目自己的服务器。（`server/` 是**你自己**部署、自己掌控的可选示例，它不接收桌面端数据。）
-- 微信情报只读本机索引；邮件只整理、写草稿，不代发。
 - 第三方模块按 capability 白名单运行。
 - 漏洞走 [SECURITY.md](SECURITY.md)，不要在公开 Issue 里贴凭据。
 
@@ -180,4 +175,4 @@ UI 仍是中文硬编码，方案见 [docs/i18n-plan.md](docs/i18n-plan.md)。�
 
 [MIT License](LICENSE)。运行时依赖 [Cordis](https://github.com/cordiverse/cordis) 与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。
 
-站点：[OPC-Fellows](https://opc-fellows.solokit.run/) · 维护者 [bitou.tech](https://pen.bitou.tech/)
+仓库：[OPC-Fellows](https://github.com/Alfred-Lau/OPC-Fellows)

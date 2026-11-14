@@ -1068,7 +1068,7 @@ export interface DispatchAction {
 }
 
 export interface DispatchOptions {
-  /** 当前会话所属成员：没有 @ 时，对话型继续聊，随手记继续记，职业主对话走分配。 */
+  /** 当前会话所属成员：没有 @ 时，对话型继续聊，职业主对话走分配。 */
   implicitAgentId?: string
   /** 项目在场成员。问身份 / 能力且没 @ 时，全部听见，不只主成员。 */
   projectAgentIds?: readonly string[]

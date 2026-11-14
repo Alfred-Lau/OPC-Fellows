@@ -25,7 +25,7 @@ test('session id 只留协议能吃的字符', () => {
 })
 
 test('每轮把人设和用户话拼成一条 prompt', () => {
-  assert.equal(composeDshTurn('你是随手记。', '买牛奶'), '你是随手记。\n\n---\n\n买牛奶')
+  assert.equal(composeDshTurn('你是主理人。', '买牛奶'), '你是主理人。\n\n---\n\n买牛奶')
 })
 
 test('工具回灌仍带着用户原话，思考块不进正文', () => {
@@ -186,11 +186,11 @@ test('助手没正文时用 tool/result，turn/end 报错要露出来', () => {
       sessionId: 's1',
       event: {
         type: 'tool/result',
-        data: { message: { role: 'user', content: [{ type: 'text', text: '已记到随手记：买牛奶' }] } },
+        data: { message: { role: 'user', content: [{ type: 'text', text: '已记到工作区：买牛奶' }] } },
       },
     },
   })
-  assert.equal(collector.reply(), '已记到随手记：买牛奶')
+  assert.equal(collector.reply(), '已记到工作区：买牛奶')
   collector.push({
     method: 'session.event',
     params: {

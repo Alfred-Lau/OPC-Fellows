@@ -288,7 +288,7 @@ test('@标题 能解析到 Agent，系统收件会话始终存在', () => {
 })
 
 test('换一个名字会跳过已经占用的', () => {
-  assert.equal(pickAgentName(['Rumi', 'Mina'], 0), '阿宁')
+  assert.equal(pickAgentName(['Rumi', 'Mina'], 0), '星河')
 })
 
 test('空白 Agent 不依赖任何模块', () => {
@@ -529,10 +529,10 @@ test('花名册按 sortOrder 排，缺省先按最近活动再钉死顺序', () 
       ['social-ammo', 'host'],
     )
   }
-  const renamed = planRenameAgent(stamped, [], 'rumi', '  阿宁  ', clock)
+  const renamed = planRenameAgent(stamped, [], 'rumi', '  青石  ', clock)
   assert.equal(renamed.ok, true)
   if (renamed.ok) {
-    assert.equal(renamed.agents.find((agent) => agent.id === 'rumi')?.title, '阿宁')
+    assert.equal(renamed.agents.find((agent) => agent.id === 'rumi')?.title, '青石')
   }
   assert.equal(canRemoveAgent(rumi), true)
   assert.equal(canRemoveAgent(sampleAgent()), false)

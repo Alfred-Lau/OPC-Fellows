@@ -28,7 +28,7 @@ test('没有显示名时用机器名', () => {
 
 test('当前档案是空的才认领旧目录里的称呼和头像', () => {
   const empty = defaultProfile()
-  const saved = { displayName: '硬核老 K', avatarPath: '/tmp/a.png' }
+  const saved = { displayName: '示例用户', avatarPath: '/tmp/a.png' }
   assert.equal(profileHasIdentity(empty), false)
   assert.equal(shouldAdoptProfile(empty, saved), true)
   assert.equal(shouldAdoptProfile(saved, { displayName: '别人', avatarPath: '' }), false)

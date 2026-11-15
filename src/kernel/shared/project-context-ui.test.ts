@@ -12,16 +12,16 @@ function source(rel: string): string {
 }
 
 test('海框展示层用字符串拆目录名，不依赖 node:path', () => {
-  assert.equal(folderLabel('/Users/yu/申城'), '申城')
-  assert.equal(folderLabel('/Users/yu/申城/'), '申城')
-  assert.equal(folderLabel('C:\\work\\申城'), '申城')
-  assert.deepEqual(composerContextChip({ folderPath: '/Users/yu/申城', hostName: 'opc.local' }), {
+  assert.equal(folderLabel('/Users/me/示例项目'), '示例项目')
+  assert.equal(folderLabel('/Users/me/示例项目/'), '示例项目')
+  assert.equal(folderLabel('C:\\work\\示例项目'), '示例项目')
+  assert.deepEqual(composerContextChip({ folderPath: '/Users/me/示例项目', hostName: 'opc.local' }), {
     kind: 'folder',
-    label: '申城',
-    title: '/Users/yu/申城',
+    label: '示例项目',
+    title: '/Users/me/示例项目',
   })
-  assert.deepEqual(contextFileFromPath('/tmp/申城/readme.md'), {
-    path: '/tmp/申城/readme.md',
+  assert.deepEqual(contextFileFromPath('/tmp/opc-fellows/workspace/readme.md'), {
+    path: '/tmp/opc-fellows/workspace/readme.md',
     name: 'readme.md',
   })
 })

@@ -208,7 +208,7 @@ groupKey: 'occupation.group.project'
 - 已存在成员不改名
 - 雇成员面板上的模具列表始终按当前语言显示（读模板 key，不读已落库实例）
 
-单字印（`监` / `选` / `收`）：英文用短拉丁（`Mo` / `Mi` / `$`）或保留汉字作视觉符号。**推荐英文也给 1–2 个字母印**，避免侧栏中英混排。产品词（OPC、Skill、Panel、SoloKit）两语都不译。
+单字印（`监` / `选` / `收`）：英文用短拉丁（`Mo` / `Mi` / `$`）或保留汉字作视觉符号。**推荐英文也给 1–2 个字母印**，避免侧栏中英混排。产品词（OPC、Skill、Panel、OPC-Fellows）两语都不译。
 
 ### 4.8 日期、数字、排序
 
@@ -263,7 +263,7 @@ groupKey: 'occupation.group.project'
 | 工作情况 | Catalog | workspace settings |
 | 自媒体运营达人 | Creator hire | fourth content job |
 
-品牌名不译：OPC-Fellows、SoloKit、bitou.tech、DeepSeek、Creem、Vercel、微信、小红书、抖音、视频号。
+品牌名不译：OPC-Fellows、DeepSeek、Creem、Vercel、微信、小红书、抖音、视频号。
 
 ---
 
@@ -281,7 +281,7 @@ groupKey: 'occupation.group.project'
 - `shell.ts` 菜单 / 托盘 label 用 `t()`，`locale:changed` 时走现成的 `rebuild`
 - `Notification({ title, body })` 用 `notify.*`
 - `dialog.showOpenDialog({ title })` 用 `notify.dialog.*`
-- `electron-builder.yml` 的 `NSUserNotificationsUsageDescription` 最后再改；英文包可用 `mac.extendInfo` 或接受中文一句（个人包可延后）
+- `electron-builder.yml` 的 `NSUserNotificationsUsageDescription` 最后再改；英文包可用 `mac.extendInfo`，或本轮先保留中文一句
 
 ### 6.3 内核
 

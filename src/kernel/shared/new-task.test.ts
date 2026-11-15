@@ -51,11 +51,11 @@ function agent(overrides: Partial<AgentRecord> = {}): AgentRecord {
 function project(overrides: Partial<ThreadRecord> = {}): ThreadRecord {
   return {
     id: 'thread:user:poem',
-    title: '古诗图文素材',
+    title: '服务合同大纲',
     kind: 'user',
     agentIds: ['demo', 'social-ammo'],
     workspaceAgentId: 'demo',
-    description: '把目录和封面图一次收齐',
+    description: '把范围、交付物和时间表一次收齐',
     createdAt: clock.now(),
     updatedAt: clock.now(),
     ...overrides,
@@ -82,7 +82,7 @@ test('没选项目时标题是发起新项目，不预勾身份', () => {
   assert.equal(page.brief, '')
   assert.deepEqual(
     page.projects.map((item) => item.title),
-    ['古诗图文素材'],
+    ['服务合同大纲'],
   )
 })
 
@@ -96,12 +96,12 @@ test('选了已有项目时标题点名，并带上参与者和主 Agent', () =>
     hostName: 'opc.local',
     projectId: 'thread:user:poem',
   })
-  assert.equal(page.headline, '在「古诗图文素材」里继续？')
-  assert.equal(page.triggerLabel, '古诗图文素材')
+  assert.equal(page.headline, '在「服务合同大纲」里继续？')
+  assert.equal(page.triggerLabel, '服务合同大纲')
   assert.equal(page.isNew, false)
   assert.equal(page.showComposer, true)
   assert.equal(page.emptyHint, '')
-  assert.equal(page.brief, '把目录和封面图一次收齐')
+  assert.equal(page.brief, '把范围、交付物和时间表一次收齐')
   assert.equal(page.leadId, 'demo')
   assert.equal(page.folderLabel, '')
   assert.equal(page.chipLabel, 'opc.local')
@@ -253,7 +253,7 @@ test('点选成员：未选则加入，已选非主则改主，主再点则移�
 })
 
 test('弹窗建项目：要标题和成员，简述可空，标题取用户写的而不是第一句聊天', () => {
-  assert.equal(normalizeProjectTitle('  \n古诗图文素材\n第二行'), '古诗图文素材')
+  assert.equal(normalizeProjectTitle('  \n服务合同大纲\n第二行'), '服务合同大纲')
   assert.equal(normalizeProjectTitle(''), '')
   assert.equal(normalizeProjectTitle('x'.repeat(PROJECT_TITLE_MAX + 4)).length, PROJECT_TITLE_MAX)
   assert.equal(normalizeProjectDescription('  把目录收齐  '), '把目录收齐')
@@ -265,7 +265,7 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
     assert.equal(untitled.error, '先给项目起个标题')
   }
 
-  const empty = planProjectCreate({ title: '古诗图文素材', agentIds: [], clock })
+  const empty = planProjectCreate({ title: '服务合同大纲', agentIds: [], clock })
   assert.equal(empty.ok, true)
   if (empty.ok) {
     assert.deepEqual(empty.thread.agentIds, [HOST_AGENT_ID])
@@ -273,22 +273,22 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
   }
 
   const created = planProjectCreate({
-    title: '古诗图文素材',
-    description: '把目录和封面图一次收齐',
+    title: '服务合同大纲',
+    description: '把范围、交付物和时间表一次收齐',
     agentIds: ['rumi', 'mina'],
     workspaceAgentId: 'mina',
-    folderPath: '/tmp/申城',
+    folderPath: '/tmp/opc-fellows/workspace',
     clock,
   })
   assert.equal(created.ok, true)
   if (created.ok) {
     assert.equal(created.thread.id, 'thread:user:2026-09-10T12:00:00.000Z')
     assert.equal(created.thread.kind, 'user')
-    assert.equal(created.thread.title, '古诗图文素材')
-    assert.equal(created.thread.description, '把目录和封面图一次收齐')
+    assert.equal(created.thread.title, '服务合同大纲')
+    assert.equal(created.thread.description, '把范围、交付物和时间表一次收齐')
     assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'rumi', 'mina'])
     assert.equal(created.thread.workspaceAgentId, 'mina')
-    assert.equal(created.thread.folderPath, '/tmp/申城')
+    assert.equal(created.thread.folderPath, '/tmp/opc-fellows/workspace')
   }
 
   const bare = planProjectCreate({ title: '周报', agentIds: ['rumi'], clock })
@@ -301,7 +301,7 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
 })
 
 test('没有另选成员也能开项目，默认带上主理人；新建用第一句话当标题；续写只改成员', () => {
-  assert.equal(titleFromTaskText('把封面图和目录一起带上'), '把封面图和目录一起带上')
+  assert.equal(titleFromTaskText('把合同附件和大纲一起带上'), '把合同附件和大纲一起带上')
   assert.equal(titleFromTaskText('  \n明天交周报，附上数据\n第二行'), '明天交周报，附上数据')
   assert.equal(titleFromTaskText(''), '新项目')
 
@@ -313,7 +313,7 @@ test('没有另选成员也能开项目，默认带上主理人；新建用第�
   }
 
   const created = planProjectSubmit({
-    text: '把封面图和目录一起带上',
+    text: '把合同附件和大纲一起带上',
     agentIds: ['rumi', 'mina'],
     workspaceAgentId: 'rumi',
     clock,
@@ -322,7 +322,7 @@ test('没有另选成员也能开项目，默认带上主理人；新建用第�
   if (created.ok && created.mode === 'create') {
     assert.equal(created.thread.id, 'thread:user:2026-09-10T12:00:00.000Z')
     assert.equal(created.thread.kind, 'user')
-    assert.equal(created.thread.title, '把封面图和目录一起带上')
+    assert.equal(created.thread.title, '把合同附件和大纲一起带上')
     assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'rumi', 'mina'])
     assert.equal(created.thread.workspaceAgentId, 'rumi')
   }

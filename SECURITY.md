@@ -10,8 +10,6 @@ OPC-Fellows 是本地优先桌面工作台。
 
 - 业务数据只写本机 `userData`，不经过本项目自己的服务器。
 - 模型密钥、邮箱专用密码、Creem key 走 Electron `safeStorage` 或环境变量，**仓库里不得出现真值**。
-- 微信情报只读本机索引：不上传聊天、不把 key 送出本机、不代发消息。
-- 邮件整理只读收件箱并写本机草稿，不代发。
 - 第三方模块只能调用 manifest 声明的 capability。`secrets` / `subprocess` / `net:listen:*` 安装前必须确认。
 
 请不要把已签名的 `.app` / `.dmg`、`.env`、本机 `userData` 或 Apple 公证凭据推进 git。身份目录默认在用户家目录下的 `OPC-Fellows/agents`，不要把能标识运营者的路径写进默认值。对齐参考实现时只复制运行时机制，见 [ADR 0007](docs/adr/0007-opensource-sanitization.md)。
@@ -41,8 +39,6 @@ OPC-Fellows is a local-first desktop workbench.
 
 - Business data stays in on-device `userData`. There is no first-party backend for it.
 - Model keys, mailbox app passwords, and Creem keys go through Electron `safeStorage` or environment variables. **Real values must never land in the repo.**
-- WeChat intel is a local read-only index: no upload, no key exfil, no sending.
-- Mail triage reads the inbox and writes local drafts. It does not send mail.
 - Third-party modules may call only capabilities declared in their manifest. `secrets` / `subprocess` / `net:listen:*` confirm at install.
 
 Do not push signed `.app` / `.dmg` files, `.env`, on-device `userData`, or Apple notarization credentials. The default identity directory is `OPC-Fellows/agents` under the user home. Do not bake operator-identifying paths into defaults. When aligning a private reference tree, copy runtime mechanisms only. See [ADR 0007](docs/adr/0007-opensource-sanitization.md).

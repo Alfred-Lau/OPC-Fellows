@@ -64,7 +64,7 @@ function sampleAgent(overrides: Partial<AgentRecord> = {}): AgentRecord {
 }
 
 test('slugify 吃中文也能给出稳定 id', () => {
-  assert.equal(slugify('Rumi'), 'rumi')
+  assert.equal(slugify('North'), 'north')
   assert.equal(slugify('Hello World'), 'hello-world')
   assert.equal(slugify('示例成员'), '示例成员')
 })
@@ -160,9 +160,9 @@ test('推荐列表包含当前全部可见 Agent 和内置模板', () => {
   const agents = [
     sampleAgent(),
     sampleAgent({
-      id: 'rumi',
+      id: 'north',
       templateId: 'blank',
-      title: 'Rumi',
+      title: '北辰',
       kind: 'conversational',
       origin: 'user',
       moduleIds: [],
@@ -198,7 +198,7 @@ test('推荐列表包含当前全部可见 Agent 和内置模板', () => {
   assert.equal(recommend.templates.some((template) => template.id === 'harness'), false)
   assert.deepEqual(
     recommend.agents.map((agent) => agent.id).sort(),
-    ['rumi', 'social-ammo'],
+    ['north', 'social-ammo'],
   )
   const created = planCreateAgent(agents, { templateId: 'pet', title: '小鹿' }, [{ id: 'pet', enabled: true }], clock)
   assert.equal(created.ok, false)
@@ -240,17 +240,17 @@ test('已有成员可以改工具包和计划模式', () => {
 })
 
 test('@标题 能解析到 Agent，系统收件会话始终存在', () => {
-  const rumi = sampleAgent({
-    id: 'rumi',
-    title: 'Rumi',
+  const north = sampleAgent({
+    id: 'north',
+    title: '北辰',
     templateId: 'blank',
     kind: 'conversational',
     singleton: false,
     moduleIds: [],
   })
-  const agents = [sampleAgent(), rumi]
-  const parsed = parseMentions('@社媒弹药手 装填弹药 @Rumi', agents)
-  assert.deepEqual(parsed.agentIds, ['social-ammo', 'rumi'])
+  const agents = [sampleAgent(), north]
+  const parsed = parseMentions('@社媒弹药手 装填弹药 @北辰', agents)
+  assert.deepEqual(parsed.agentIds, ['social-ammo', 'north'])
   assert.equal(parsed.rest, '装填弹药')
   const glued = parseMentions('@社媒弹药手装填弹药', agents)
   assert.deepEqual(glued.agentIds, ['social-ammo'])
@@ -258,10 +258,10 @@ test('@标题 能解析到 Agent，系统收件会话始终存在', () => {
   const atCursor = mentionQueryAt('看看 @社', 6)
   assert.deepEqual(atCursor, { start: 3, query: '社' })
   assert.equal(filterMentionAgents('社', agents)[0]?.id, 'social-ammo')
-  const prefer = filterMentionAgents('', agents, ['rumi', 'social-ammo'])
+  const prefer = filterMentionAgents('', agents, ['north', 'social-ammo'])
   assert.deepEqual(
     prefer.map((agent) => agent.id),
-    ['rumi', 'social-ammo'],
+    ['north', 'social-ammo'],
   )
   const paused = sampleAgent({
     id: 'social-ammo',
@@ -272,7 +272,7 @@ test('@标题 能解析到 Agent，系统收件会话始终存在', () => {
     status: 'needs-module',
   })
   assert.equal(
-    filterMentionAgents('', [rumi, paused]).some((agent) => agent.id === 'social-ammo'),
+    filterMentionAgents('', [north, paused]).some((agent) => agent.id === 'social-ammo'),
     false,
   )
   const spans = mentionSpans('@主理人 帮我更新 readme @社媒弹药手', [
@@ -288,7 +288,7 @@ test('@标题 能解析到 Agent，系统收件会话始终存在', () => {
 })
 
 test('换一个名字会跳过已经占用的', () => {
-  assert.equal(pickAgentName(['Rumi', 'Mina'], 0), '阿宁')
+  assert.equal(pickAgentName(['北辰', '青禾'], 0), '石渚')
 })
 
 test('空白 Agent 不依赖任何模块', () => {
@@ -313,23 +313,23 @@ test('未 @ 的普通事项拆成待办，多 @ 先转发；空白 Agent 走对�
   const none = planDispatch('明天下午交周报', [])
   assert.equal(none.actions[0]?.kind, 'decompose')
 
-  const rumi = sampleAgent({
-    id: 'rumi',
-    title: 'Rumi',
+  const north = sampleAgent({
+    id: 'north',
+    title: '北辰',
     templateId: 'blank',
     kind: 'conversational',
     singleton: false,
     moduleIds: [],
     description: '通用助手。用对话把事情说清楚。',
   })
-  const many = planDispatch('@社媒弹药手 装填弹药 @Rumi', [sampleAgent(), rumi])
+  const many = planDispatch('@社媒弹药手 装填弹药 @北辰', [sampleAgent(), north])
   assert.equal(many.actions[0]?.kind, 'forward')
   assert.ok(many.actions.some((action) => action.kind === 'invoke' && action.invoke === 'load'))
-  assert.ok(many.actions.some((action) => action.kind === 'chat' && action.agentId === 'rumi'))
+  assert.ok(many.actions.some((action) => action.kind === 'chat' && action.agentId === 'north'))
 
-  const implicit = planDispatch('把这段话说清楚', [rumi], { implicitAgentId: 'rumi' })
+  const implicit = planDispatch('把这段话说清楚', [north], { implicitAgentId: 'north' })
   assert.equal(implicit.actions[0]?.kind, 'chat')
-  assert.deepEqual(implicit.agentIds, ['rumi'])
+  assert.deepEqual(implicit.agentIds, ['north'])
 })
 
 test('项目里问能力没 @ 时查到全部在场成员，不只主成员', () => {
@@ -370,29 +370,29 @@ test('项目里问能力没 @ 时查到全部在场成员，不只主成员', ()
 })
 
 test('推荐 Agent 按最近会话排，/ 技能能插入 @刷新', () => {
-  const rumi = sampleAgent({
-    id: 'rumi',
-    title: 'Rumi',
+  const north = sampleAgent({
+    id: 'north',
+    title: '北辰',
     templateId: 'blank',
     kind: 'conversational',
     singleton: false,
     moduleIds: [],
     updatedAt: '2026-09-10T02:00:00.000Z',
   })
-  const ranked = recommendAgents([sampleAgent(), rumi], [
+  const ranked = recommendAgents([sampleAgent(), north], [
     {
-      id: 'thread:rumi',
-      title: 'Rumi',
+      id: 'thread:north',
+      title: '北辰',
       kind: 'agent',
-      agentIds: ['rumi'],
+      agentIds: ['north'],
       createdAt: '2026-09-10T03:00:00.000Z',
       updatedAt: '2026-09-10T03:00:00.000Z',
     },
   ])
-  assert.equal(ranked.agents[0]?.id, 'rumi')
+  assert.equal(ranked.agents[0]?.id, 'north')
   const slash = skillQueryAt('/刷', 2)
   assert.deepEqual(slash, { start: 0, query: '刷' })
-  const skills = listComposerSkills('装', [sampleAgent(), rumi])
+  const skills = listComposerSkills('装', [sampleAgent(), north])
   assert.equal(skills[0]?.insert, '@社媒弹药手 装填弹药')
   const load = listComposerSkills('装填', [
     sampleAgent({
@@ -444,33 +444,33 @@ test('有 key 时说不清的职业话交给对话（工具目录在人设里）
 })
 
 test('赋能后的成员在主对话和项目里会 invoke 这条 Skill', () => {
-  const rumi = sampleAgent({
-    id: 'rumi',
-    title: 'Rumi',
+  const north = sampleAgent({
+    id: 'north',
+    title: '北辰',
     templateId: 'blank',
     kind: 'conversational',
     singleton: false,
     moduleIds: [],
     skillIds: ['product-design'],
   })
-  const implicit = planDispatch('做产品设计建议', [rumi], { implicitAgentId: 'rumi' })
+  const implicit = planDispatch('做产品设计建议', [north], { implicitAgentId: 'north' })
   assert.equal(implicit.actions[0]?.kind, 'invoke')
   assert.equal(implicit.actions[0]?.invoke, 'product-design')
-  const mentioned = planDispatch('@Rumi 做产品设计建议', [rumi])
+  const mentioned = planDispatch('@北辰 做产品设计建议', [north])
   assert.equal(mentioned.actions[0]?.kind, 'invoke')
   assert.equal(mentioned.actions[0]?.invoke, 'product-design')
-  assert.equal(promoteToClassify(implicit.actions, [rumi], { hasKey: true })[0]?.kind, 'chat')
-  assert.equal(promoteToClassify(implicit.actions, [rumi], { hasKey: false })[0]?.kind, 'invoke')
-  assert.match(agentSystemPrompt(rumi), /产品设计建议/)
-  assert.match(agentSystemPrompt(rumi), /不要编造用户没给的调研数字/)
-  const chips = occupationSkillChoices(rumi).map((skill) => skill.title)
+  assert.equal(promoteToClassify(implicit.actions, [north], { hasKey: true })[0]?.kind, 'chat')
+  assert.equal(promoteToClassify(implicit.actions, [north], { hasKey: false })[0]?.kind, 'invoke')
+  assert.match(agentSystemPrompt(north), /产品设计建议/)
+  assert.match(agentSystemPrompt(north), /不要编造用户没给的调研数字/)
+  const chips = occupationSkillChoices(north).map((skill) => skill.title)
   assert.equal(chips.includes('产品设计建议'), true)
 })
 
 test('花名册按 sortOrder 排，缺省先按最近活动再钉死顺序', () => {
-  const rumi = sampleAgent({
-    id: 'rumi',
-    title: 'Rumi',
+  const north = sampleAgent({
+    id: 'north',
+    title: '北辰',
     templateId: 'blank',
     kind: 'conversational',
     origin: 'user',
@@ -478,9 +478,9 @@ test('花名册按 sortOrder 排，缺省先按最近活动再钉死顺序', () 
     moduleIds: [],
     updatedAt: '2026-09-12T10:00:00.000Z',
   })
-  const mina = sampleAgent({
-    id: 'mina',
-    title: 'Mina',
+  const river = sampleAgent({
+    id: 'river',
+    title: '青禾',
     templateId: 'blank',
     kind: 'conversational',
     origin: 'user',
@@ -488,20 +488,20 @@ test('花名册按 sortOrder 排，缺省先按最近活动再钉死顺序', () 
     moduleIds: [],
     updatedAt: '2026-09-11T10:00:00.000Z',
   })
-  const stamped = ensureRosterSortOrder([rumi, mina])
+  const stamped = ensureRosterSortOrder([north, river])
   assert.deepEqual(
     stamped.map((agent) => [agent.id, agent.sortOrder]),
     [
-      ['rumi', 0],
-      ['mina', 1],
+      ['north', 0],
+      ['river', 1],
     ],
   )
-  const moved = planReorderAgents(stamped, ['mina', 'rumi'])
+  const moved = planReorderAgents(stamped, ['river', 'north'])
   assert.equal(moved.ok, true)
   if (moved.ok) {
     assert.deepEqual(
       visibleAgents(moved.agents).map((agent) => agent.id),
-      ['mina', 'rumi'],
+      ['river', 'north'],
     )
   }
   const host = sampleAgent({
@@ -529,18 +529,18 @@ test('花名册按 sortOrder 排，缺省先按最近活动再钉死顺序', () 
       ['social-ammo', 'host'],
     )
   }
-  const renamed = planRenameAgent(stamped, [], 'rumi', '  阿宁  ', clock)
+  const renamed = planRenameAgent(stamped, [], 'north', '  示例成员  ', clock)
   assert.equal(renamed.ok, true)
   if (renamed.ok) {
-    assert.equal(renamed.agents.find((agent) => agent.id === 'rumi')?.title, '阿宁')
+    assert.equal(renamed.agents.find((agent) => agent.id === 'north')?.title, '示例成员')
   }
-  assert.equal(canRemoveAgent(rumi), true)
+  assert.equal(canRemoveAgent(north), true)
   assert.equal(canRemoveAgent(sampleAgent()), false)
   const home = {
-    id: 'thread:rumi',
-    title: 'Rumi',
+    id: 'thread:north',
+    title: '北辰',
     kind: 'agent' as const,
-    agentIds: ['rumi'],
+    agentIds: ['north'],
     createdAt: clock.now(),
     updatedAt: clock.now(),
   }
@@ -548,29 +548,29 @@ test('花名册按 sortOrder 排，缺省先按最近活动再钉死顺序', () 
     id: 'thread:user:poem',
     title: '古诗',
     kind: 'user' as const,
-    agentIds: ['rumi', 'mina'],
-    workspaceAgentId: 'rumi',
+    agentIds: ['north', 'river'],
+    workspaceAgentId: 'north',
     createdAt: clock.now(),
     updatedAt: clock.now(),
   }
   const removed = planRemoveAgent(
-    [rumi, mina],
+    [north, river],
     [home, project],
     [{ id: 'msg-1', threadId: home.id, role: 'user', text: 'hi', createdAt: clock.now() }],
-    'rumi',
+    'north',
   )
   assert.equal(removed.ok, true)
   if (removed.ok) {
     assert.deepEqual(
       removed.agents.map((agent) => agent.id),
-      ['mina'],
+      ['river'],
     )
     assert.equal(
       removed.threads.some((thread) => thread.id === home.id),
       false,
     )
-    assert.deepEqual(removed.threads[0]?.agentIds, ['mina'])
-    assert.equal(removed.threads[0]?.workspaceAgentId, 'mina')
+    assert.deepEqual(removed.threads[0]?.agentIds, ['river'])
+    assert.equal(removed.threads[0]?.workspaceAgentId, 'river')
     assert.equal(removed.messages.length, 0)
   }
 })

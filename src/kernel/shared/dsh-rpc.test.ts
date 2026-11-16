@@ -16,7 +16,7 @@ import {
 } from './dsh-rpc.ts'
 
 test('session id 只留协议能吃的字符', () => {
-  assert.equal(dshSessionId('thread:rumi', 'rumi'), 'opc:thread:rumi:rumi')
+  assert.equal(dshSessionId('thread:north', 'north'), 'opc:thread:north:north')
   assert.equal(dshSessionId('thread/a b', 'x y'), 'opc:thread_a_b:x_y')
   assert.equal(dshRuntimeSessionId('opc:thread:notes:notes', 'boot1'), 'opc:thread:notes:notes:boot1')
   assert.equal(dshRuntimeSessionId('opc:thread:notes:notes', '  '), 'opc:thread:notes:notes')

@@ -30,7 +30,7 @@ const clock = { now: () => '2026-09-10T12:00:00.000Z' }
 
 function agent(overrides: Partial<AgentRecord> = {}): AgentRecord {
   return {
-    id: 'rumi',
+    id: 'north',
     templateId: 'blank',
     title: '通用助手',
     mark: '助',
@@ -65,7 +65,7 @@ function project(overrides: Partial<ThreadRecord> = {}): ThreadRecord {
 test('没选项目时标题是发起新项目，不预勾身份', () => {
   const page = describeNewTaskPage({
     threads: [project()],
-    agents: [agent(), agent({ id: 'mina', title: 'Mina', mark: '米', hue: 1 })],
+    agents: [agent(), agent({ id: 'river', title: '青禾', mark: '青', hue: 1 })],
     hostName: 'opc.local',
   })
   assert.equal(page.headline, '发起新项目？')
@@ -231,25 +231,25 @@ test('新任务列出可见身份，后台能力不进选择，停用的也不�
   })
   assert.deepEqual(
     page.agents.map((item) => item.id),
-    ['rumi', 'social-ammo'],
+    ['north', 'social-ammo'],
   )
 })
 
 test('点选成员：未选则加入，已选非主则改主，主再点则移出；主理人不能移出', () => {
-  const added = clickProjectAgent([], undefined, 'rumi')
-  assert.deepEqual(added, { selectedIds: [HOST_AGENT_ID, 'rumi'], leadId: HOST_AGENT_ID })
+  const added = clickProjectAgent([], undefined, 'north')
+  assert.deepEqual(added, { selectedIds: [HOST_AGENT_ID, 'north'], leadId: HOST_AGENT_ID })
 
-  const joined = clickProjectAgent(['rumi'], 'rumi', 'mina')
-  assert.deepEqual(joined, { selectedIds: [HOST_AGENT_ID, 'rumi', 'mina'], leadId: 'rumi' })
+  const joined = clickProjectAgent(['north'], 'north', 'river')
+  assert.deepEqual(joined, { selectedIds: [HOST_AGENT_ID, 'north', 'river'], leadId: 'north' })
 
-  const switched = clickProjectAgent(['rumi', 'mina'], 'rumi', 'mina')
-  assert.deepEqual(switched, { selectedIds: [HOST_AGENT_ID, 'rumi', 'mina'], leadId: 'mina' })
+  const switched = clickProjectAgent(['north', 'river'], 'north', 'river')
+  assert.deepEqual(switched, { selectedIds: [HOST_AGENT_ID, 'north', 'river'], leadId: 'river' })
 
-  const dropped = clickProjectAgent(['rumi', 'mina'], 'mina', 'mina')
-  assert.deepEqual(dropped, { selectedIds: [HOST_AGENT_ID, 'rumi'], leadId: HOST_AGENT_ID })
+  const dropped = clickProjectAgent(['north', 'river'], 'river', 'river')
+  assert.deepEqual(dropped, { selectedIds: [HOST_AGENT_ID, 'north'], leadId: HOST_AGENT_ID })
 
-  const kept = clickProjectAgent([HOST_AGENT_ID, 'rumi'], HOST_AGENT_ID, HOST_AGENT_ID)
-  assert.deepEqual(kept, { selectedIds: [HOST_AGENT_ID, 'rumi'], leadId: HOST_AGENT_ID })
+  const kept = clickProjectAgent([HOST_AGENT_ID, 'north'], HOST_AGENT_ID, HOST_AGENT_ID)
+  assert.deepEqual(kept, { selectedIds: [HOST_AGENT_ID, 'north'], leadId: HOST_AGENT_ID })
 })
 
 test('弹窗建项目：要标题和成员，简述可空，标题取用户写的而不是第一句聊天', () => {
@@ -259,7 +259,7 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
   assert.equal(normalizeProjectDescription('  把目录收齐  '), '把目录收齐')
   assert.equal(normalizeProjectDescription('y'.repeat(PROJECT_DESC_MAX + 8)).length, PROJECT_DESC_MAX)
 
-  const untitled = planProjectCreate({ title: '  ', agentIds: ['rumi'], clock })
+  const untitled = planProjectCreate({ title: '  ', agentIds: ['north'], clock })
   assert.equal(untitled.ok, false)
   if (!untitled.ok) {
     assert.equal(untitled.error, '先给项目起个标题')
@@ -275,9 +275,9 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
   const created = planProjectCreate({
     title: '古诗图文素材',
     description: '把目录和封面图一次收齐',
-    agentIds: ['rumi', 'mina'],
-    workspaceAgentId: 'mina',
-    folderPath: '/tmp/申城',
+    agentIds: ['north', 'river'],
+    workspaceAgentId: 'river',
+    folderPath: '/tmp/opc-fellows/workspace',
     clock,
   })
   assert.equal(created.ok, true)
@@ -286,16 +286,16 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
     assert.equal(created.thread.kind, 'user')
     assert.equal(created.thread.title, '古诗图文素材')
     assert.equal(created.thread.description, '把目录和封面图一次收齐')
-    assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'rumi', 'mina'])
-    assert.equal(created.thread.workspaceAgentId, 'mina')
-    assert.equal(created.thread.folderPath, '/tmp/申城')
+    assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'north', 'river'])
+    assert.equal(created.thread.workspaceAgentId, 'river')
+    assert.equal(created.thread.folderPath, '/tmp/opc-fellows/workspace')
   }
 
-  const bare = planProjectCreate({ title: '周报', agentIds: ['rumi'], clock })
+  const bare = planProjectCreate({ title: '周报', agentIds: ['north'], clock })
   assert.equal(bare.ok, true)
   if (bare.ok) {
     assert.equal(bare.thread.description, undefined)
-    assert.deepEqual(bare.thread.agentIds, [HOST_AGENT_ID, 'rumi'])
+    assert.deepEqual(bare.thread.agentIds, [HOST_AGENT_ID, 'north'])
     assert.equal(bare.thread.workspaceAgentId, HOST_AGENT_ID)
   }
 })
@@ -314,8 +314,8 @@ test('没有另选成员也能开项目，默认带上主理人；新建用第�
 
   const created = planProjectSubmit({
     text: '把封面图和目录一起带上',
-    agentIds: ['rumi', 'mina'],
-    workspaceAgentId: 'rumi',
+    agentIds: ['north', 'river'],
+    workspaceAgentId: 'north',
     clock,
   })
   assert.equal(created.ok, true)
@@ -323,39 +323,39 @@ test('没有另选成员也能开项目，默认带上主理人；新建用第�
     assert.equal(created.thread.id, 'thread:user:2026-09-10T12:00:00.000Z')
     assert.equal(created.thread.kind, 'user')
     assert.equal(created.thread.title, '把封面图和目录一起带上')
-    assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'rumi', 'mina'])
-    assert.equal(created.thread.workspaceAgentId, 'rumi')
+    assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'north', 'river'])
+    assert.equal(created.thread.workspaceAgentId, 'north')
   }
 
   const continued = planProjectSubmit({
     text: '整理目录',
-    agentIds: ['rumi', 'mina'],
-    workspaceAgentId: 'mina',
+    agentIds: ['north', 'river'],
+    workspaceAgentId: 'river',
     projectId: 'thread:user:poem',
     clock,
   })
   assert.equal(continued.ok, true)
   if (continued.ok && continued.mode === 'continue') {
     assert.equal(continued.threadId, 'thread:user:poem')
-    assert.deepEqual(continued.agentIds, [HOST_AGENT_ID, 'rumi', 'mina'])
-    assert.equal(continued.workspaceAgentId, 'mina')
+    assert.deepEqual(continued.agentIds, [HOST_AGENT_ID, 'north', 'river'])
+    assert.equal(continued.workspaceAgentId, 'river')
   }
 })
 
 test('主对话里 @ 别人要点名，项目里不拦', () => {
-  const rumi = agent()
-  const mina = agent({ id: 'mina', title: 'Mina', mark: '米', hue: 1 })
+  const north = agent()
+  const river = agent({ id: 'river', title: '青禾', mark: '青', hue: 1 })
   const home: ThreadRecord = {
-    id: 'thread:rumi',
+    id: 'thread:north',
     title: '通用助手',
     kind: 'agent',
-    agentIds: ['rumi'],
+    agentIds: ['north'],
     createdAt: clock.now(),
     updatedAt: clock.now(),
   }
-  assert.deepEqual(homeThreadForeignTitles(home, '@Mina 一起看封面', [rumi, mina]), ['Mina'])
-  assert.deepEqual(homeThreadForeignTitles(home, '@通用助手 继续', [rumi, mina]), [])
-  assert.deepEqual(homeThreadForeignTitles(project(), '@Mina 一起看封面', [rumi, mina]), [])
+  assert.deepEqual(homeThreadForeignTitles(home, '@青禾 一起看封面', [north, river]), ['青禾'])
+  assert.deepEqual(homeThreadForeignTitles(home, '@通用助手 继续', [north, river]), [])
+  assert.deepEqual(homeThreadForeignTitles(project(), '@青禾 一起看封面', [north, river]), [])
 })
 
 test('发起新项目不带会话列表，今日空收件箱也不出空列表', () => {
@@ -396,7 +396,7 @@ test('有主理人时新项目默认勾上且不能移出；旧项目补进主�
     page.agents.map((item) => [item.id, item.selected, item.lead, item.locked]),
     [
       [HOST_AGENT_ID, true, true, true],
-      ['rumi', false, false, false],
+      ['north', false, false, false],
     ],
   )
 
@@ -412,5 +412,5 @@ test('有主理人时新项目默认勾上且不能移出；旧项目补进主�
   assert.deepEqual(hydrated[0]?.agentIds, [HOST_AGENT_ID, 'demo', 'social-ammo'])
   assert.equal(hydrated[0]?.workspaceAgentId, 'demo')
   assert.deepEqual(hydrated[1]?.agentIds, [])
-  assert.deepEqual(withHostAgent(['mina', HOST_AGENT_ID, 'mina']), [HOST_AGENT_ID, 'mina'])
+  assert.deepEqual(withHostAgent(['river', HOST_AGENT_ID, 'river']), [HOST_AGENT_ID, 'river'])
 })

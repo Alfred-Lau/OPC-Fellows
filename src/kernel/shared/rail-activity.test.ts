@@ -25,22 +25,22 @@ function mark(
 
 test('成员行只看自己的工作标记', () => {
   const marks = [
-    mark({ agentId: 'rumi', threadId: 'thread:user:a', kind: 'thinking' }),
-    mark({ agentId: 'mina', threadId: 'thread:user:a', kind: 'working' }),
+    mark({ agentId: 'north', threadId: 'thread:user:a', kind: 'thinking' }),
+    mark({ agentId: 'river', threadId: 'thread:user:a', kind: 'working' }),
   ]
-  assert.equal(agentRailActivity('rumi', marks), 'thinking')
-  assert.equal(agentRailActivity('mina', marks), 'working')
-  assert.equal(agentRailActivity('nari', marks), 'idle')
+  assert.equal(agentRailActivity('north', marks), 'thinking')
+  assert.equal(agentRailActivity('river', marks), 'working')
+  assert.equal(agentRailActivity('grove', marks), 'idle')
 })
 
 test('项目行只点亮正在该项目里干活的人，主对话不算', () => {
-  const project = { id: 'thread:user:opc', agentIds: ['rumi', 'mina'] }
+  const project = { id: 'thread:user:opc', agentIds: ['north', 'river'] }
   const marks = [
-    mark({ agentId: 'rumi', threadId: 'thread:agent:rumi', kind: 'working' }),
-    mark({ agentId: 'mina', threadId: 'thread:user:opc', kind: 'thinking' }),
+    mark({ agentId: 'north', threadId: 'thread:agent:north', kind: 'working' }),
+    mark({ agentId: 'river', threadId: 'thread:user:opc', kind: 'thinking' }),
   ]
   assert.equal(projectRailActivity(project, marks), 'thinking')
-  assert.equal(agentRailActivity('rumi', marks), 'working')
+  assert.equal(agentRailActivity('north', marks), 'working')
 })
 
 test('同一项目里执行压过思考，思考压过出错', () => {
@@ -50,15 +50,15 @@ test('同一项目里执行压过思考，思考压过出错', () => {
 })
 
 test('工作标记按成员覆盖，忙完就清掉', () => {
-  const first = upsertRailMark([], mark({ agentId: 'rumi', threadId: 't1', kind: 'thinking' }))
-  const next = upsertRailMark(first, mark({ agentId: 'rumi', threadId: 't1', kind: 'working' }))
+  const first = upsertRailMark([], mark({ agentId: 'north', threadId: 't1', kind: 'thinking' }))
+  const next = upsertRailMark(first, mark({ agentId: 'north', threadId: 't1', kind: 'working' }))
   assert.deepEqual(
     next.map((item) => item.kind),
     ['working'],
   )
   assert.equal(isRailBusy(next), true)
-  assert.equal(isRailBusy(removeRailMark(next, 'rumi')), false)
-  assert.equal(isRailBusy([mark({ agentId: 'rumi', threadId: 't1', kind: 'error' })]), false)
+  assert.equal(isRailBusy(removeRailMark(next, 'north')), false)
+  assert.equal(isRailBusy([mark({ agentId: 'north', threadId: 't1', kind: 'error' })]), false)
 })
 
 test('工作态文案覆盖全部种类', () => {

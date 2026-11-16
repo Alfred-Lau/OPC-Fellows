@@ -20,7 +20,7 @@ const rendererSrc = join(dirname(fileURLToPath(import.meta.url)), '../../rendere
 function project(partial: Partial<ThreadRecord> & Pick<ThreadRecord, 'id' | 'title'>): ThreadRecord {
   return {
     kind: 'user',
-    agentIds: ['rumi'],
+    agentIds: ['north'],
     createdAt: '2026-09-12T10:00:00.000Z',
     updatedAt: '2026-09-13T10:00:00.000Z',
     ...partial,
@@ -58,19 +58,19 @@ test('左栏 HTML 有和项目、成员同级的置顶列表', () => {
 
 test('成员拖到另一人上方后绘制顺序立刻跟着变', () => {
   const agents = [
-    { id: 'rumi', sortOrder: 0 },
-    { id: 'mina', sortOrder: 1 },
-    { id: 'nari', sortOrder: 2 },
+    { id: 'north', sortOrder: 0 },
+    { id: 'river', sortOrder: 1 },
+    { id: 'grove', sortOrder: 2 },
   ]
   const ids = moveRailIds(
     agents.map((agent) => agent.id),
-    'nari',
-    'rumi',
+    'grove',
+    'north',
     true,
   )
-  assert.deepEqual(ids, ['nari', 'rumi', 'mina'])
+  assert.deepEqual(ids, ['grove', 'north', 'river'])
   const next = applyAgentSortOrder(agents, ids)
-  assert.deepEqual(listedAgentRailIds(next), ['nari', 'rumi', 'mina'])
+  assert.deepEqual(listedAgentRailIds(next), ['grove', 'north', 'river'])
 })
 
 test('能力已停用的成员不进左栏名单，主理人有默认徽章', () => {

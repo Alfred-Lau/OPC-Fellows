@@ -188,16 +188,16 @@ export const HOST_BADGE_LABEL = '默认'
 export const HOST_BADGE_TITLE = '每个项目都在场的默认主成员'
 
 export const AGENT_NAME_POOL = [
-  'Rumi',
-  'Mina',
-  '阿宁',
-  '小禾',
-  '青石',
-  '木白',
+  '北辰',
+  '青禾',
+  '石渚',
   '南风',
   '台伴',
   '墨铜',
   '扣子',
+  '远山',
+  '疏影',
+  '同行',
 ] as const
 
 export function describeAgentKind(kind: AgentKind): string {

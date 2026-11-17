@@ -34,8 +34,8 @@ const clock = '2026-09-15T03:00:00.000Z'
 
 function project(overrides: Partial<ThreadRecord> = {}): ThreadRecord {
   return {
-    id: 'thread:user:poem',
-    title: '古诗图文素材',
+    id: 'thread:user:demo',
+    title: '示例项目',
     kind: 'user',
     agentIds: ['rumi'],
     workspaceAgentId: 'rumi',
@@ -46,14 +46,14 @@ function project(overrides: Partial<ThreadRecord> = {}): ThreadRecord {
 }
 
 test('海框芯片：有文件夹显示目录名，否则显示本机名', () => {
-  assert.equal(folderLabel('/Users/yu/申城'), '申城')
-  assert.deepEqual(composerContextChip({ folderPath: '/Users/yu/申城', hostName: 'opc.local' }), {
+  assert.equal(folderLabel('/tmp/opc-fellows/project'), 'project')
+  assert.deepEqual(composerContextChip({ folderPath: '/tmp/opc-fellows/project', hostName: 'opc.local' }), {
     kind: 'folder',
-    label: '申城',
-    title: '/Users/yu/申城',
+    label: 'project',
+    title: '/tmp/opc-fellows/project',
   })
-  assert.equal(composerContextChip({ hostName: '申城' }).kind, 'host')
-  assert.equal(composerContextChip({ hostName: '申城' }).label, '申城')
+  assert.equal(composerContextChip({ hostName: 'studio.local' }).kind, 'host')
+  assert.equal(composerContextChip({ hostName: 'studio.local' }).label, 'studio.local')
 })
 
 test('海框下拉：文件夹、文件、引用技能；绑了目录才出现清除', () => {
@@ -65,8 +65,8 @@ test('海框下拉：文件夹、文件、引用技能；绑了目录才出现�
   assert.match(idle[0]?.hint ?? '', /dsh/)
   const bound = composerContextMenuItems({
     allowWorkspace: true,
-    folderPath: '/tmp/申城',
-    files: [{ path: '/tmp/申城/readme.md', name: 'readme.md' }],
+    folderPath: '/tmp/opc-fellows/project',
+    files: [{ path: '/tmp/opc-fellows/project/readme.md', name: 'readme.md' }],
   })
   assert.equal(bound.some((item) => item.action === 'clear-folder'), true)
   assert.equal(bound.some((item) => item.action === 'detach-file' && item.path?.endsWith('readme.md')), true)
@@ -94,19 +94,19 @@ test('选文件夹只改项目 / 主对话，今日不行', () => {
     updatedAt: clock,
   }
   assert.equal(canBindProjectFolder(inbox), false)
-  const denied = planSetProjectFolder([inbox], inbox.id, '/tmp/申城')
+  const denied = planSetProjectFolder([inbox], inbox.id, '/tmp/opc-fellows/project')
   assert.equal(denied.ok, false)
   if (!denied.ok) {
     assert.match(denied.error, /今日不是项目/)
   }
 
-  const set = planSetProjectFolder([project()], 'thread:user:poem', '/tmp/申城/ ')
+  const set = planSetProjectFolder([project()], 'thread:user:demo', '/tmp/opc-fellows/project/ ')
   assert.equal(set.ok, true)
   if (set.ok) {
-    assert.equal(set.thread.folderPath, resolve('/tmp/申城'))
+    assert.equal(set.thread.folderPath, resolve('/tmp/opc-fellows/project'))
   }
 
-  const cleared = planClearProjectFolder([project({ folderPath: '/tmp/申城' })], 'thread:user:poem')
+  const cleared = planClearProjectFolder([project({ folderPath: '/tmp/opc-fellows/project' })], 'thread:user:demo')
   assert.equal(cleared.ok, true)
   if (cleared.ok) {
     assert.equal(cleared.thread.folderPath, undefined)
@@ -118,7 +118,7 @@ test('选文件会绑到共同父目录，并丢掉目录外的引用', () => {
   const dir = mkdtempSync(join(tmpdir(), 'opc-ctx-'))
   const inside = join(dir, 'a.md')
   const nested = join(dir, 'docs', 'b.md')
-  const attached = planAttachProjectFiles([project()], 'thread:user:poem', [inside, nested])
+  const attached = planAttachProjectFiles([project()], 'thread:user:demo', [inside, nested])
   assert.equal(attached.ok, true)
   if (attached.ok) {
     assert.equal(attached.thread.folderPath, dir)
@@ -127,7 +127,7 @@ test('选文件会绑到共同父目录，并丢掉目录外的引用', () => {
 
   const outside = planAttachProjectFiles(
     [project({ folderPath: dir, attachedFiles: [{ path: inside, name: 'a.md' }] })],
-    'thread:user:poem',
+    'thread:user:demo',
     ['/tmp/not-this/x.md'],
   )
   assert.equal(outside.ok, false)
@@ -145,7 +145,7 @@ test('选文件会绑到共同父目录，并丢掉目录外的引用', () => {
 
   const detached = planDetachProjectFile(
     [project({ folderPath: dir, attachedFiles: [{ path: inside, name: 'a.md' }] })],
-    'thread:user:poem',
+    'thread:user:demo',
     inside,
   )
   assert.equal(detached.ok, true)
@@ -158,11 +158,11 @@ test('选文件会绑到共同父目录，并丢掉目录外的引用', () => {
 test('dsh cwd：项目文件夹优先于成员工作区；换目录要重启进程', () => {
   assert.equal(
     resolveProjectCwd({
-      folderPath: '/tmp/申城',
+      folderPath: '/tmp/opc-fellows/project',
       agentWorkspace: '/tmp/userData/workspaces/rumi',
       fallback: '/tmp/userData',
     }),
-    resolve('/tmp/申城'),
+    resolve('/tmp/opc-fellows/project'),
   )
   assert.equal(
     resolveProjectCwd({
@@ -174,17 +174,17 @@ test('dsh cwd：项目文件夹优先于成员工作区；换目录要重启进�
   assert.equal(shouldRestartDsh('', '/tmp/a'), false)
   assert.equal(shouldRestartDsh('/tmp/a', '/tmp/a/'), false)
   assert.equal(shouldRestartDsh('/tmp/a', '/tmp/b'), true)
-  assert.equal(shouldWriteWorkspaceDocument('/tmp/申城', '/tmp/userData'), true)
+  assert.equal(shouldWriteWorkspaceDocument('/tmp/opc-fellows/project', '/tmp/userData'), true)
   assert.equal(shouldWriteWorkspaceDocument('/tmp/userData', '/tmp/userData'), false)
 })
 
 test('人设和引用文件都声明工作目录', () => {
-  const hint = composeWorkspaceSystemHint('/tmp/申城')
-  assert.match(hint, /\/tmp\/申城/)
+  const hint = composeWorkspaceSystemHint('/tmp/opc-fellows/project')
+  assert.match(hint, /\/tmp\/opc-fellows\/project/)
   assert.match(hint, /dsh-fs/)
-  const prompt = composeAttachedFilesPrompt('/tmp/申城', [
-    { path: '/tmp/申城/readme.md', name: 'readme.md', text: '# hi' },
-    { path: '/tmp/申城/shot.png', name: 'shot.png', omitted: '不是文本' },
+  const prompt = composeAttachedFilesPrompt('/tmp/opc-fellows/project', [
+    { path: '/tmp/opc-fellows/project/readme.md', name: 'readme.md', text: '# hi' },
+    { path: '/tmp/opc-fellows/project/shot.png', name: 'shot.png', omitted: '不是文本' },
   ])
   assert.match(prompt, /readme\.md/)
   assert.match(prompt, /# hi/)

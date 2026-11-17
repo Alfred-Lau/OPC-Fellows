@@ -94,8 +94,8 @@ xattr -cr "/Applications/OPC-Fellows.app"
 ```
 
 Then open the app. **Upgrading from v0.7.3:** this release builds under the name **OPC-Fellows**, so it starts
-with a fresh workspace — the previous build kept its data in `~/Library/Application Support/OPC Agent Team - Solokit`
-and the new name does not read it. The same first-hour path applies: model key → hire → bind a folder → Work situation.
+with a fresh workspace. A previous build used a different Application Support folder and the new name does not
+read it. The same first-hour path applies: model key → hire → bind a folder → Work situation.
 
 ## Extend the roster: add your own member
 
@@ -150,8 +150,6 @@ docs/           architecture and ADRs
 `server/` is an optional, self-hosted reference backend for users who want to stand up their own full-stack app. It is deliberately outside the desktop build: its own `package.json`, not in any pnpm workspace, and nothing here imports it — see [server/README.md](server/README.md).
 
 Runtime: [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness). Peer desktop hosts: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
-
-The author runs this workbench against [SoloKit](https://www.solokit.run/) and [榆关](https://pen.bitou.tech/). That is a configuration, not the trunk defaults.
 
 ## Contributing
 

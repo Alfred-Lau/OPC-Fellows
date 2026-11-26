@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="docs/cover.png" alt="OPC-Fellows — local-first workbench for a one-person company" width="100%">
+</p>
+
+<p align="center">
   <strong>OPC-Fellows</strong> · hire occupations as members, then point them at <em>your</em> work<br>
   A small kernel (shell, todos, contracts) plus occupation plugins you can enable or write.
 </p>
@@ -150,8 +154,6 @@ docs/           architecture and ADRs
 `server/` is an optional, self-hosted reference backend for users who want to stand up their own full-stack app. It is deliberately outside the desktop build: its own `package.json`, not in any pnpm workspace, and nothing here imports it — see [server/README.md](server/README.md).
 
 Runtime: [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness). Peer desktop hosts: [github.com/topics/dsh-plugin](https://github.com/topics/dsh-plugin).
-
-The author runs this workbench against [SoloKit](https://www.solokit.run/) and [榆关](https://pen.bitou.tech/). That is a configuration, not the trunk defaults.
 
 ## Contributing
 

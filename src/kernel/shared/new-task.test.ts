@@ -277,7 +277,7 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
     description: '把目录和封面图一次收齐',
     agentIds: ['rumi', 'mina'],
     workspaceAgentId: 'mina',
-    folderPath: '/tmp/申城',
+    folderPath: '/tmp/opc-fellows/workspace',
     clock,
   })
   assert.equal(created.ok, true)
@@ -288,7 +288,7 @@ test('弹窗建项目：要标题和成员，简述可空，标题取用户写�
     assert.equal(created.thread.description, '把目录和封面图一次收齐')
     assert.deepEqual(created.thread.agentIds, [HOST_AGENT_ID, 'rumi', 'mina'])
     assert.equal(created.thread.workspaceAgentId, 'mina')
-    assert.equal(created.thread.folderPath, '/tmp/申城')
+    assert.equal(created.thread.folderPath, '/tmp/opc-fellows/workspace')
   }
 
   const bare = planProjectCreate({ title: '周报', agentIds: ['rumi'], clock })
